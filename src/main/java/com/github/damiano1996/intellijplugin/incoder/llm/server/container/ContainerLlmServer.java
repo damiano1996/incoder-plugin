@@ -18,6 +18,9 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class ContainerLlmServer implements LlmServer {
 
+    private static final String CONTAINER_HF_HOME = "/app/.cache/huggingface";
+    private static final String CONTAINER_HF_HUB_CACHE = "/app/.cache/huggingface/hub";
+
     private final ContainerOrchestrator containerOrchestrator;
     private final List<InitializableListener> listeners = new ArrayList<>();
     private final com.github.damiano1996.intellijplugin.incoder.client.api.DefaultApi client;
@@ -59,11 +62,24 @@ public class ContainerLlmServer implements LlmServer {
 
         initContainerConfigs();
 
+        pullImage();
+
         startContainer();
         waitContainer();
         loadLargeLanguageModel();
 
         notify("Container is ready");
+    }
+
+    private void pullImage() throws InitializableException {
+        try {
+            notify("Pulling image %s:%s...".formatted(container.getImage().getName(), container.getImage().getVersion()));
+            containerOrchestrator.pull(
+                    container.getImage().getName(), container.getImage().getVersion());
+            notify("Image pulled successfully");
+        } catch (ContainerException e) {
+            throw new InitializableException("Unable to pull image.", e);
+        }
     }
 
     private void notify(String message) {
@@ -84,11 +100,10 @@ public class ContainerLlmServer implements LlmServer {
                         .binds(
                                 List.of(
                                         new Container.Bind(
-                                                settingsState.huggingFace.home,
-                                                "/root/.cache/huggingface"),
+                                                settingsState.huggingFace.home, CONTAINER_HF_HOME),
                                         new Container.Bind(
                                                 settingsState.huggingFace.hubCache,
-                                                "/root/.cache/huggingface/hub")))
+                                                CONTAINER_HF_HUB_CACHE)))
                         .envVariables(
                                 Map.of(
                                         "BIG_MODEL",
@@ -99,9 +114,9 @@ public class ContainerLlmServer implements LlmServer {
                                         "CUDA",
                                         String.valueOf(settingsState.cuda),
                                         "HF_HOME",
-                                        "/root/.cache/huggingface",
+                                        CONTAINER_HF_HOME,
                                         "HF_HUB_CACHE",
-                                        "/root/.cache/huggingface/hub"));
+                                        CONTAINER_HF_HUB_CACHE));
 
         if (settingsState.cuda) {
             setCudaSettings(containerBuilder);

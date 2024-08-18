@@ -7,6 +7,7 @@ import com.github.damiano1996.intellijplugin.incoder.llm.server.container.orches
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -28,6 +29,19 @@ public class DockerContainerOrchestrator implements ContainerOrchestrator {
         return envVariables.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .toArray(String[]::new);
+    }
+
+    @Override
+    public void pull(String name, String version) throws ContainerException {
+        try {
+            dockerClient
+                    .pullImageCmd("%s:%s".formatted(name, version))
+                    .exec(new PullImageResultCallback())
+                    .awaitCompletion();
+        } catch (InterruptedException e) {
+            throw new ContainerException(
+                    "Unable to pull the image: %s:%s".formatted(name, version), e);
+        }
     }
 
     @Override

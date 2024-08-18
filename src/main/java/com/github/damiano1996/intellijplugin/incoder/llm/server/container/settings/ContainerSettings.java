@@ -39,10 +39,10 @@ public final class ContainerSettings implements PersistentStateComponent<Contain
 
         public OrchestratorType orchestratorType = OrchestratorType.DOCKER;
 
-        public String imageName = "incoder-service";
-        public String imageTag = "latest";
+        public String imageName = "ghcr.io/damiano1996/incoder-api";
+        public String imageTag = "4c639cde9a0b129aafa8b52e59614735c549ad53";
 
-        public String containerName = "incoder-service";
+        public String containerName = "incoder-api";
         public int containerPortNumber = 8000;
         public int localHostPortNumber = 8899;
 

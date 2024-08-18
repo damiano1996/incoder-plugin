@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ContainerOrchestrator {
 
+    void pull(String name, String version) throws ContainerException;
+
     Container start(@NotNull Container container) throws ContainerException;
 
     void restart(Container container) throws ContainerException;
