@@ -1,0 +1,35 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin require-restart="false">
+    <id>com.github.damiano1996.intellijplugin.incoder</id>
+    <name>InCoder</name>
+    <vendor email="damiano.derin@gmail.com">Damiano Derin</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <resource-bundle>messages.bundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="com.github.damiano1996.intellijplugin.incoder.InCoderActivity"/>
+        <applicationConfigurable
+                parentId="tools"
+                instance="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
+                id="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
+                displayName="InCoder"/>
+        <notificationGroup id="InCoder Notifications" displayType="BALLOON"/>
+    </extensions>
+
+    <applicationListeners>
+        <listener class="com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionAction"
+                  topic="com.intellij.openapi.actionSystem.ex.AnActionListener"/>
+    </applicationListeners>
+
+    <actions>
+        <action id="com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionAction"
+                class="com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionAction"
+                text="ConfirmInCoderAction"
+                description="Confirm InCoder suggestion">
+            <keyboard-shortcut keymap="$default" first-keystroke="TAB"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ESCAPE"/>
+        </action>
+    </actions>
+</idea-plugin>
