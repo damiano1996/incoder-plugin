@@ -73,7 +73,7 @@ public class ContainerLlmServer implements LlmServer {
 
     private void pullImage() throws InitializableException {
         try {
-            notify("Pulling image %s:%s...".formatted(container.getImage().getName(), container.getImage().getVersion()));
+            notify("Pulling image %s:%s".formatted(container.getImage().getName(), container.getImage().getVersion()));
             containerOrchestrator.pull(
                     container.getImage().getName(), container.getImage().getVersion());
             notify("Image pulled successfully");
