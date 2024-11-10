@@ -5,7 +5,6 @@ import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionCo
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionException;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionListener;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableException;
-import com.github.damiano1996.intellijplugin.incoder.llm.client.LlmClient;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.LlmServer;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.ServerException;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.ServerSettings;
@@ -33,8 +32,10 @@ public final class LlmService implements Disposable {
 
     private final BlockingQueue<CodeCompletionContext> queue = new ArrayBlockingQueue<>(1);
 
-    private LlmClient client;
+    private final LlmServerFactory llmServerFactory = new LlmServerFactoryImpl();
+
     private LlmServer server;
+    private LlmClient client;
 
     public LlmService(Project project) {
         this.project = project;
@@ -45,10 +46,7 @@ public final class LlmService implements Disposable {
     }
 
     public void init() {
-        LlmAbstractFactory llmAbstractFactory =
-                new LlmFactoryProviderImpl().createLlmAbstractFactory(ServerSettings.getInstance());
-        client = llmAbstractFactory.createClient();
-        server = llmAbstractFactory.createServer();
+        server = llmServerFactory.createServer(ServerSettings.getInstance());
 
         ProgressManager.getInstance()
                 .run(
@@ -63,7 +61,7 @@ public final class LlmService implements Disposable {
                                     log.debug("Server is ready");
 
                                     log.debug("Initializing the client");
-                                    client.updateBaseUrl(server.getBaseUrl());
+                                    client = server.createClient();
                                     client.subscribe(indicator::setText);
                                     client.init();
                                     log.debug("Client initialized");

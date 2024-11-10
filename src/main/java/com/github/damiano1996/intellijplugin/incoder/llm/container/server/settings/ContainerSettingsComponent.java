@@ -1,9 +1,12 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.server.container.settings;
+package com.github.damiano1996.intellijplugin.incoder.llm.container.server.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.orchestration.orchestrators.OrchestratorType;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.settings.renderers.HuggingFaceModelRenderer;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.orchestration.orchestrators.OrchestratorType;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.settings.renderers.HuggingFaceModelRenderer;
+import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.CustomServerSettingsComponent;
+import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.ServerSettings;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.TitledSeparator;
@@ -15,7 +18,7 @@ import javax.swing.*;
 import lombok.Getter;
 
 @Getter
-public class ContainerSettingsComponent {
+public class ContainerSettingsComponent implements CustomServerSettingsComponent {
 
     private final JPanel mainPanel;
 
@@ -72,6 +75,16 @@ public class ContainerSettingsComponent {
                         .setFormLeftIndent(0)
                         .addComponentFillVertically(new JPanel(), 0)
                         .getPanel();
+    }
+
+    @Override
+    public ServerSettings.State.ServerType getServerType() {
+        return ServerSettings.State.ServerType.LOCAL_CONTAINER;
+    }
+
+    @Override
+    public Configurable getConfigurable() {
+        return new ContainerSettingsConfigurable(this);
     }
 
     public static class HuggingFaceModelComboBox

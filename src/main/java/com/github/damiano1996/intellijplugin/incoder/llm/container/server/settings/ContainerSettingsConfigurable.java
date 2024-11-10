@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.server.container.settings;
+package com.github.damiano1996.intellijplugin.incoder.llm.container.server.settings;
 
 import com.intellij.openapi.options.Configurable;
 import java.util.Objects;

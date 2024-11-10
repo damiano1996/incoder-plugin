@@ -1,7 +1,7 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.server.container.settings;
+package com.github.damiano1996.intellijplugin.incoder.llm.container.server.settings;
 
 import com.github.damiano1996.intellijplugin.incoder.InCoderBundle;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.orchestration.orchestrators.OrchestratorType;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.orchestration.orchestrators.OrchestratorType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;

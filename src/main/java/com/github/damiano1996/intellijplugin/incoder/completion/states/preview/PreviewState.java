@@ -5,7 +5,6 @@ import com.github.damiano1996.intellijplugin.incoder.completion.states.BaseState
 import com.github.damiano1996.intellijplugin.incoder.completion.states.decision.DecisionState;
 import com.github.damiano1996.intellijplugin.incoder.completion.states.preview.renderer.PreviewInlayRenderer;
 import com.intellij.codeInsight.daemon.impl.HintRenderer;
-import com.intellij.codeInsight.intention.impl.preview.IntentionPreviewUnsupportedOperationException;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -102,8 +101,7 @@ public class PreviewState extends BaseState {
                         .getInlineElementsInRange(0, editor.getDocument().getTextLength())
                         .forEach(Disposable::dispose);
             }
-        } catch (IntentionPreviewUnsupportedOperationException e) {
-            // fixme
+        } catch (Exception e) {
             log.warn("Error while cleaning inlay model: {}", e.getMessage());
         }
     }

@@ -1,8 +1,8 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.server.container.orchestration.orchestrators;
+package com.github.damiano1996.intellijplugin.incoder.llm.container.server.orchestration.orchestrators;
 
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.Container;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.ContainerException;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.ContainerState;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.Container;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.ContainerException;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.ContainerState;
 import org.jetbrains.annotations.NotNull;
 
 public interface ContainerOrchestrator {

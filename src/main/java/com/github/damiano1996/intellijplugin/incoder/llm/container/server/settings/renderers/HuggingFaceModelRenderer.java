@@ -1,6 +1,6 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.server.container.settings.renderers;
+package com.github.damiano1996.intellijplugin.incoder.llm.container.server.settings.renderers;
 
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.settings.ContainerSettings;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.settings.ContainerSettings;
 import java.awt.*;
 import javax.swing.*;
 
