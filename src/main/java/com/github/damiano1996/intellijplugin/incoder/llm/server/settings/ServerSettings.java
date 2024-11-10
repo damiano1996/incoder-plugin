@@ -1,5 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.llm.server.settings;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
@@ -32,10 +33,13 @@ public final class ServerSettings implements PersistentStateComponent<ServerSett
 
     @ToString
     public static class State {
-        public ServerType serverType = ServerType.LOCAL;
+        public ServerType serverType = ServerType.LANG_CHAIN_4J;
 
         public enum ServerType {
-            LOCAL
+            @JsonProperty("Local Container")
+            LOCAL_CONTAINER,
+            @JsonProperty("LangChain4j")
+            LANG_CHAIN_4J
         }
     }
 }

@@ -33,5 +33,6 @@ public final class PluginSettings implements PersistentStateComponent<PluginSett
     @ToString
     public static class State {
         public boolean isFirstPluginRun = true;
+        public boolean isPluginConfigured = false;
     }
 }

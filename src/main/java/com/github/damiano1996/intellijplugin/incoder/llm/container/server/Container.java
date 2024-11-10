@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.server.container;
+package com.github.damiano1996.intellijplugin.incoder.llm.container.server;
 
 import java.util.List;
 import java.util.Map;

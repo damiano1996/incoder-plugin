@@ -1,18 +1,21 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.server.container;
+package com.github.damiano1996.intellijplugin.incoder.llm.container.server;
 
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableException;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableListener;
+import com.github.damiano1996.intellijplugin.incoder.llm.LlmClient;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.client.ContainerLlmClient;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.orchestration.OrchestratorFactoryImpl;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.orchestration.orchestrators.ContainerOrchestrator;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.settings.ContainerSettings;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.LlmServer;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.ServerException;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.orchestration.OrchestratorFactoryImpl;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.orchestration.orchestrators.ContainerOrchestrator;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.settings.ContainerSettings;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -38,8 +41,8 @@ public class ContainerLlmServer implements LlmServer {
                 ContainerSettings.getInstance().getState(), "Container settings must be defined.");
     }
 
-    @Override
-    public URL getBaseUrl() throws ServerException {
+    @Contract(" -> new")
+    private @NotNull URL getBaseUrl() throws ServerException {
         try {
             String baseUrl =
                     "http://localhost:%s".formatted(getSettingsState().localHostPortNumber);
@@ -48,6 +51,11 @@ public class ContainerLlmServer implements LlmServer {
         } catch (MalformedURLException e) {
             throw new ServerException(e);
         }
+    }
+
+    @Override
+    public LlmClient createClient() throws ServerException {
+        return new ContainerLlmClient(getBaseUrl());
     }
 
     @Override
@@ -73,7 +81,11 @@ public class ContainerLlmServer implements LlmServer {
 
     private void pullImage() throws InitializableException {
         try {
-            notify("Pulling image %s:%s".formatted(container.getImage().getName(), container.getImage().getVersion()));
+            notify(
+                    "Pulling image %s:%s"
+                            .formatted(
+                                    container.getImage().getName(),
+                                    container.getImage().getVersion()));
             containerOrchestrator.pull(
                     container.getImage().getName(), container.getImage().getVersion());
             notify("Image pulled successfully");

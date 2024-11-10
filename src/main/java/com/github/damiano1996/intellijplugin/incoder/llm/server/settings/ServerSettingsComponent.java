@@ -1,12 +1,16 @@
 package com.github.damiano1996.intellijplugin.incoder.llm.server.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.settings.ContainerSettingsComponent;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.settings.ContainerSettingsComponent;
+import com.github.damiano1996.intellijplugin.incoder.llm.langchain.server.settings.LangChainSettingsComponent;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.TitledSeparator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
+import java.awt.event.ItemEvent;
+import java.util.List;
 import javax.swing.*;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 public class ServerSettingsComponent {
@@ -14,35 +18,57 @@ public class ServerSettingsComponent {
     private final JPanel mainPanel;
     private final ComboBox<ServerSettings.State.ServerType> serverTypeComboBox;
 
-    private final ContainerSettingsComponent containerSettingsComponent;
+    private final List<CustomServerSettingsComponent> customServerSettingsComponents =
+            List.of(new ContainerSettingsComponent(), new LangChainSettingsComponent());
 
     public ServerSettingsComponent() {
         serverTypeComboBox = new ComboBox<>(ServerSettings.State.ServerType.values());
 
-        containerSettingsComponent = new ContainerSettingsComponent();
+        List<JPanel> panels =
+                customServerSettingsComponents.stream()
+                        .map(CustomServerSettingsComponent::getMainPanel)
+                        .toList();
 
-        var containerPanel = containerSettingsComponent.getMainPanel();
+        updateVisibility(serverTypeComboBox.getItem());
 
         serverTypeComboBox.addItemListener(
-                e -> {
-                    var enable = e.getItem().equals(ServerSettings.State.ServerType.LOCAL);
-                    containerPanel.setEnabled(enable);
-                    for (int i = 0; i < containerPanel.getComponents().length; i++) {
-                        containerPanel.getComponent(i).setEnabled(enable);
-                    }
+                event -> {
+                    updateVisibility(event);
+                    revalidatePanels();
                 });
 
-        // Create the main panel using FormBuilder
-        mainPanel =
+        var formBuilder =
                 FormBuilder.createFormBuilder()
                         .addComponent(new TitledSeparator("Server Settings"))
                         .setVerticalGap(5)
                         .setFormLeftIndent(20)
-                        .addLabeledComponent(new JBLabel("Location:"), serverTypeComboBox, 1, false)
-                        .addComponentFillVertically(new JPanel(), 0)
-                        .setFormLeftIndent(0)
-                        .addComponent(containerPanel)
-                        .addComponentFillVertically(new JPanel(), 0)
-                        .getPanel();
+                        .addLabeledComponent(new JBLabel("Type:"), serverTypeComboBox, 1, false)
+                        .setFormLeftIndent(0);
+
+        panels.forEach(formBuilder::addComponent);
+
+        mainPanel = formBuilder.addComponentFillVertically(new JPanel(), 0).getPanel();
+    }
+
+    private void updateVisibility(@NotNull ItemEvent e) {
+        var selected = (ServerSettings.State.ServerType) e.getItem();
+        updateVisibility(selected);
+    }
+
+    private void updateVisibility(ServerSettings.State.ServerType serverType) {
+        customServerSettingsComponents.forEach(
+                customServerSettingsComponent -> {
+                    customServerSettingsComponent
+                            .getMainPanel()
+                            .setVisible(
+                                    customServerSettingsComponent
+                                            .getServerType()
+                                            .equals(serverType));
+                });
+    }
+
+    private void revalidatePanels() {
+        mainPanel.revalidate();
+        mainPanel.repaint();
     }
 }

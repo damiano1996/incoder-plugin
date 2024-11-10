@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.client.container;
+package com.github.damiano1996.intellijplugin.incoder.llm.container.client;
 
 import com.github.damiano1996.intellijplugin.incoder.client.invoker.ApiException;
 import com.github.damiano1996.intellijplugin.incoder.client.model.AutocompleteRequest;
@@ -6,7 +6,7 @@ import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionCo
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionException;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableException;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableListener;
-import com.github.damiano1996.intellijplugin.incoder.llm.client.LlmClient;
+import com.github.damiano1996.intellijplugin.incoder.llm.LlmClient;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +19,9 @@ public class ContainerLlmClient implements LlmClient {
     private final com.github.damiano1996.intellijplugin.incoder.client.api.DefaultApi client;
     private final List<InitializableListener> listeners = new ArrayList<>();
 
-    public ContainerLlmClient() {
+    public ContainerLlmClient(URL baseUrl) {
         client = new com.github.damiano1996.intellijplugin.incoder.client.api.DefaultApi();
+        client.setCustomBaseUrl(baseUrl.toString());
     }
 
     @Override
@@ -56,9 +57,4 @@ public class ContainerLlmClient implements LlmClient {
 
     @Override
     public void close() {}
-
-    @Override
-    public void updateBaseUrl(@NotNull URL baseUrl) {
-        client.setCustomBaseUrl(baseUrl.toString());
-    }
 }

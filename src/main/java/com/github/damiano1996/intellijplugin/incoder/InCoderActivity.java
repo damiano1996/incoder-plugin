@@ -24,9 +24,17 @@ public class InCoderActivity implements ProjectActivity {
         EventQueue.invokeLater(
                 () -> {
                     notifyWelcomeMessage(project);
-                    initServices(project);
+                    configureBeforeInitServices(project);
                 });
         return null;
+    }
+
+    private static void configureBeforeInitServices(@NotNull Project project) {
+        if (Objects.requireNonNull(PluginSettings.getInstance().getState()).isPluginConfigured) {
+            initServices(project);
+        } else {
+            NotificationService.getInstance(project).notifyFirstConfiguration();
+        }
     }
 
     private static void notifyWelcomeMessage(@NotNull Project project) {
@@ -36,7 +44,7 @@ public class InCoderActivity implements ProjectActivity {
         }
     }
 
-    private static void initServices(@NotNull Project project) {
+    public static void initServices(@NotNull Project project) {
         try {
             log.debug("Initializing services...");
             LlmService.getInstance(project).init();

@@ -1,9 +1,9 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.server.container.orchestration.orchestrators.docker;
+package com.github.damiano1996.intellijplugin.incoder.llm.container.server.orchestration.orchestrators.docker;
 
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.Container;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.ContainerException;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.ContainerState;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.orchestration.orchestrators.ContainerOrchestrator;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.Container;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.ContainerException;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.ContainerState;
+import com.github.damiano1996.intellijplugin.incoder.llm.container.server.orchestration.orchestrators.ContainerOrchestrator;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
@@ -45,18 +45,13 @@ public class DockerContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public com.github.damiano1996.intellijplugin.incoder.llm.server.container.Container start(
-            @NotNull
-                    com.github.damiano1996.intellijplugin.incoder.llm.server.container.Container
-                            container)
-            throws ContainerException {
+    public Container start(@NotNull Container container) throws ContainerException {
 
         try {
             if (container.getName() != null) removeExistingContainers(container.getName());
 
             String id = createContainerIdentifier(container);
-            com.github.damiano1996.intellijplugin.incoder.llm.server.container.Container
-                    containerWithId = container.withId(id);
+            Container containerWithId = container.withId(id);
             log.debug("Container with id: {}", containerWithId);
 
             assert containerWithId.getId() != null;
@@ -90,10 +85,7 @@ public class DockerContainerOrchestrator implements ContainerOrchestrator {
                 });
     }
 
-    private String createContainerIdentifier(
-            @NotNull
-                    com.github.damiano1996.intellijplugin.incoder.llm.server.container.Container
-                            container) {
+    private String createContainerIdentifier(@NotNull Container container) {
         log.debug("Going to create Docker container command. Configs: {}", container);
         CreateContainerCmd createContainerCmd = getCreateContainerCmd(container);
 
@@ -109,11 +101,7 @@ public class DockerContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void restart(
-            @NotNull
-                    com.github.damiano1996.intellijplugin.incoder.llm.server.container.Container
-                            container)
-            throws ContainerException {
+    public void restart(@NotNull Container container) throws ContainerException {
         if (container.getId() == null)
             throw new ContainerException("Container id must be defined to restart the container.");
 
@@ -126,10 +114,7 @@ public class DockerContainerOrchestrator implements ContainerOrchestrator {
         }
     }
 
-    private CreateContainerCmd getCreateContainerCmd(
-            @NotNull
-                    com.github.damiano1996.intellijplugin.incoder.llm.server.container.Container
-                            container) {
+    private CreateContainerCmd getCreateContainerCmd(@NotNull Container container) {
         return dockerClient
                 .createContainerCmd(
                         "%s:%s"
@@ -166,10 +151,7 @@ public class DockerContainerOrchestrator implements ContainerOrchestrator {
                 .withEnv(envVariablesToList(container.getEnvVariables()));
     }
 
-    public ContainerState getContainerState(
-            @NotNull
-                    com.github.damiano1996.intellijplugin.incoder.llm.server.container.Container
-                            container)
+    public ContainerState getContainerState(@NotNull Container container)
             throws ContainerException {
         if (container.getId() == null)
             throw new ContainerException("Container id must be defined.");

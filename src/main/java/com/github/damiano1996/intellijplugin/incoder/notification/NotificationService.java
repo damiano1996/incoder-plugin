@@ -54,6 +54,16 @@ public final class NotificationService {
                         InCoderBundle.message("plugin-title"),
                         InCoderBundle.message("notification-welcome"),
                         NotificationType.INFORMATION)
+                .notify(project);
+    }
+
+    public void notifyFirstConfiguration() {
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup(InCoderBundle.message("notification-group"))
+                .createNotification(
+                        InCoderBundle.message("plugin-title"),
+                        InCoderBundle.message("notification-first-configuration"),
+                        NotificationType.INFORMATION)
                 .addAction(
                         NotificationAction.createSimple(
                                 InCoderBundle.message("notification-settings-button"),

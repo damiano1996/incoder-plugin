@@ -1,10 +1,15 @@
 package com.github.damiano1996.intellijplugin.incoder.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.llm.server.container.settings.ContainerSettingsConfigurable;
+import com.github.damiano1996.intellijplugin.incoder.InCoderActivity;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.ServerSettingsComponent;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.ServerSettingsConfigurable;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.options.UnnamedConfigurable;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.util.ui.FormBuilder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.swing.*;
 import org.jetbrains.annotations.Contract;
@@ -14,15 +19,17 @@ import org.jetbrains.annotations.Nullable;
 
 public final class PluginSettingsConfigurable implements Configurable {
 
-    private final ServerSettingsConfigurable serverSettingsConfigurable;
-    private final ContainerSettingsConfigurable containerSettingsConfigurable;
+    private final List<Configurable> configurables = new ArrayList<>();
 
     public PluginSettingsConfigurable() {
         ServerSettingsComponent serverSettingsComponent = new ServerSettingsComponent();
-        serverSettingsConfigurable = new ServerSettingsConfigurable(serverSettingsComponent);
-        containerSettingsConfigurable =
-                new ContainerSettingsConfigurable(
-                        serverSettingsComponent.getContainerSettingsComponent());
+
+        configurables.add(new ServerSettingsConfigurable(serverSettingsComponent));
+        serverSettingsComponent
+                .getCustomServerSettingsComponents()
+                .forEach(
+                        customServerSettingsComponent ->
+                                configurables.add(customServerSettingsComponent.getConfigurable()));
     }
 
     @Contract(pure = true)
@@ -34,45 +41,48 @@ public final class PluginSettingsConfigurable implements Configurable {
 
     @Override
     public JComponent getPreferredFocusedComponent() {
-        return serverSettingsConfigurable.getPreferredFocusedComponent();
+        return configurables.get(0).getPreferredFocusedComponent();
     }
 
     @Nullable
     @Override
     public JComponent createComponent() {
-        var serverSettingsConfigurableComponent =
-                Objects.requireNonNull(serverSettingsConfigurable.createComponent());
-        var containerSettingsConfigurableComponent =
-                Objects.requireNonNull(containerSettingsConfigurable.createComponent());
+        var formBuilder = FormBuilder.createFormBuilder();
+        configurables.forEach(
+                configurable ->
+                        formBuilder.addComponent(
+                                Objects.requireNonNull(configurable.createComponent())));
 
-        return FormBuilder.createFormBuilder()
-                .addComponent(serverSettingsConfigurableComponent)
-                .addComponent(containerSettingsConfigurableComponent)
-                .addComponentFillVertically(new JPanel(), 0)
-                .getPanel();
+        return formBuilder.addComponentFillVertically(new JPanel(), 0).getPanel();
     }
 
     @Override
     public boolean isModified() {
-        return serverSettingsConfigurable.isModified()
-                || containerSettingsConfigurable.isModified();
+        return configurables.stream().anyMatch(UnnamedConfigurable::isModified);
     }
 
     @Override
     public void apply() {
-        serverSettingsConfigurable.apply();
-        containerSettingsConfigurable.apply();
+        configurables.forEach(
+                configurable -> {
+                    try {
+                        configurable.apply();
+                    } catch (ConfigurationException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+
+        Objects.requireNonNull(PluginSettings.getInstance().getState()).isPluginConfigured = true;
+        InCoderActivity.initServices(ProjectManager.getInstance().getDefaultProject());
     }
 
     @Override
     public void reset() {
-        serverSettingsConfigurable.reset();
-        containerSettingsConfigurable.reset();
+        configurables.forEach(UnnamedConfigurable::reset);
     }
 
     @Override
     public void disposeUIResources() {
-        serverSettingsConfigurable.disposeUIResources();
-        containerSettingsConfigurable.disposeUIResources();
+        configurables.forEach(UnnamedConfigurable::disposeUIResources);
     }
 }
