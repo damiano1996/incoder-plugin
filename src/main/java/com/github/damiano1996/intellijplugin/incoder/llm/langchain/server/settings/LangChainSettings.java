@@ -41,8 +41,8 @@ public final class LangChainSettings implements PersistentStateComponent<LangCha
         @ToString
         public static class OllamaState {
             public String baseUrl = "http://localhost:11434/";
-            public String modelName;
-            public Double temperature;
+            public String modelName = "llama3.1";
+            public Double temperature = 0.2;
         }
     }
 }

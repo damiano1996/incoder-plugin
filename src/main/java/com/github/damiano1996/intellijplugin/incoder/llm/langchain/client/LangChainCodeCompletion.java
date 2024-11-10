@@ -5,7 +5,6 @@ import dev.langchain4j.service.V;
 
 public interface LangChainCodeCompletion {
 
-
     @UserMessage(
             """
                     Given the following code context, provide only the missing line of code.
@@ -20,8 +19,8 @@ public interface LangChainCodeCompletion {
                     Respond only with the necessary code to complete the line.
                     Do not include markdown, comments, or additional explanations.
                     If the line is partially written, complete it up to the first newline.
-                    """
-    )
+                    If the line is already at the end, return an empty response.
+                    """)
     String codeComplete(
             @V("leftContext") String leftContext, @V("rightContext") String rightContext);
 }
