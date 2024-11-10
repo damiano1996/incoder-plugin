@@ -4,6 +4,8 @@ import com.github.damiano1996.intellijplugin.incoder.client.invoker.ApiException
 import com.github.damiano1996.intellijplugin.incoder.client.model.AutocompleteRequest;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionException;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationContext;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationException;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableException;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableListener;
 import com.github.damiano1996.intellijplugin.incoder.llm.LlmClient;
@@ -11,6 +13,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -57,4 +60,9 @@ public class ContainerLlmClient implements LlmClient {
 
     @Override
     public void close() {}
+
+    @Override
+    public String generate(CodeGenerationContext codeGenerationContext) throws CodeGenerationException {
+        throw new NotImplementedException("Container mode didn't implement code generation from prompt");
+    }
 }

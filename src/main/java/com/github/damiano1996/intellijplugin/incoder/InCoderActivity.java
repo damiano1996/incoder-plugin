@@ -49,6 +49,7 @@ public class InCoderActivity implements ProjectActivity {
             log.debug("Initializing services...");
             LlmService.getInstance(project).init();
             CodeCompletionService.getInstance(project).init();
+
             log.debug("Services initialized");
         } catch (Exception e) {
             log.error("Error while initializing services", e);

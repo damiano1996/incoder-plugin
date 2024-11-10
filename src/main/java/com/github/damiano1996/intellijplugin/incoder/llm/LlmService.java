@@ -4,6 +4,8 @@ import com.github.damiano1996.intellijplugin.incoder.InCoderBundle;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionException;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionListener;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationContext;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationException;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableException;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.LlmServer;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.ServerException;
@@ -106,6 +108,10 @@ public final class LlmService implements Disposable {
         }
     }
 
+    public String generate(CodeGenerationContext codeGenerationContext) throws CodeGenerationException {
+            return client.generate(codeGenerationContext);
+    }
+
     @Override
     public void dispose() {
         try {
@@ -130,7 +136,7 @@ public final class LlmService implements Disposable {
 
                     try {
                         // TODO: decide where to strip and split
-                        var prediction = client.codeComplete(codeCompletionContext);
+                        var prediction = client.codeComplete(codeCompletionContext).split("\n")[0].trim();
                         log.debug("Prediction received from service: {}", prediction);
 
                         if (queue.isEmpty()) {

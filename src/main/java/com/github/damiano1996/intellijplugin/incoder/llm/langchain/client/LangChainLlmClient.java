@@ -2,6 +2,8 @@ package com.github.damiano1996.intellijplugin.incoder.llm.langchain.client;
 
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionException;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationContext;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationException;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableListener;
 import com.github.damiano1996.intellijplugin.incoder.llm.LlmClient;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -23,9 +25,7 @@ public class LangChainLlmClient implements LlmClient {
             LangChainCodeCompletion langChainCodeCompletion =
                     AiServices.create(LangChainCodeCompletion.class, model);
             return langChainCodeCompletion
-                    .codeComplete(context.leftContext(), context.rightContext())
-                    .split("\n")[0]
-                    .trim();
+                    .codeComplete(context.leftContext(), context.rightContext());
         } catch (Exception e) {
             throw new CodeCompletionException("Unable to generate code.", e);
         }
@@ -39,4 +39,15 @@ public class LangChainLlmClient implements LlmClient {
 
     @Override
     public void close() {}
+
+    @Override
+    public String generate(CodeGenerationContext codeGenerationContext) throws CodeGenerationException {
+        try {
+            LangChainCodeGeneration langChainCodeGeneration =
+                    AiServices.create(LangChainCodeGeneration.class, model);
+            return langChainCodeGeneration
+                    .codeGenerate(codeGenerationContext.prompt(), codeGenerationContext.actualCode());
+        } catch (Exception e) {
+            throw new CodeGenerationException("Unable to generate code.", e);
+        }}
 }
