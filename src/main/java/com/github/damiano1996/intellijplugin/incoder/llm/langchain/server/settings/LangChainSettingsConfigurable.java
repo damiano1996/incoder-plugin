@@ -47,7 +47,7 @@ public final class LangChainSettingsConfigurable implements Configurable {
                         .getItem()
                         .equals(state.modelType);
 
-        if (state.modelType == LangChainModelType.OLLAMA) {
+        if (state.modelType.equals(LangChainModelType.OLLAMA)) {
             modified |=
                     !langChainSettingsComponent
                                     .getOllamaBaseUrlField()
