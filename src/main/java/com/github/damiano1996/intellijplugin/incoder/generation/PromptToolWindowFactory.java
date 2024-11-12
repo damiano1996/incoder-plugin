@@ -10,21 +10,23 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
 
 @Slf4j
 public final class PromptToolWindowFactory implements ToolWindowFactory, DumbAware {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        PromptToolWindowContent toolWindowContent = new PromptToolWindowContent(project, toolWindow);
-        Content content = ContentFactory.getInstance().createContent(toolWindowContent.getContentPanel(), "", false);
+        PromptToolWindowContent toolWindowContent =
+                new PromptToolWindowContent(project, toolWindow);
+        Content content =
+                ContentFactory.getInstance()
+                        .createContent(toolWindowContent.getContentPanel(), "", false);
         toolWindow.getContentManager().addContent(content);
     }
 
@@ -32,8 +34,7 @@ public final class PromptToolWindowFactory implements ToolWindowFactory, DumbAwa
 
         private final Project project;
 
-        @Getter
-        private final JPanel contentPanel;
+        @Getter private final JPanel contentPanel;
         private final JBTextField promptTextField = new JBTextField();
         private final JButton submitButton = new JButton("Submit");
 
@@ -43,23 +44,30 @@ public final class PromptToolWindowFactory implements ToolWindowFactory, DumbAwa
             promptTextField.addActionListener(this::handleAction);
             submitButton.addActionListener(this::handleAction);
 
-            contentPanel = FormBuilder.createFormBuilder()
-                    .setVerticalGap(5)
-                    .setFormLeftIndent(20)
-
-                    .addLabeledComponent(
-                            new JBLabel("Enter prompt:"), new JPanel(new BorderLayout()) {{
-                                setBorder(JBUI.Borders.emptyRight(10));
-                                add(promptTextField);
-                            }}, 1, true)
-                    .addComponent(new JPanel(new BorderLayout()) {{
-                        setBorder(JBUI.Borders.emptyRight(10));
-                        add(new JButton("Submit"), BorderLayout.EAST);
-                    }})
-
-                    .setFormLeftIndent(0)
-                    .addComponentFillVertically(new JPanel(), 0)
-                    .getPanel();
+            contentPanel =
+                    FormBuilder.createFormBuilder()
+                            .setVerticalGap(5)
+                            .setFormLeftIndent(20)
+                            .addLabeledComponent(
+                                    new JBLabel("Enter prompt:"),
+                                    new JPanel(new BorderLayout()) {
+                                        {
+                                            setBorder(JBUI.Borders.emptyRight(10));
+                                            add(promptTextField);
+                                        }
+                                    },
+                                    1,
+                                    true)
+                            .addComponent(
+                                    new JPanel(new BorderLayout()) {
+                                        {
+                                            setBorder(JBUI.Borders.emptyRight(10));
+                                            add(new JButton("Submit"), BorderLayout.EAST);
+                                        }
+                                    })
+                            .setFormLeftIndent(0)
+                            .addComponentFillVertically(new JPanel(), 0)
+                            .getPanel();
         }
 
         private void handleAction(ActionEvent e) {
@@ -73,9 +81,8 @@ public final class PromptToolWindowFactory implements ToolWindowFactory, DumbAwa
             } else {
                 log.debug("Prompt: {}", prompt);
                 promptTextField.setText("");
-                CodeGenerationAction.getInstance(project).updateCode(prompt);
+                CodeGenerationService.getInstance(project).updateCode(prompt);
             }
         }
-
     }
 }

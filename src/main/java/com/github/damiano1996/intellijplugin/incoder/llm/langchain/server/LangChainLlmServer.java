@@ -8,7 +8,9 @@ import com.github.damiano1996.intellijplugin.incoder.llm.langchain.server.settin
 import com.github.damiano1996.intellijplugin.incoder.llm.server.LlmServer;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.ServerException;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,8 +51,23 @@ public class LangChainLlmServer implements LlmServer {
         }
     }
 
+    public StreamingChatLanguageModel createStreamingModel() {
+        //noinspection SwitchStatementWithTooFewBranches
+        switch (getSettingsState().modelType) {
+            case OLLAMA -> {
+                return OllamaStreamingChatModel.builder()
+                        .baseUrl(getSettingsState().ollamaState.baseUrl)
+                        .modelName(getSettingsState().ollamaState.modelName)
+                        .temperature(getSettingsState().ollamaState.temperature)
+                        .build();
+            }
+            default -> throw new IllegalStateException(
+                    "Unexpected value: " + getSettingsState().modelType);
+        }
+    }
+
     @Override
     public LlmClient createClient() throws ServerException {
-        return new LangChainLlmClient(createModel());
+        return new LangChainLlmClient(createModel(), createStreamingModel());
     }
 }

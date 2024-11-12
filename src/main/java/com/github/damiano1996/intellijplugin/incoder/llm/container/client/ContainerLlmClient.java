@@ -5,7 +5,7 @@ import com.github.damiano1996.intellijplugin.incoder.client.model.AutocompleteRe
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionException;
 import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationContext;
-import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationException;
+import com.github.damiano1996.intellijplugin.incoder.generation.GenerationStream;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableException;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableListener;
 import com.github.damiano1996.intellijplugin.incoder.llm.LlmClient;
@@ -62,7 +62,8 @@ public class ContainerLlmClient implements LlmClient {
     public void close() {}
 
     @Override
-    public String generate(CodeGenerationContext codeGenerationContext) throws CodeGenerationException {
-        throw new NotImplementedException("Container mode didn't implement code generation from prompt");
+    public GenerationStream generate(CodeGenerationContext codeGenerationContext) {
+        throw new NotImplementedException(
+                "Container mode didn't implement code generation from prompt");
     }
 }
