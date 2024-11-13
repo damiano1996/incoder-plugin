@@ -5,7 +5,7 @@ import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionCo
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionException;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionListener;
 import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationContext;
-import com.github.damiano1996.intellijplugin.incoder.generation.GenerationStream;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeUpdateResponse;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableException;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.LlmServer;
 import com.github.damiano1996.intellijplugin.incoder.llm.server.ServerException;
@@ -108,8 +108,12 @@ public final class LlmService implements Disposable {
         }
     }
 
-    public GenerationStream getGenerationStream(CodeGenerationContext codeGenerationContext) {
-        return client.generate(codeGenerationContext);
+    public CodeUpdateResponse getCodeUpdate(CodeGenerationContext codeGenerationContext) {
+        try {
+            return client.generate(codeGenerationContext);
+        } catch (com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

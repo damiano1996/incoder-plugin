@@ -36,22 +36,20 @@ public final class CodeGenerationService {
         return project.getService(CodeGenerationService.class);
     }
 
-    public void updateCode(String prompt) {
+    public CodeUpdateResponse updateCode(String prompt) {
         log.debug("Going to update the code based on the user prompt: {}", prompt);
         Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
         var actualCode = Objects.requireNonNull(editor).getDocument().getText();
         log.debug("Virtual file name: {}", editor.getVirtualFile().getName());
 
-        LlmService.getInstance(project)
-                .getGenerationStream(
-                        new CodeGenerationContext(editor.getVirtualFile(), prompt, actualCode))
-                .onNext(token -> {})
-                .onComplete(
-                        updatedCode ->
-                                ApplicationManager.getApplication()
-                                        .invokeLater(() -> showDiff(updatedCode, editor)))
-                .onError(throwable -> {})
-                .start();
+        var generationResponse = LlmService.getInstance(project)
+                .getCodeUpdate(
+                        new CodeGenerationContext(editor.getVirtualFile(), prompt, actualCode));
+
+        ApplicationManager.getApplication()
+                .invokeLater(() -> showDiff(generationResponse.updatedCode(), editor));
+
+        return generationResponse;
     }
 
     private void showDiff(String newCode, @NotNull Editor editor) {

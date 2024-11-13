@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.llm.langchain.client;
+package com.github.damiano1996.intellijplugin.incoder.llm.langchain.client.generation;
 
 import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
@@ -26,7 +26,7 @@ public interface LangChainCodeGeneration {
 
                     Updated code:
                     """)
-    TokenStream codeGenerate(
+    LangChainCodeUpdate codeGenerate(
             @V("filePath") String filePath,
             @V("prompt") String prompt,
             @V("actualCode") String actualCode);

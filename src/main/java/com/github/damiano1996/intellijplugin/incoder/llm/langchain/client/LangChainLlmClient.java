@@ -3,24 +3,25 @@ package com.github.damiano1996.intellijplugin.incoder.llm.langchain.client;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionException;
 import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationContext;
-import com.github.damiano1996.intellijplugin.incoder.generation.GenerationStream;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationException;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeUpdateResponse;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableListener;
 import com.github.damiano1996.intellijplugin.incoder.llm.LlmClient;
+import com.github.damiano1996.intellijplugin.incoder.llm.langchain.client.generation.LangChainCodeGeneration;
+import com.github.damiano1996.intellijplugin.incoder.llm.langchain.client.generation.LangChainCodeUpdate;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.service.AiServices;
-import dev.langchain4j.service.TokenStream;
-import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 
 public class LangChainLlmClient implements LlmClient {
 
-    private final ChatLanguageModel model;
+    private final ChatLanguageModel chatLanguageModel;
     private final StreamingChatLanguageModel streamingChatLanguageModel;
 
     public LangChainLlmClient(
-            ChatLanguageModel model, StreamingChatLanguageModel streamingChatLanguageModel) {
-        this.model = model;
+            ChatLanguageModel chatLanguageModel, StreamingChatLanguageModel streamingChatLanguageModel) {
+        this.chatLanguageModel = chatLanguageModel;
         this.streamingChatLanguageModel = streamingChatLanguageModel;
     }
 
@@ -29,7 +30,7 @@ public class LangChainLlmClient implements LlmClient {
             throws CodeCompletionException {
         try {
             LangChainCodeCompletion langChainCodeCompletion =
-                    AiServices.create(LangChainCodeCompletion.class, model);
+                    AiServices.create(LangChainCodeCompletion.class, chatLanguageModel);
             return langChainCodeCompletion.codeComplete(
                     context.leftContext(), context.rightContext());
         } catch (Exception e) {
@@ -47,48 +48,15 @@ public class LangChainLlmClient implements LlmClient {
     public void close() {}
 
     @Override
-    public GenerationStream generate(@NotNull CodeGenerationContext codeGenerationContext) {
+    public CodeUpdateResponse generate(@NotNull CodeGenerationContext codeGenerationContext) throws CodeGenerationException {
         LangChainCodeGeneration langChainCodeGeneration =
-                AiServices.create(LangChainCodeGeneration.class, streamingChatLanguageModel);
+                AiServices.create(LangChainCodeGeneration.class, chatLanguageModel);
 
-        TokenStream tokenStream =
+        LangChainCodeUpdate langChainCodeUpdate =
                 langChainCodeGeneration.codeGenerate(
                         codeGenerationContext.virtualFile().getPath(),
                         codeGenerationContext.prompt(),
                         codeGenerationContext.actualCode());
-
-        return new GenerationStream() {
-
-            @Override
-            public GenerationStream onNext(Consumer<String> tokenHandler) {
-                tokenStream.onNext(tokenHandler);
-                return this;
-            }
-
-            @Override
-            public GenerationStream onComplete(Consumer<String> completionHandler) {
-                tokenStream.onComplete(
-                        aiMessageResponse ->
-                                completionHandler.accept(aiMessageResponse.content().text()));
-                return this;
-            }
-
-            @Override
-            public GenerationStream onError(Consumer<Throwable> errorHandler) {
-                tokenStream.onError(errorHandler);
-                return this;
-            }
-
-            @Override
-            public GenerationStream ignoreErrors() {
-                tokenStream.ignoreErrors();
-                return this;
-            }
-
-            @Override
-            public void start() {
-                tokenStream.start();
-            }
-        };
+        return new CodeUpdateResponse(langChainCodeUpdate.getUpdatedCode(), langChainCodeUpdate.getNotes());
     }
 }

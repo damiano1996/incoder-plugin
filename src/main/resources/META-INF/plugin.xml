@@ -19,7 +19,7 @@
 
         <toolWindow id="InCoder" secondary="true"
                     icon="com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON" anchor="right"
-                    factoryClass="com.github.damiano1996.intellijplugin.incoder.generation.PromptToolWindowFactory"/>
+                    factoryClass="com.github.damiano1996.intellijplugin.incoder.tool.window.InCoderToolWindowFactory"/>
     </extensions>
 
     <applicationListeners>
