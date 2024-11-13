@@ -24,7 +24,6 @@ public class HumanMessage implements MessageComponent {
                 super.paintComponent(g);
             }
         };
-
     }
 
     @Override
@@ -33,8 +32,4 @@ public class HumanMessage implements MessageComponent {
         return this;
     }
 
-    @Override
-    public JComponent getTextArea() {
-        return message;
-    }
 }

@@ -16,9 +16,4 @@ public class AiMessage implements MessageComponent{
         return this;
     }
 
-    @Override
-    public JComponent getTextArea() {
-        return message;
-    }
-
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.github.damiano1996.intellijplugin.incoder.tool.window.Tools">
-  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="10" bottom="0" right="10"/>
     <constraints>
       <xy x="20" y="20" width="500" height="5431"/>
@@ -18,7 +18,7 @@
       </component>
       <nested-form id="99109" form-file="com/github/damiano1996/intellijplugin/incoder/tool/window/chat/Chat.form" binding="chat">
         <constraints>
-          <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
       </nested-form>
       <component id="c8e6a" class="javax.swing.JButton" binding="submit">
@@ -29,16 +29,6 @@
           <text value="Submit"/>
         </properties>
       </component>
-      <nested-form id="859f7" form-file="com/github/damiano1996/intellijplugin/incoder/tool/window/chat/messages/HumanMessage.form" binding="hm" custom-create="true">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </nested-form>
-      <nested-form id="6195e" form-file="com/github/damiano1996/intellijplugin/incoder/tool/window/chat/messages/HumanMessage.form" binding="hm2" custom-create="true">
-        <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </nested-form>
     </children>
   </grid>
 </form>

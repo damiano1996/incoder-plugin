@@ -11,15 +11,13 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 
 @Slf4j
-public class Tools {
+public class Tools{
     private JTextField promptTextField;
     private JButton submit;
     private Chat chat;
 
     @Getter
     private JPanel mainPanel;
-    private HumanMessage hm;
-    private HumanMessage hm2;
 
 
     public void addMessageToHistory(ChatMessage message) {
@@ -27,9 +25,10 @@ public class Tools {
         chat.addMessage(message);
     }
 
-    public void setActionListeners(Project project) {
+    public Tools setActionListeners(Project project) {
         promptTextField.addActionListener(e -> handleAction(project));
         submit.addActionListener(e -> handleAction(project));
+        return this;
     }
 
     private void handleAction(Project project) {
@@ -47,14 +46,5 @@ public class Tools {
             var codeUpdateResponse = CodeGenerationService.getInstance(project).updateCode(prompt);
             addMessageToHistory(new ChatMessage(ChatMessage.Author.AI, codeUpdateResponse.notes()));
         }
-    }
-
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
-        hm = new HumanMessage();
-        hm.setMessage("Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!");
-
-        hm2 = new HumanMessage();
-        hm2.setMessage("Hi");
     }
 }

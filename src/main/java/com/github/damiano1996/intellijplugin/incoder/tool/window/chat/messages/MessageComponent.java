@@ -8,5 +8,4 @@ public interface MessageComponent {
 
     JPanel getMainPanel();
 
-    JComponent getTextArea();
 }
