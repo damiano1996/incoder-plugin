@@ -20,7 +20,8 @@ public class LangChainLlmClient implements LlmClient {
     private final StreamingChatLanguageModel streamingChatLanguageModel;
 
     public LangChainLlmClient(
-            ChatLanguageModel chatLanguageModel, StreamingChatLanguageModel streamingChatLanguageModel) {
+            ChatLanguageModel chatLanguageModel,
+            StreamingChatLanguageModel streamingChatLanguageModel) {
         this.chatLanguageModel = chatLanguageModel;
         this.streamingChatLanguageModel = streamingChatLanguageModel;
     }
@@ -48,7 +49,8 @@ public class LangChainLlmClient implements LlmClient {
     public void close() {}
 
     @Override
-    public CodeUpdateResponse generate(@NotNull CodeGenerationContext codeGenerationContext) throws CodeGenerationException {
+    public CodeUpdateResponse generate(@NotNull CodeGenerationContext codeGenerationContext)
+            throws CodeGenerationException {
         LangChainCodeGeneration langChainCodeGeneration =
                 AiServices.create(LangChainCodeGeneration.class, chatLanguageModel);
 
@@ -57,6 +59,7 @@ public class LangChainLlmClient implements LlmClient {
                         codeGenerationContext.virtualFile().getPath(),
                         codeGenerationContext.prompt(),
                         codeGenerationContext.actualCode());
-        return new CodeUpdateResponse(langChainCodeUpdate.getUpdatedCode(), langChainCodeUpdate.getNotes());
+        return new CodeUpdateResponse(
+                langChainCodeUpdate.getUpdatedCode(), langChainCodeUpdate.getNotes());
     }
 }

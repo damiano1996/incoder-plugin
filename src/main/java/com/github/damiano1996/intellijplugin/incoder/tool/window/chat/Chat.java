@@ -1,61 +1,61 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat;
 
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationService;
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeUpdateResponse;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.messages.AiMessage;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.messages.HumanMessage;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.messages.MessageComponent;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.ui.JBUI;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
+import com.intellij.openapi.project.Project;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+
+import com.intellij.ui.JBColor;
+import com.intellij.ui.RoundedLineBorder;
+import com.intellij.ui.components.JBTextField;
 import lombok.Getter;
-import lombok.NonNull;
-import org.jetbrains.annotations.Contract;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.util.Objects;
 
-@Getter
+@Slf4j
 public class Chat {
+    private JTextField prompt;
+    private ChatBody chatBody;
 
-    private JPanel mainPanel;
+    @Getter private JPanel mainPanel;
 
-    private JPanel p2;
-    private JScrollPane scrollPane;
+    public void addMessageToHistory(ChatMessage message) {
+        // ChatMessageService.getInstance(project).getChatMessageList().add(message);
+        chatBody.addMessage(message);
+    }
 
-    @Contract("_ -> new")
-    public static @NotNull MessageComponent getMessageComponent(ChatMessage.@NonNull Author author) {
-        switch (author) {
-            case AI -> {
-                return new AiMessage();
-            }
-            case USER -> {
-                return new HumanMessage();
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + author);
+    public Chat setActionListeners(Project project) {
+        prompt.addActionListener(e -> handleAction(project));
+        return this;
+    }
+
+    private void handleAction(Project project) {
+        String prompt = this.prompt.getText();
+        handlePrompt(project, prompt);
+    }
+
+    private void handlePrompt(Project project, @NotNull String prompt) {
+        if (prompt.isEmpty()) {
+            log.debug("Prompt is empty.");
+        } else {
+            log.debug("Prompt: {}", prompt);
+            this.prompt.setText("");
+
+            addMessageToHistory(new ChatMessage(ChatMessage.Author.USER, prompt));
+            var codeUpdateResponse = new CodeUpdateResponse(prompt, prompt); // CodeGenerationService.getInstance(project).updateCode(prompt);
+            addMessageToHistory(new ChatMessage(ChatMessage.Author.AI, codeUpdateResponse.notes()));
         }
     }
 
-    public void addMessage(@NotNull ChatMessage item) {
-        var messageComponent = getMessageComponent(item.author()).setMessage(item.message());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = p2.getComponentCount();
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = JBUI.insets(5); // Optional: Add spacing
-
-        p2.add(messageComponent.getMainPanel(), gbc);
-//        p2.revalidate();
-//        p2.repaint();
-    }
-
     private void createUIComponents() {
-        mainPanel = new JPanel();
-
-        p2 = new JPanel();
-        p2.setLayout(new GridBagLayout());
-
-        scrollPane = new JBScrollPane(p2);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        prompt = new PlaceholderTextField("Enter a prompt...");
     }
 }

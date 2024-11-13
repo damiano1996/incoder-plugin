@@ -111,7 +111,9 @@ public final class LlmService implements Disposable {
     public CodeUpdateResponse getCodeUpdate(CodeGenerationContext codeGenerationContext) {
         try {
             return client.generate(codeGenerationContext);
-        } catch (com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationException e) {
+        } catch (
+                com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationException
+                        e) {
             throw new RuntimeException(e);
         }
     }

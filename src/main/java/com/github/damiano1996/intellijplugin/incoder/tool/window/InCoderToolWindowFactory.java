@@ -1,5 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window;
 
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.Chat;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -15,19 +16,9 @@ public final class InCoderToolWindowFactory implements ToolWindowFactory, DumbAw
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 
-        Tools tools = new Tools().setActionListeners(project);
+        Chat chat = new Chat().setActionListeners(project);
 
-        Content content =
-                ContentFactory.getInstance()
-                        .createContent(tools.getMainPanel(), "", false);
+        Content content = ContentFactory.getInstance().createContent(chat.getMainPanel(), "Chat", false);
         toolWindow.getContentManager().addContent(content);
-
-        tools.addMessageToHistory(new ChatMessage(ChatMessage.Author.USER, "Hello!"));
-        tools.addMessageToHistory(new ChatMessage(ChatMessage.Author.AI, "I'm Jarvis."));
-
-        tools.addMessageToHistory(new ChatMessage(ChatMessage.Author.USER, "Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!"));
-        tools.addMessageToHistory(new ChatMessage(ChatMessage.Author.AI, "Good morning!"));
     }
-
-
 }

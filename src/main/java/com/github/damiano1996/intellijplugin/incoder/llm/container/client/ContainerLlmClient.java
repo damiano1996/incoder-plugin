@@ -63,7 +63,8 @@ public class ContainerLlmClient implements LlmClient {
     public void close() {}
 
     @Override
-    public CodeUpdateResponse generate(CodeGenerationContext codeGenerationContext) throws CodeGenerationException {
+    public CodeUpdateResponse generate(CodeGenerationContext codeGenerationContext)
+            throws CodeGenerationException {
         throw new NotImplementedException(
                 "Container mode didn't implement code generation from prompt");
     }

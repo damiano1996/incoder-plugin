@@ -42,9 +42,11 @@ public final class CodeGenerationService {
         var actualCode = Objects.requireNonNull(editor).getDocument().getText();
         log.debug("Virtual file name: {}", editor.getVirtualFile().getName());
 
-        var generationResponse = LlmService.getInstance(project)
-                .getCodeUpdate(
-                        new CodeGenerationContext(editor.getVirtualFile(), prompt, actualCode));
+        var generationResponse =
+                LlmService.getInstance(project)
+                        .getCodeUpdate(
+                                new CodeGenerationContext(
+                                        editor.getVirtualFile(), prompt, actualCode));
 
         ApplicationManager.getApplication()
                 .invokeLater(() -> showDiff(generationResponse.updatedCode(), editor));

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody">
+  <grid id="27dc6" binding="mainPanel" custom-create="true" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="500" height="500"/>
+    </constraints>
+    <properties>
+      <maximumSize width="-1" height="-1"/>
+      <minimumSize width="300" height="-1"/>
+      <opaque value="true"/>
+      <preferredSize width="300" height="100"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <scrollpane id="a254a" binding="scrollPane" custom-create="true">
+        <constraints border-constraint="North"/>
+        <properties>
+          <horizontalScrollBarPolicy value="31"/>
+          <minimumSize width="-1" height="-1"/>
+          <opaque value="false"/>
+          <wheelScrollingEnabled value="false"/>
+        </properties>
+        <border type="empty"/>
+        <children/>
+      </scrollpane>
+    </children>
+  </grid>
+</form>

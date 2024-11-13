@@ -1,6 +1,5 @@
 package com.github.damiano1996.intellijplugin.incoder.llm.langchain.client.generation;
 
-import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 
