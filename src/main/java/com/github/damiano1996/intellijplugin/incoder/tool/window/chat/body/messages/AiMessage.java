@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public class AiMessage implements MessageComponent {
-    private JLabel message;
     private JPanel mainPanel;
+    private JTextArea message;
 
     @Override
     public MessageComponent setMessage(String message) {

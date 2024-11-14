@@ -1,5 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.llm.langchain.client.generation;
 
+import com.github.damiano1996.intellijplugin.incoder.llm.Llm;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 
@@ -29,4 +30,8 @@ public interface LangChainCodeGeneration {
             @V("filePath") String filePath,
             @V("prompt") String prompt,
             @V("actualCode") String actualCode);
+
+
+    @UserMessage("Classify the given prompt: {{it}}")
+    Llm.PromptType classify(String prompt);
 }

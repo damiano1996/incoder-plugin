@@ -37,30 +37,19 @@ public class ChatBody {
 
     public void addMessage(@NotNull ChatMessage item) {
         var messageComponent = getMessageComponent(item.author()).setMessage(item.message());
-        GridBagConstraints gridBagConstraints = createGridBagConstraints();
-        messagePanel.add(messageComponent.getMainPanel(), gridBagConstraints);
-        mainPanel.revalidate();
-    }
-
-    private @NotNull GridBagConstraints createGridBagConstraints() {
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = messagePanel.getComponentCount();
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = JBUI.insets(5);
-        return gridBagConstraints;
+        messagePanel.add(messageComponent.getMainPanel(), 0);
     }
 
     private void createUIComponents() {
         mainPanel = new JPanel();
 
         messagePanel = new JPanel();
-        messagePanel.setLayout(new GridBagLayout());
+        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
 
         scrollPane = new JBScrollPane(messagePanel);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-
-
     }
 }

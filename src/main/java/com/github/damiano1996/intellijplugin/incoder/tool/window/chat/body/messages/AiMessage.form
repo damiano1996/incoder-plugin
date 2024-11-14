@@ -9,10 +9,13 @@
       <size top="10" left="10" bottom="10" right="50"/>
     </border>
     <children>
-      <component id="c19ae" class="javax.swing.JLabel" binding="message">
+      <component id="c19ae" class="javax.swing.JTextArea" binding="message">
         <constraints border-constraint="North"/>
         <properties>
+          <editable value="false"/>
+          <lineWrap value="true"/>
           <text value="Label"/>
+          <wrapStyleWord value="true"/>
         </properties>
       </component>
     </children>
