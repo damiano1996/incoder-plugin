@@ -1,17 +1,15 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages;
 
 import com.intellij.ui.JBColor;
-import lombok.Getter;
-
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
+import lombok.Getter;
 
 public class HumanMessage implements MessageComponent {
 
     private JTextArea message;
 
-    @Getter
-    private JPanel mainPanel;
+    @Getter private JPanel mainPanel;
 
     private void createUIComponents() {
         message =

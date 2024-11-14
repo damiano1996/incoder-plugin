@@ -19,7 +19,7 @@
       </component>
       <nested-form id="99109" form-file="com/github/damiano1996/intellijplugin/incoder/tool/window/chat/body/ChatBody.form" binding="chatBody">
         <constraints>
-          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="4" hsize-policy="4" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
       </nested-form>
       <component id="b1a1b" class="javax.swing.JLabel">

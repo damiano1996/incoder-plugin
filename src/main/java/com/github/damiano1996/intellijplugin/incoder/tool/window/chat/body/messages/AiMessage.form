@@ -2,20 +2,36 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.AiMessage">
   <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
     <constraints>
-      <xy x="20" y="20" width="500" height="400"/>
+      <xy x="20" y="20" width="582" height="400"/>
     </constraints>
     <properties/>
-    <border type="empty">
+    <border type="none">
       <size top="10" left="10" bottom="10" right="50"/>
     </border>
     <children>
-      <component id="c19ae" class="javax.swing.JTextArea" binding="message">
+      <component id="90cbf" class="javax.swing.JLabel">
         <constraints border-constraint="North"/>
         <properties>
+          <font style="1"/>
+          <horizontalAlignment value="2"/>
+          <horizontalTextPosition value="2"/>
+          <iconTextGap value="0"/>
+          <maximumSize width="77" height="-1"/>
+          <minimumSize width="77" height="-1"/>
+          <opaque value="true"/>
+          <preferredSize width="77" height="20"/>
+          <text value="AI Message"/>
+          <verticalAlignment value="0"/>
+          <verticalTextPosition value="0"/>
+        </properties>
+      </component>
+      <component id="c19ae" class="javax.swing.JEditorPane" binding="message" custom-create="true">
+        <constraints border-constraint="Center"/>
+        <properties>
           <editable value="false"/>
-          <lineWrap value="true"/>
-          <text value="Label"/>
-          <wrapStyleWord value="true"/>
+          <margin top="0" left="0" bottom="10" right="0"/>
+          <opaque value="false"/>
+          <text value=""/>
         </properties>
       </component>
     </children>

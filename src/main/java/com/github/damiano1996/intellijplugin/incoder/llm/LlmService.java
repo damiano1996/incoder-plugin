@@ -16,15 +16,15 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-
+import dev.langchain4j.service.TokenStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 @Service(Service.Level.PROJECT)
@@ -110,7 +110,6 @@ public final class LlmService implements Llm, Disposable {
         }
     }
 
-
     @Override
     public void dispose() {
         try {
@@ -124,7 +123,6 @@ public final class LlmService implements Llm, Disposable {
         }
     }
 
-
     @Override
     public CompletableFuture<String> chat(String input) {
         return client.chat(input);
@@ -136,15 +134,15 @@ public final class LlmService implements Llm, Disposable {
     }
 
     @Override
-    public CompletableFuture<CodeEditingResponse> edit(@NonNull Editor editor, @NonNull String editDescription) {
+    public CompletableFuture<CodeEditingResponse> edit(
+            @NonNull Editor editor, @NonNull String editDescription) {
         return client.edit(editor, editDescription);
     }
 
     @Override
-    public CompletableFuture<CodeRagResponse> rag(@NonNull Editor editor, @NonNull String question) {
-        return client.rag(editor, question);
+    public TokenStream answer(@NonNull Editor editor, @NonNull String question) {
+        return client.answer(editor, question);
     }
-
 
     private class RequestRunnable implements Runnable {
         @Override

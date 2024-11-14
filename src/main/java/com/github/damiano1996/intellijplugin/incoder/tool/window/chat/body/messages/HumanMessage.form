@@ -6,7 +6,7 @@
     </constraints>
     <properties/>
     <border type="empty">
-      <size top="0" left="50" bottom="0" right="0"/>
+      <size top="0" left="50" bottom="10" right="0"/>
     </border>
     <children>
       <scrollpane id="5ab64">

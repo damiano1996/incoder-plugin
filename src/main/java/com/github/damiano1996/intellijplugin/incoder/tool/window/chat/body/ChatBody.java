@@ -5,7 +5,6 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messa
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.HumanMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.ui.JBUI;
 import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
@@ -35,9 +34,10 @@ public class ChatBody {
         }
     }
 
-    public void addMessage(@NotNull ChatMessage item) {
+    public MessageComponent addMessage(@NotNull ChatMessage item) {
         var messageComponent = getMessageComponent(item.author()).setMessage(item.message());
         messagePanel.add(messageComponent.getMainPanel(), 0);
+        return messageComponent;
     }
 
     private void createUIComponents() {
@@ -47,8 +47,8 @@ public class ChatBody {
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
 
         scrollPane = new JBScrollPane(messagePanel);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        // scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        // scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
     }

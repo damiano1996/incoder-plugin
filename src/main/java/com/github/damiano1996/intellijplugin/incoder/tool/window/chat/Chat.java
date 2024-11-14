@@ -7,22 +7,20 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatB
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import java.util.Objects;
+import java.util.function.Consumer;
+import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.util.Objects;
 
 @Slf4j
 public class Chat {
     private JTextField prompt;
     private ChatBody chatBody;
 
-    @Getter
-    private JPanel mainPanel;
+    @Getter private JPanel mainPanel;
     private JProgressBar generatingAnswer;
-
 
     public Chat setActionListeners(Project project) {
         prompt.addActionListener(e -> handleAction(project));
@@ -46,34 +44,104 @@ public class Chat {
 
             LlmService.getInstance(project)
                     .classify(prompt)
-                    .thenApply(promptType -> {
-                        switch (promptType) {
-                            case EDIT -> {
-                                return LlmService.getInstance(project).edit(Objects.requireNonNull(FileEditorManager.getInstance(project).getSelectedTextEditor()), prompt)
-                                        .thenAccept(answer -> {
-                                            chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, answer.comments()));
-                                            updateGenerationProgressBar(false);
+                    .thenApply(
+                            promptType -> {
+                                switch (promptType) {
+                                    case EDIT -> {
+                                        return LlmService.getInstance(project)
+                                                .edit(
+                                                        Objects.requireNonNull(
+                                                                FileEditorManager.getInstance(
+                                                                                project)
+                                                                        .getSelectedTextEditor()),
+                                                        prompt)
+                                                .thenAccept(
+                                                        answer -> {
+                                                            chatBody.addMessage(
+                                                                    new ChatMessage(
+                                                                            ChatMessage.Author.AI,
+                                                                            answer.comments()));
+                                                            updateGenerationProgressBar(false);
 
-                                            ApplicationManager.getApplication().invokeLater(() -> CodeGenerationService.showDiff(project, answer.code(), Objects.requireNonNull(FileEditorManager.getInstance(project).getSelectedTextEditor())));
-                                        });
-                            }
-                            case CODE_QUESTION -> {
-                                return LlmService.getInstance(project).rag(Objects.requireNonNull(FileEditorManager.getInstance(project).getSelectedTextEditor()), prompt)
-                                        .thenAccept(codeRagResponse -> {
-                                            chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, codeRagResponse.response()));
-                                            updateGenerationProgressBar(false);
-                                        });
-                            }
-                            default -> {
-                                return LlmService.getInstance(project).chat(prompt)
-                                        .thenAccept(answer -> {
-                                            chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, answer));
-                                            updateGenerationProgressBar(false);
-                                        });
-                            }
-                        }
-                    })
-            ;
+                                                            ApplicationManager.getApplication()
+                                                                    .invokeLater(
+                                                                            () ->
+                                                                                    CodeGenerationService
+                                                                                            .showDiff(
+                                                                                                    project,
+                                                                                                    answer
+                                                                                                            .code(),
+                                                                                                    Objects
+                                                                                                            .requireNonNull(
+                                                                                                                    FileEditorManager
+                                                                                                                            .getInstance(
+                                                                                                                                    project)
+                                                                                                                            .getSelectedTextEditor())));
+                                                        });
+                                    }
+                                    case CODE_QUESTION -> {
+                                        var message =
+                                                chatBody.addMessage(
+                                                        new ChatMessage(ChatMessage.Author.AI, ""));
+
+                                        LlmService.getInstance(project)
+                                                .answer(
+                                                        Objects.requireNonNull(
+                                                                FileEditorManager.getInstance(
+                                                                                project)
+                                                                        .getSelectedTextEditor()),
+                                                        prompt)
+                                                .onNext(
+                                                        new Consumer<>() {
+                                                            private String answer = "";
+
+                                                            @Override
+                                                            public void accept(String token) {
+                                                                log.debug("New token: {}", token);
+
+                                                                answer += token;
+                                                                message.setMessage(answer);
+                                                            }
+                                                        })
+                                                .onComplete(
+                                                        aiMessageResponse -> {
+                                                            log.debug("Stream completed.");
+                                                            updateGenerationProgressBar(false);
+                                                        })
+                                                .onError(
+                                                        throwable -> {
+                                                            log.warn(
+                                                                    "Error during stream",
+                                                                    throwable);
+                                                            updateGenerationProgressBar(false);
+                                                        })
+                                                .start();
+
+                                        //
+                                        // .thenAccept(codeRagResponse -> {
+                                        //
+                                        // chatBody.addMessage(new
+                                        // ChatMessage(ChatMessage.Author.AI,
+                                        // codeRagResponse.response()));
+                                        //
+                                        // updateGenerationProgressBar(false);
+                                        //                                        });
+                                        return null;
+                                    }
+                                    default -> {
+                                        return LlmService.getInstance(project)
+                                                .chat(prompt)
+                                                .thenAccept(
+                                                        answer -> {
+                                                            chatBody.addMessage(
+                                                                    new ChatMessage(
+                                                                            ChatMessage.Author.AI,
+                                                                            answer));
+                                                            updateGenerationProgressBar(false);
+                                                        });
+                                    }
+                                }
+                            });
         }
     }
 
@@ -87,5 +155,4 @@ public class Chat {
         generatingAnswer = new JProgressBar();
         generatingAnswer.setVisible(false);
     }
-
 }

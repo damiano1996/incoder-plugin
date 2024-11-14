@@ -8,17 +8,16 @@
       <maximumSize width="-1" height="-1"/>
       <minimumSize width="300" height="-1"/>
       <opaque value="true"/>
-      <preferredSize width="300" height="100"/>
+      <preferredSize width="300" height="-1"/>
+      <verifyInputWhenFocusTarget value="false"/>
     </properties>
-    <border type="none"/>
+    <border type="empty"/>
     <children>
-      <scrollpane id="a254a" binding="scrollPane" custom-create="true">
-        <constraints border-constraint="North"/>
+      <scrollpane id="25ba1" binding="scrollPane" custom-create="true">
+        <constraints border-constraint="First"/>
         <properties>
           <horizontalScrollBarPolicy value="31"/>
-          <minimumSize width="-1" height="-1"/>
-          <opaque value="false"/>
-          <wheelScrollingEnabled value="false"/>
+          <verticalScrollBarPolicy value="22"/>
         </properties>
         <border type="empty"/>
         <children/>

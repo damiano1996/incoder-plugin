@@ -1,6 +1,5 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window;
 
-import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.Chat;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
@@ -19,7 +18,8 @@ public final class InCoderToolWindowFactory implements ToolWindowFactory, DumbAw
 
         Chat chat = new Chat().setActionListeners(project);
 
-        Content content = ContentFactory.getInstance().createContent(chat.getMainPanel(), "Chat", false);
+        Content content =
+                ContentFactory.getInstance().createContent(chat.getMainPanel(), "Chat", false);
         toolWindow.getContentManager().addContent(content);
     }
 }

@@ -1,9 +1,9 @@
 package com.github.damiano1996.intellijplugin.incoder.llm;
 
 import com.intellij.openapi.editor.Editor;
-import lombok.NonNull;
-
+import dev.langchain4j.service.TokenStream;
 import java.util.concurrent.CompletableFuture;
+import lombok.NonNull;
 
 public interface Llm {
 
@@ -11,10 +11,10 @@ public interface Llm {
 
     CompletableFuture<PromptType> classify(String prompt);
 
-    CompletableFuture<CodeEditingResponse> edit(@NonNull Editor editor, @NonNull String editDescription);
+    CompletableFuture<CodeEditingResponse> edit(
+            @NonNull Editor editor, @NonNull String editDescription);
 
-    CompletableFuture<CodeRagResponse> rag(@NonNull Editor editor, @NonNull String question);
-
+    TokenStream answer(@NonNull Editor editor, @NonNull String question);
 
     enum PromptType {
         EDIT,
@@ -22,9 +22,7 @@ public interface Llm {
         OTHER,
     }
 
-    record CodeEditingResponse(
-            @NonNull String code,
-            @NonNull String comments) {}
+    record CodeEditingResponse(@NonNull String code, @NonNull String comments) {}
 
-        record CodeRagResponse(@NonNull String response){}
+    record CodeAnswerResponse(@NonNull String response) {}
 }
