@@ -4,6 +4,7 @@ import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationSe
 import com.github.damiano1996.intellijplugin.incoder.llm.LlmService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.HumanMessage;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
@@ -46,11 +47,15 @@ public class Chat {
             log.debug("Prompt: {}", prompt);
             this.prompt.setText("");
 
-            chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt));
+            HumanMessage userMessageComponent = (HumanMessage) chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt));
             isGenerating(true);
 
             LlmService.getInstance(project)
                     .classify(prompt)
+                    .thenApply(promptType -> {
+                        userMessageComponent.setPromptTypeLabel(promptType);
+                        return promptType;
+                    })
                     .thenAccept(
                             promptType -> {
                                 switch (promptType) {

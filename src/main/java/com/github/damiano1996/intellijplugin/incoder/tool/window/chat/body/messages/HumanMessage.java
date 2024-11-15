@@ -1,18 +1,23 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages;
 
-import com.intellij.ui.JBColor;
-import java.awt.*;
-import javax.swing.*;
-
-import com.intellij.ui.RoundedLineBorder;
-import com.intellij.ui.components.JBTextArea;
+import com.github.damiano1996.intellijplugin.incoder.llm.Llm;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
 
 public class HumanMessage implements MessageComponent {
 
     private JTextArea message;
 
-    @Getter private JPanel mainPanel;
+    @Getter
+    private JPanel mainPanel;
+    private JLabel promptTypeLabel;
+
+    public void setPromptTypeLabel(Llm.@NotNull PromptType promptType) {
+        promptTypeLabel.setText(promptType.name().toLowerCase());
+        promptTypeLabel.setVisible(true);
+    }
 
 //    private void createUIComponents() {
 //        message =
@@ -33,15 +38,8 @@ public class HumanMessage implements MessageComponent {
 
     @Override
     public MessageComponent setMessage(String message) {
-        SwingUtilities.invokeLater(() -> {
-            this.message.setText(message);
-            mainPanel.repaint();
-        });
+        this.message.setText(message);
+        mainPanel.repaint();
         return this;
-    }
-
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
-        message = new JBTextArea();
     }
 }

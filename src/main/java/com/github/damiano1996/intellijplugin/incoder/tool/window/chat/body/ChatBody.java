@@ -27,7 +27,7 @@ public class ChatBody {
     public static @NotNull MessageComponent getMessageComponent(
             ChatMessage.@NonNull Author author) {
         return switch (author) {
-            case AI -> new HumanMessage();
+            case AI -> new AiMessage();
             case USER -> new HumanMessage();
         };
     }

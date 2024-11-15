@@ -8,11 +8,14 @@ import lombok.Getter;
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 
+import static com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON;
+
 @Getter
 public class AiMessage implements MessageComponent {
 
     private JPanel mainPanel;
     private JEditorPane message;
+    private JLabel aiIconLabel;
 
     private final Parser parser = Parser.builder().build();
     private final HtmlRenderer renderer = HtmlRenderer.builder().build();
@@ -27,5 +30,7 @@ public class AiMessage implements MessageComponent {
 
     private void createUIComponents() {
         message = new MarkdownPanel();
+
+        aiIconLabel = new JLabel("", PLUGIN_ICON, JLabel.CENTER);
     }
 }
