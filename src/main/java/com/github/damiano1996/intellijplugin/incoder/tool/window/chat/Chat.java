@@ -7,20 +7,22 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatB
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import java.util.Objects;
-import java.util.function.Consumer;
-import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+import java.util.Objects;
+import java.util.function.Consumer;
+
 @Slf4j
 public class Chat {
-    private JTextField prompt;
-    private ChatBody chatBody;
 
-    @Getter private JPanel mainPanel;
-    private JProgressBar generatingAnswer;
+    @Getter
+    private JPanel mainPanel;
+    private JTextField prompt;
+    private JProgressBar generating;
+    private ChatBody chatBody;
 
     public Chat setActionListeners(Project project) {
         prompt.addActionListener(e -> handleAction(project));
@@ -28,6 +30,11 @@ public class Chat {
     }
 
     private void handleAction(Project project) {
+//        chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, "Hi!"));
+//        chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, "Hi!"));
+//        chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, "Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi!"));
+//        chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, "Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!"));
+
         String prompt = this.prompt.getText();
         handlePrompt(project, prompt);
     }
@@ -40,15 +47,15 @@ public class Chat {
             this.prompt.setText("");
 
             chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt));
-            updateGenerationProgressBar(true);
+            isGenerating(true);
 
             LlmService.getInstance(project)
                     .classify(prompt)
-                    .thenApply(
+                    .thenAccept(
                             promptType -> {
                                 switch (promptType) {
                                     case EDIT -> {
-                                        return LlmService.getInstance(project)
+                                        LlmService.getInstance(project)
                                                 .edit(
                                                         Objects.requireNonNull(
                                                                 FileEditorManager.getInstance(
@@ -61,7 +68,7 @@ public class Chat {
                                                                     new ChatMessage(
                                                                             ChatMessage.Author.AI,
                                                                             answer.comments()));
-                                                            updateGenerationProgressBar(false);
+                                                            isGenerating(false);
 
                                                             ApplicationManager.getApplication()
                                                                     .invokeLater(
@@ -106,53 +113,63 @@ public class Chat {
                                                 .onComplete(
                                                         aiMessageResponse -> {
                                                             log.debug("Stream completed.");
-                                                            updateGenerationProgressBar(false);
+                                                            isGenerating(false);
                                                         })
                                                 .onError(
                                                         throwable -> {
                                                             log.warn(
                                                                     "Error during stream",
                                                                     throwable);
-                                                            updateGenerationProgressBar(false);
+                                                            isGenerating(false);
                                                         })
                                                 .start();
-
-                                        //
-                                        // .thenAccept(codeRagResponse -> {
-                                        //
-                                        // chatBody.addMessage(new
-                                        // ChatMessage(ChatMessage.Author.AI,
-                                        // codeRagResponse.response()));
-                                        //
-                                        // updateGenerationProgressBar(false);
-                                        //                                        });
-                                        return null;
                                     }
                                     default -> {
-                                        return LlmService.getInstance(project)
+                                        var message =
+                                                chatBody.addMessage(
+                                                        new ChatMessage(ChatMessage.Author.AI, ""));
+                                        LlmService.getInstance(project)
                                                 .chat(prompt)
-                                                .thenAccept(
-                                                        answer -> {
-                                                            chatBody.addMessage(
-                                                                    new ChatMessage(
-                                                                            ChatMessage.Author.AI,
-                                                                            answer));
-                                                            updateGenerationProgressBar(false);
-                                                        });
+                                                .onNext(
+                                                        new Consumer<>() {
+                                                            private String answer = "";
+
+                                                            @Override
+                                                            public void accept(String token) {
+                                                                log.debug("New token: {}", token);
+
+                                                                answer += token;
+                                                                message.setMessage(answer);
+                                                            }
+                                                        })
+                                                .onComplete(
+                                                        aiMessageResponse -> {
+                                                            log.debug("Stream completed.");
+                                                            isGenerating(false);
+                                                        })
+                                                .onError(
+                                                        throwable -> {
+                                                            log.warn(
+                                                                    "Error during stream",
+                                                                    throwable);
+                                                            isGenerating(false);
+                                                        })
+                                                .start();
                                     }
                                 }
                             });
         }
     }
 
-    private void updateGenerationProgressBar(boolean generating) {
-        generatingAnswer.setIndeterminate(generating);
-        generatingAnswer.setVisible(generating);
+    private void isGenerating(boolean generating) {
+        this.prompt.setEnabled(!generating);
+        this.generating.setIndeterminate(generating);
+        this.generating.setVisible(generating);
     }
 
     private void createUIComponents() {
-        prompt = new PlaceholderTextField("Enter a prompt...");
-        generatingAnswer = new JProgressBar();
-        generatingAnswer.setVisible(false);
+        prompt = new PlaceholderTextField("Enter the prompt...");
+        generating = new JProgressBar();
+        isGenerating(false);
     }
 }

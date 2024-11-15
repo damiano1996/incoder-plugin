@@ -63,7 +63,7 @@ public class ContainerLlmClient implements LlmClient {
     public void close() {}
 
     @Override
-    public CompletableFuture<String> chat(String input) {
+    public TokenStream chat(String input) {
         return null;
     }
 

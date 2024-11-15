@@ -124,7 +124,7 @@ public final class LlmService implements Llm, Disposable {
     }
 
     @Override
-    public CompletableFuture<String> chat(String input) {
+    public TokenStream chat(String input) {
         return client.chat(input);
     }
 

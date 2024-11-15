@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.AiMessage">
-  <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+  <grid id="27dc6" binding="mainPanel" layout-manager="FormLayout">
+    <rowspec value="center:d:noGrow"/>
+    <rowspec value="center:d:grow"/>
+    <colspec value="fill:d:grow"/>
     <constraints>
-      <xy x="20" y="20" width="582" height="400"/>
+      <xy x="20" y="20" width="850" height="400"/>
     </constraints>
     <properties/>
-    <border type="none">
-      <size top="10" left="10" bottom="10" right="50"/>
+    <border type="empty">
+      <size top="10" left="10" bottom="10" right="70"/>
     </border>
     <children>
       <component id="90cbf" class="javax.swing.JLabel">
-        <constraints border-constraint="North"/>
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-vert="false"/>
+        </constraints>
         <properties>
           <font style="1"/>
           <horizontalAlignment value="2"/>
@@ -20,20 +26,35 @@
           <minimumSize width="77" height="-1"/>
           <opaque value="true"/>
           <preferredSize width="77" height="20"/>
-          <text value="AI Message"/>
+          <text resource-bundle="messages/bundle" key="ai.message"/>
           <verticalAlignment value="0"/>
           <verticalTextPosition value="0"/>
         </properties>
       </component>
-      <component id="c19ae" class="javax.swing.JEditorPane" binding="message" custom-create="true">
-        <constraints border-constraint="Center"/>
+      <scrollpane id="2628c">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
+        </constraints>
         <properties>
-          <editable value="false"/>
-          <margin top="0" left="0" bottom="10" right="0"/>
-          <opaque value="false"/>
-          <text value=""/>
+          <enabled value="true"/>
+          <horizontalScrollBarPolicy value="31"/>
+          <verticalScrollBarPolicy value="21"/>
+          <wheelScrollingEnabled value="true"/>
         </properties>
-      </component>
+        <border type="empty"/>
+        <children>
+          <component id="58e27" class="javax.swing.JEditorPane" binding="message" custom-create="true">
+            <constraints/>
+            <properties>
+              <background color="-5369565"/>
+              <editable value="false"/>
+              <margin top="0" left="0" bottom="0" right="0"/>
+              <opaque value="true"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
     </children>
   </grid>
 </form>

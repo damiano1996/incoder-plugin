@@ -7,6 +7,19 @@ import dev.langchain4j.service.V;
 
 public interface LangChainCodeService {
 
+
+    @UserMessage("""
+            You are a professional AI assistant with the task of helping users in generating, editing and explaining codes.
+            You are installed as JetBrains plugin developed by damiano1996 (https://github.com/damiano1996). The name of the plugin is InCoder.
+            
+            Instructions:
+            - Provide professional answers like a Tech Lead would do.
+            
+            User input: {{it}}
+            """)
+    TokenStream chat(String input);
+
+
     @UserMessage(
             """
                     Given the following code context, provide only the missing line of code.
