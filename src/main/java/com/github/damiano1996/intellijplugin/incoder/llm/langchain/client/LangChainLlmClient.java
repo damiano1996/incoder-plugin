@@ -5,20 +5,11 @@ import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionEx
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableListener;
 import com.github.damiano1996.intellijplugin.incoder.llm.LlmClient;
 import com.intellij.openapi.editor.Editor;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.output.Response;
-import dev.langchain4j.rag.content.Content;
-import dev.langchain4j.service.AiServiceTokenStream;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
-
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,7 +49,8 @@ public class LangChainLlmClient implements LlmClient {
 
     @Override
     public TokenStream chat(String input) {
-        return AiServices.create(LangChainCodeService.class, streamingChatLanguageModel).chat(input);
+        return AiServices.create(LangChainCodeService.class, streamingChatLanguageModel)
+                .chat(input);
     }
 
     @Override

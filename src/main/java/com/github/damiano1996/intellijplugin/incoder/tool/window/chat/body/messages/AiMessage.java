@@ -1,14 +1,13 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages;
 
-import com.intellij.util.ui.HtmlPanel;
+import static com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON;
+
+import com.intellij.ui.JBColor;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-import lombok.Getter;
-
+import java.awt.*;
 import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
-
-import static com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON;
+import lombok.Getter;
 
 @Getter
 public class AiMessage implements MessageComponent {
@@ -22,15 +21,15 @@ public class AiMessage implements MessageComponent {
 
     @Override
     public MessageComponent setMessage(String markdown) {
-            SwingUtilities.invokeLater(() -> this.message.setText(markdown));
-
-
+        this.message.setText(markdown);
         return this;
     }
 
+
     private void createUIComponents() {
         message = new MarkdownPanel();
-
-        aiIconLabel = new JLabel("", PLUGIN_ICON, JLabel.CENTER);
+        aiIconLabel = new RoundedLabel(PLUGIN_ICON,60, 60);
+        aiIconLabel.setBackground(JBColor.namedColor("Label.background"));
+        aiIconLabel.setForeground(JBColor.namedColor("Label.foreground"));
     }
 }

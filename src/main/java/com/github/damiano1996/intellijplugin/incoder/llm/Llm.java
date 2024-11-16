@@ -18,7 +18,9 @@ public interface Llm {
     TokenStream answer(@NonNull Editor editor, @NonNull String question);
 
     enum PromptType {
-        @Description("The prompt describes how the user wants to edit the code. The user can ask to add, remove, update the code.")
+        @Description(
+                "The prompt describes how the user wants to edit the code. The user can ask to add,"
+                        + " remove, update the code.")
         EDIT,
         @Description("The user is asking something about the code he is viewing.")
         CODE_QUESTION,

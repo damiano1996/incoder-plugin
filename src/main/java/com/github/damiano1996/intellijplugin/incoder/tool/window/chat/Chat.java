@@ -8,19 +8,20 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messa
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.JBColor;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.model.output.Response;
+import java.util.Objects;
+import java.util.function.Consumer;
+import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import java.util.Objects;
-import java.util.function.Consumer;
-
 @Slf4j
 public class Chat {
 
-    @Getter
-    private JPanel mainPanel;
+    @Getter private JPanel mainPanel;
     private JTextField prompt;
     private JProgressBar generating;
     private ChatBody chatBody;
@@ -31,10 +32,13 @@ public class Chat {
     }
 
     private void handleAction(Project project) {
-//        chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, "Hi!"));
-//        chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, "Hi!"));
-//        chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, "Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi!"));
-//        chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, "Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!"));
+        //        chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, "Hi!"));
+        //        chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, "Hi!"));
+        //        chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, "Hi! Hi! Hi! Hi! Hi!
+        // Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi!"));
+        //        chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, "Hello World! Hello
+        // World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!
+        // Hello World! Hello World! Hello World! Hello World!"));
 
         String prompt = this.prompt.getText();
         handlePrompt(project, prompt);
@@ -47,15 +51,18 @@ public class Chat {
             log.debug("Prompt: {}", prompt);
             this.prompt.setText("");
 
-            HumanMessage userMessageComponent = (HumanMessage) chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt));
+            HumanMessage userMessageComponent =
+                    (HumanMessage)
+                            chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt));
             isGenerating(true);
 
             LlmService.getInstance(project)
                     .classify(prompt)
-                    .thenApply(promptType -> {
-                        userMessageComponent.setPromptTypeLabel(promptType);
-                        return promptType;
-                    })
+                    .thenApply(
+                            promptType -> {
+                                userMessageComponent.setPromptTypeLabel(promptType);
+                                return promptType;
+                            })
                     .thenAccept(
                             promptType -> {
                                 switch (promptType) {
@@ -92,9 +99,8 @@ public class Chat {
                                                         });
                                     }
                                     case CODE_QUESTION -> {
-                                        var message =
-                                                chatBody.addMessage(
-                                                        new ChatMessage(ChatMessage.Author.AI, ""));
+                                        var tokenConsumer =
+                                                new TokenConsumer(ChatMessage.Author.AI, chatBody);
 
                                         LlmService.getInstance(project)
                                                 .answer(
@@ -103,67 +109,39 @@ public class Chat {
                                                                                 project)
                                                                         .getSelectedTextEditor()),
                                                         prompt)
-                                                .onNext(
-                                                        new Consumer<>() {
-                                                            private String answer = "";
-
-                                                            @Override
-                                                            public void accept(String token) {
-                                                                log.debug("New token: {}", token);
-
-                                                                answer += token;
-                                                                message.setMessage(answer);
-                                                            }
-                                                        })
-                                                .onComplete(
-                                                        aiMessageResponse -> {
-                                                            log.debug("Stream completed.");
-                                                            isGenerating(false);
-                                                        })
-                                                .onError(
-                                                        throwable -> {
-                                                            log.warn(
-                                                                    "Error during stream",
-                                                                    throwable);
-                                                            isGenerating(false);
-                                                        })
+                                                .onNext(tokenConsumer)
+                                                .onComplete(onTokenStreamComplete())
+                                                .onError(onTokenStreamError())
                                                 .start();
                                     }
                                     default -> {
-                                        var message =
-                                                chatBody.addMessage(
-                                                        new ChatMessage(ChatMessage.Author.AI, ""));
+                                        var tokenConsumer =
+                                                new TokenConsumer(ChatMessage.Author.AI, chatBody);
+
                                         LlmService.getInstance(project)
                                                 .chat(prompt)
-                                                .onNext(
-                                                        new Consumer<>() {
-                                                            private String answer = "";
-
-                                                            @Override
-                                                            public void accept(String token) {
-                                                                log.debug("New token: {}", token);
-
-                                                                answer += token;
-                                                                message.setMessage(answer);
-                                                            }
-                                                        })
-                                                .onComplete(
-                                                        aiMessageResponse -> {
-                                                            log.debug("Stream completed.");
-                                                            isGenerating(false);
-                                                        })
-                                                .onError(
-                                                        throwable -> {
-                                                            log.warn(
-                                                                    "Error during stream",
-                                                                    throwable);
-                                                            isGenerating(false);
-                                                        })
+                                                .onNext(tokenConsumer)
+                                                .onComplete(onTokenStreamComplete())
+                                                .onError(onTokenStreamError())
                                                 .start();
                                     }
                                 }
                             });
         }
+    }
+
+    private @NotNull Consumer<Throwable> onTokenStreamError() {
+        return throwable -> {
+            log.warn("Error during stream", throwable);
+            isGenerating(false);
+        };
+    }
+
+    private @NotNull Consumer<Response<AiMessage>> onTokenStreamComplete() {
+        return aiMessageResponse -> {
+            log.debug("Stream completed.");
+            isGenerating(false);
+        };
     }
 
     private void isGenerating(boolean generating) {
@@ -173,6 +151,9 @@ public class Chat {
     }
 
     private void createUIComponents() {
+        mainPanel = new JPanel();
+        mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
+
         prompt = new PlaceholderTextField("Enter the prompt...");
         generating = new JProgressBar();
         isGenerating(false);
