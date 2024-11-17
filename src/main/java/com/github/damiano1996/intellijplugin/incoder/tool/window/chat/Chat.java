@@ -78,28 +78,6 @@ public class Chat {
                                                 .onComplete(onTokenStreamComplete())
                                                 .onError(onTokenStreamError())
                                                 .start();
-                                        //
-                                        //
-                                        // CodeGenerationService
-                                        //                                                .showDiff(
-                                        //
-                                        // project,
-                                        //
-                                        // answer
-                                        //
-                                        //      .code(),
-                                        //
-                                        // Objects
-                                        //
-                                        //      .requireNonNull(
-                                        //
-                                        //              FileEditorManager
-                                        //
-                                        //                      .getInstance(
-                                        //
-                                        //                              project)
-                                        //
-                                        //                      .getSelectedTextEditor()));
                                     }
                                     case CODE_QUESTION -> {
                                         var tokenConsumer =

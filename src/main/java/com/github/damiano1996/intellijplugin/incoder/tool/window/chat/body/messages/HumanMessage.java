@@ -27,6 +27,11 @@ public class HumanMessage implements MessageComponent {
         this.message.setText(token);
     }
 
+    @Override
+    public String getFullText() {
+        return message.getText();
+    }
+
     private void createUIComponents() {
         message = new RoundedTextArea(35, 35);
         message.setBackground(JBColor.namedColor("Label.foreground"));

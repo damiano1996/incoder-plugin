@@ -3,4 +3,6 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 public interface StreamWriter {
 
     void write(String token);
+
+    String getFullText();
 }

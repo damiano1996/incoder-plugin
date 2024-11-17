@@ -17,8 +17,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 public class AiMessage implements MessageComponent {
 
-    @Nullable
-    private Project project;
+    @Nullable private Project project;
 
     private JPanel mainPanel;
     private MarkdownPanel markdownPanel;
@@ -30,13 +29,17 @@ public class AiMessage implements MessageComponent {
 
     public void setProject(@Nullable Project project) {
         this.project = project;
-        ((MarkdownPanel)this.markdownPanel).setProject(project);
-
+        this.markdownPanel.setProject(project);
     }
 
     @Override
     public void write(String token) {
-        ((MarkdownPanel)this.markdownPanel).write(token);
+        this.markdownPanel.write(token);
+    }
+
+    @Override
+    public String getFullText() {
+        return "";
     }
 
     private void createUIComponents() {

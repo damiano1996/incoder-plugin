@@ -1,29 +1,24 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages;
 
+import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationService;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.JBColor;
-import com.intellij.ui.components.JBScrollPane;
-import com.jgoodies.forms.layout.FormLayout;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import javax.swing.*;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
 @Slf4j
 public class MarkdownPanel extends JPanel implements StreamWriter {
 
-    @Setter @Nullable
-    private Project project;
-
     private final List<MarkdownEditorPane> markdownEditorPanes;
-    private final List<CodeEditorPanel> codeEditorPanels;
-
+    private final List<CodeEditorWriter> codeEditorWriters;
+    @Setter @Nullable private Project project;
     private boolean isWritingACodeBlock = false;
     private boolean skipNext = false;
 
@@ -31,11 +26,9 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         markdownEditorPanes = new ArrayList<>();
-        codeEditorPanels = new ArrayList<>();
+        codeEditorWriters = new ArrayList<>();
 
         addMarkdownEditorPane();
-
-
     }
 
     @Override
@@ -51,32 +44,53 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
             } else {
                 addMarkdownEditorPane();
             }
-        }else if (skipNext){
+        } else if (skipNext) {
             skipNext = false;
         } else {
 
             if (isWritingACodeBlock) {
-                codeEditorPanels.get(codeEditorPanels.size() - 1).write(token);
+                codeEditorWriters.get(codeEditorWriters.size() - 1).write(token);
             } else {
                 markdownEditorPanes.get(markdownEditorPanes.size() - 1).write(token);
             }
         }
     }
 
-    private void addCodeEditorPanel() {
-        var codeBlock = new CodeEditorPanel(project);
-        codeEditorPanels.add(codeBlock);
+    @Override
+    public String getFullText() {
+        return "";
+    }
 
-        ApplicationManager.getApplication().invokeLater(() -> add(codeBlock.getComponent()));
+    private void addCodeEditorPanel() {
+        var codeBlock = new CodeEditorWriter(project);
+        codeEditorWriters.add(codeBlock);
+
+        ApplicationManager.getApplication()
+                .invokeLater(
+                        () -> {
+                            add(codeBlock.getComponent());
+
+                            var button = new JButton("Merge...");
+                            button.addActionListener(
+                                    e ->
+                                            CodeGenerationService.showDiff(
+                                                    project,
+                                                    codeBlock.getFullText(),
+                                                    Objects.requireNonNull(
+                                                            FileEditorManager.getInstance(project)
+                                                                    .getSelectedTextEditor())));
+
+                            add(button);
+                        });
     }
 
     private void addMarkdownEditorPane() {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            var markdownPane = new MarkdownEditorPane();
-            markdownEditorPanes.add(markdownPane);
-            markdownPane.setOpaque(false);
-            markdownPane.setBackground(new JBColor(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0)));
-            add(markdownPane);
-        });
+        ApplicationManager.getApplication()
+                .invokeLater(
+                        () -> {
+                            var markdownPane = new MarkdownEditorPane();
+                            markdownEditorPanes.add(markdownPane);
+                            add(markdownPane);
+                        });
     }
 }

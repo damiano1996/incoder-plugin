@@ -3,23 +3,24 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 import com.intellij.ui.JBColor;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
-import java.awt.*;
 
 public class MarkdownEditorPane extends JEditorPane implements StreamWriter {
 
     private final Parser parser = Parser.builder().build();
     private final HtmlRenderer renderer = HtmlRenderer.builder().build();
 
-    private String writtenText = "";
+    private String body = "";
 
     public MarkdownEditorPane() {
         setEditable(false);
         HTMLEditorKit editorKit = new HTMLEditorKit();
         setEditorKit(editorKit);
         setContentType("text/html");
+        setOpaque(false);
+        setBackground(new JBColor(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0)));
     }
 
     @Override
@@ -37,7 +38,12 @@ public class MarkdownEditorPane extends JEditorPane implements StreamWriter {
 
     @Override
     public void write(String token) {
-        writtenText += token;
-        setText(writtenText);
+        body += token;
+        setText(body);
+    }
+
+    @Override
+    public String getFullText() {
+        return body;
     }
 }
