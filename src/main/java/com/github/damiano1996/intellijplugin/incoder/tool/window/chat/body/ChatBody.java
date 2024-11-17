@@ -39,7 +39,8 @@ public class ChatBody {
     }
 
     public MessageComponent addMessage(@NotNull ChatMessage item, FileType fileType) {
-        var messageComponent = getMessageComponent(item.author()).setMessage(item.message());
+        var messageComponent = getMessageComponent(item.author());
+        messageComponent.write(item.message());
         listModel.insertElementAt(messageComponent, 0);
         return messageComponent;
     }

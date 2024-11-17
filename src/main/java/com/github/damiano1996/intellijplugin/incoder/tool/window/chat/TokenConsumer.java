@@ -13,13 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TokenConsumer implements Consumer<String> {
 
-    private final Project project;
     private final MessageComponent messageComponent;
     private final ChatBody chatBody;
     private final List<String> acceptedTokens = new ArrayList<>();
 
     public TokenConsumer(Project project, ChatMessage.Author author, ChatBody chatBody) {
-        this.project = project;
         this.chatBody = chatBody;
         this.messageComponent =
                 this.chatBody.addMessage(new ChatMessage(author, ""), PlainTextFileType.INSTANCE);
@@ -30,7 +28,7 @@ public class TokenConsumer implements Consumer<String> {
     public void accept(String token) {
         log.debug("New token received: {}", token);
         acceptedTokens.add(token);
-        messageComponent.setMessage(String.join("", acceptedTokens));
+        messageComponent.write(token);
         ((ChatBody.FirableListModel<?>) chatBody.getListModel()).update(0);
     }
 }

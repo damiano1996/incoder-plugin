@@ -15,7 +15,7 @@ public class HumanMessage implements MessageComponent {
     private JLabel promptTypeLabel;
 
     public void setPromptTypeLabel(Llm.@NotNull PromptType promptType) {
-        promptTypeLabel.setText(promptType.name().toLowerCase());
+        promptTypeLabel.setText(promptType.getName().toLowerCase());
         promptTypeLabel.setVisible(true);
     }
 
@@ -23,9 +23,8 @@ public class HumanMessage implements MessageComponent {
     public void setProject(Project project) {}
 
     @Override
-    public MessageComponent setMessage(String message) {
-        this.message.setText(message);
-        return this;
+    public void write(String token) {
+        this.message.setText(token);
     }
 
     private void createUIComponents() {
