@@ -73,7 +73,7 @@ public class ContainerLlmClient implements LlmClient {
     }
 
     @Override
-    public CompletableFuture<CodeEditingResponse> edit(
+    public TokenStream edit(
             @NonNull Editor editor, @NonNull String editDescription) {
         return null;
     }

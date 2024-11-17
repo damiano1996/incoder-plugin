@@ -1,23 +1,22 @@
 package com.github.damiano1996.intellijplugin.incoder.llm.langchain.client;
 
 import com.github.damiano1996.intellijplugin.incoder.llm.Llm;
+import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 
 public interface LangChainCodeService {
 
-    @UserMessage(
+    @SystemMessage(
             """
             You are a professional AI assistant with the task of helping users in generating, editing and explaining codes.
             You are installed as JetBrains plugin developed by damiano1996 (https://github.com/damiano1996). The name of the plugin is InCoder.
 
             Instructions:
             - Provide professional answers like a Tech Lead would do.
-
-            User input: {{it}}
             """)
-    TokenStream chat(String input);
+    TokenStream chat(@UserMessage String input);
 
     @UserMessage(
             """
@@ -57,7 +56,7 @@ public interface LangChainCodeService {
 
                     Edited code:
                     """)
-    CodeEditResponse editCode(
+    TokenStream editCode(
             @V("filePath") String filePath,
             @V("prompt") String prompt,
             @V("actualCode") String actualCode);

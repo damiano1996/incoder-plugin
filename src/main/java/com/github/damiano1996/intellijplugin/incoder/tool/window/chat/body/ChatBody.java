@@ -1,9 +1,10 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body;
 
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.AiMessage;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.AiMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.HumanMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.*;
@@ -22,10 +23,8 @@ public class ChatBody {
     private DefaultListModel<MessageComponent> listModel;
     private JScrollPane scrollPane;
 
-    public static class FirableListModel<T> extends DefaultListModel<T>
-    {
-        public void update(int index)
-        {
+    public static class FirableListModel<T> extends DefaultListModel<T> {
+        public void update(int index) {
             fireContentsChanged(this, index, index);
         }
     }
@@ -39,9 +38,8 @@ public class ChatBody {
         };
     }
 
-    public MessageComponent addMessage(@NotNull ChatMessage item) {
+    public MessageComponent addMessage(@NotNull ChatMessage item, FileType fileType) {
         var messageComponent = getMessageComponent(item.author()).setMessage(item.message());
-        // listModel.add(0, messageComponent);
         listModel.insertElementAt(messageComponent, 0);
         return messageComponent;
     }

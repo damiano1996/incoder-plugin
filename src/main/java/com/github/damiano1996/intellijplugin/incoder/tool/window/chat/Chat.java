@@ -1,27 +1,33 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat;
 
-import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationService;
 import com.github.damiano1996.intellijplugin.incoder.llm.LlmService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.HumanMessage;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.EditorKind;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Computable;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.ui.JBColor;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.output.Response;
-import java.util.Objects;
-import java.util.function.Consumer;
-import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+import java.util.Objects;
+import java.util.function.Consumer;
+
 @Slf4j
 public class Chat {
 
-    @Getter private JPanel mainPanel;
+    @Getter
+    private JPanel mainPanel;
     private JTextField prompt;
     private JProgressBar generating;
     private ChatBody chatBody;
@@ -32,14 +38,6 @@ public class Chat {
     }
 
     private void handleAction(Project project) {
-        //        chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, "Hi!"));
-        //        chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, "Hi!"));
-        //        chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, "Hi! Hi! Hi! Hi! Hi!
-        // Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi! Hi!"));
-        //        chatBody.addMessage(new ChatMessage(ChatMessage.Author.AI, "Hello World! Hello
-        // World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!
-        // Hello World! Hello World! Hello World! Hello World!"));
-
         String prompt = this.prompt.getText();
         handlePrompt(project, prompt);
     }
@@ -53,13 +51,15 @@ public class Chat {
 
             HumanMessage userMessageComponent =
                     (HumanMessage)
-                            chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt));
+                            chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt), FileEditorManager.getInstance(
+                                    project).getSelectedTextEditor().getVirtualFile().getFileType());
             isGenerating(true);
 
             LlmService.getInstance(project)
                     .classify(prompt)
                     .thenApply(
                             promptType -> {
+                                log.debug("Prompt classified as: {}", promptType);
                                 userMessageComponent.setPromptTypeLabel(promptType);
                                 return promptType;
                             })
@@ -67,6 +67,9 @@ public class Chat {
                             promptType -> {
                                 switch (promptType) {
                                     case EDIT -> {
+
+                                        var tokenConsumer = new TokenConsumer(project, ChatMessage.Author.AI, chatBody);
+
                                         LlmService.getInstance(project)
                                                 .edit(
                                                         Objects.requireNonNull(
@@ -74,33 +77,26 @@ public class Chat {
                                                                                 project)
                                                                         .getSelectedTextEditor()),
                                                         prompt)
-                                                .thenAccept(
-                                                        answer -> {
-                                                            chatBody.addMessage(
-                                                                    new ChatMessage(
-                                                                            ChatMessage.Author.AI,
-                                                                            answer.comments()));
-                                                            isGenerating(false);
-
-                                                            ApplicationManager.getApplication()
-                                                                    .invokeLater(
-                                                                            () ->
-                                                                                    CodeGenerationService
-                                                                                            .showDiff(
-                                                                                                    project,
-                                                                                                    answer
-                                                                                                            .code(),
-                                                                                                    Objects
-                                                                                                            .requireNonNull(
-                                                                                                                    FileEditorManager
-                                                                                                                            .getInstance(
-                                                                                                                                    project)
-                                                                                                                            .getSelectedTextEditor())));
-                                                        });
+                                                .onNext(tokenConsumer)
+                                                .onComplete(onTokenStreamComplete())
+                                                .onError(onTokenStreamError())
+                                                .start();
+//
+//                                        CodeGenerationService
+//                                                .showDiff(
+//                                                        project,
+//                                                        answer
+//                                                                .code(),
+//                                                        Objects
+//                                                                .requireNonNull(
+//                                                                        FileEditorManager
+//                                                                                .getInstance(
+//                                                                                        project)
+//                                                                                .getSelectedTextEditor()));
                                     }
                                     case CODE_QUESTION -> {
                                         var tokenConsumer =
-                                                new TokenConsumer(ChatMessage.Author.AI, chatBody);
+                                                new TokenConsumer(project, ChatMessage.Author.AI, chatBody);
 
                                         LlmService.getInstance(project)
                                                 .answer(
@@ -116,7 +112,7 @@ public class Chat {
                                     }
                                     default -> {
                                         var tokenConsumer =
-                                                new TokenConsumer(ChatMessage.Author.AI, chatBody);
+                                                new TokenConsumer(project, ChatMessage.Author.AI, chatBody);
 
                                         LlmService.getInstance(project)
                                                 .chat(prompt)
@@ -145,6 +141,7 @@ public class Chat {
     }
 
     private void isGenerating(boolean generating) {
+        log.debug("Is generating...");
         this.prompt.setEnabled(!generating);
         this.generating.setIndeterminate(generating);
         this.generating.setVisible(generating);
@@ -158,4 +155,5 @@ public class Chat {
         generating = new JProgressBar();
         isGenerating(false);
     }
+
 }
