@@ -3,10 +3,9 @@ package com.github.damiano1996.intellijplugin.incoder.llm;
 import com.intellij.openapi.editor.Editor;
 import dev.langchain4j.model.output.structured.Description;
 import dev.langchain4j.service.TokenStream;
+import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.NonNull;
-
-import java.util.concurrent.CompletableFuture;
 
 public interface Llm {
 
@@ -14,8 +13,7 @@ public interface Llm {
 
     CompletableFuture<PromptType> classify(String prompt);
 
-    TokenStream edit(
-            @NonNull Editor editor, @NonNull String editDescription);
+    TokenStream edit(@NonNull Editor editor, @NonNull String editDescription);
 
     TokenStream answer(@NonNull Editor editor, @NonNull String question);
 
@@ -37,5 +35,4 @@ public interface Llm {
             this.name = name;
         }
     }
-
 }

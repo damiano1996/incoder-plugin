@@ -134,8 +134,7 @@ public final class LlmService implements Llm, Disposable {
     }
 
     @Override
-    public TokenStream edit(
-            @NonNull Editor editor, @NonNull String editDescription) {
+    public TokenStream edit(@NonNull Editor editor, @NonNull String editDescription) {
         return client.edit(editor, editDescription);
     }
 

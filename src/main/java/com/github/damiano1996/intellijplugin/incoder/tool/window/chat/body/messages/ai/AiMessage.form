@@ -15,7 +15,7 @@
       <size top="10" left="10" bottom="10" right="10"/>
     </border>
     <children>
-      <scrollpane id="2628c">
+      <scrollpane id="2628c" binding="scrollPane" custom-create="true">
         <constraints>
           <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
           <forms defaultalign-horz="false" defaultalign-vert="false"/>

@@ -4,30 +4,22 @@ import com.github.damiano1996.intellijplugin.incoder.llm.LlmService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.HumanMessage;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.EditorFactory;
-import com.intellij.openapi.editor.EditorKind;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Computable;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.ui.JBColor;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.output.Response;
+import java.util.Objects;
+import java.util.function.Consumer;
+import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import java.util.Objects;
-import java.util.function.Consumer;
-
 @Slf4j
 public class Chat {
 
-    @Getter
-    private JPanel mainPanel;
+    @Getter private JPanel mainPanel;
     private JTextField prompt;
     private JProgressBar generating;
     private ChatBody chatBody;
@@ -51,8 +43,12 @@ public class Chat {
 
             HumanMessage userMessageComponent =
                     (HumanMessage)
-                            chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt), FileEditorManager.getInstance(
-                                    project).getSelectedTextEditor().getVirtualFile().getFileType());
+                            chatBody.addMessage(
+                                    new ChatMessage(ChatMessage.Author.USER, prompt),
+                                    FileEditorManager.getInstance(project)
+                                            .getSelectedTextEditor()
+                                            .getVirtualFile()
+                                            .getFileType());
             isGenerating(true);
 
             LlmService.getInstance(project)
@@ -67,8 +63,9 @@ public class Chat {
                             promptType -> {
                                 switch (promptType) {
                                     case EDIT -> {
-
-                                        var tokenConsumer = new TokenConsumer(project, ChatMessage.Author.AI, chatBody);
+                                        var tokenConsumer =
+                                                new TokenConsumer(
+                                                        project, ChatMessage.Author.AI, chatBody);
 
                                         LlmService.getInstance(project)
                                                 .edit(
@@ -81,22 +78,33 @@ public class Chat {
                                                 .onComplete(onTokenStreamComplete())
                                                 .onError(onTokenStreamError())
                                                 .start();
-//
-//                                        CodeGenerationService
-//                                                .showDiff(
-//                                                        project,
-//                                                        answer
-//                                                                .code(),
-//                                                        Objects
-//                                                                .requireNonNull(
-//                                                                        FileEditorManager
-//                                                                                .getInstance(
-//                                                                                        project)
-//                                                                                .getSelectedTextEditor()));
+                                        //
+                                        //
+                                        // CodeGenerationService
+                                        //                                                .showDiff(
+                                        //
+                                        // project,
+                                        //
+                                        // answer
+                                        //
+                                        //      .code(),
+                                        //
+                                        // Objects
+                                        //
+                                        //      .requireNonNull(
+                                        //
+                                        //              FileEditorManager
+                                        //
+                                        //                      .getInstance(
+                                        //
+                                        //                              project)
+                                        //
+                                        //                      .getSelectedTextEditor()));
                                     }
                                     case CODE_QUESTION -> {
                                         var tokenConsumer =
-                                                new TokenConsumer(project, ChatMessage.Author.AI, chatBody);
+                                                new TokenConsumer(
+                                                        project, ChatMessage.Author.AI, chatBody);
 
                                         LlmService.getInstance(project)
                                                 .answer(
@@ -112,7 +120,8 @@ public class Chat {
                                     }
                                     default -> {
                                         var tokenConsumer =
-                                                new TokenConsumer(project, ChatMessage.Author.AI, chatBody);
+                                                new TokenConsumer(
+                                                        project, ChatMessage.Author.AI, chatBody);
 
                                         LlmService.getInstance(project)
                                                 .chat(prompt)
@@ -155,5 +164,4 @@ public class Chat {
         generating = new JProgressBar();
         isGenerating(false);
     }
-
 }

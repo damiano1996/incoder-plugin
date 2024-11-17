@@ -4,7 +4,6 @@ import com.github.damiano1996.intellijplugin.incoder.llm.Llm;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import javax.swing.*;
-
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,9 +20,7 @@ public class HumanMessage implements MessageComponent {
     }
 
     @Override
-    public void setProject(Project project) {
-
-    }
+    public void setProject(Project project) {}
 
     @Override
     public MessageComponent setMessage(String message) {

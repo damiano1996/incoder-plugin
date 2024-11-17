@@ -3,12 +3,11 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
+import com.intellij.openapi.fileTypes.PlainTextFileType;
+import com.intellij.openapi.project.Project;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-
-import com.intellij.openapi.fileTypes.PlainTextFileType;
-import com.intellij.openapi.project.Project;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -22,7 +21,8 @@ public class TokenConsumer implements Consumer<String> {
     public TokenConsumer(Project project, ChatMessage.Author author, ChatBody chatBody) {
         this.project = project;
         this.chatBody = chatBody;
-        this.messageComponent = this.chatBody.addMessage(new ChatMessage(author, ""), PlainTextFileType.INSTANCE);
+        this.messageComponent =
+                this.chatBody.addMessage(new ChatMessage(author, ""), PlainTextFileType.INSTANCE);
         this.messageComponent.setProject(project);
     }
 

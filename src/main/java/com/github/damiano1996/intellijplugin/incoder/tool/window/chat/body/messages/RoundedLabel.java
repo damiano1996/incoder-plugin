@@ -3,7 +3,7 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 import java.awt.*;
 import javax.swing.*;
 
-public class RoundedLabel<T> extends JLabel {
+public class RoundedLabel extends JLabel {
 
     private final int arcWidth;
     private final int arcHeight;
@@ -33,7 +33,8 @@ public class RoundedLabel<T> extends JLabel {
         this.verticalPadding = 0;
     }
 
-    public RoundedLabel(Icon image, int arcWidth, int arcHeight, int horizontalPadding, int verticalPadding) {
+    public RoundedLabel(
+            Icon image, int arcWidth, int arcHeight, int horizontalPadding, int verticalPadding) {
         super(image);
         this.arcWidth = arcWidth;
         this.arcHeight = arcHeight;
@@ -57,6 +58,6 @@ public class RoundedLabel<T> extends JLabel {
 
     @Override
     public int getHeight() {
-        return super.getHeight()+verticalPadding;
+        return super.getHeight() + verticalPadding;
     }
 }

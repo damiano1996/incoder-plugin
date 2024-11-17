@@ -11,11 +11,10 @@ public class MarkdownPanel extends JEditorPane {
 
     private final Parser parser = Parser.builder().build();
     private final HtmlRenderer renderer = HtmlRenderer.builder().build();
-    private final HTMLDocument htmlDoc = new HTMLDocument();
-    private final HTMLEditorKit editorKit = new HTMLEditorKit();
 
     public MarkdownPanel() {
         setEditable(false);
+        HTMLEditorKit editorKit = new HTMLEditorKit();
         setEditorKit(editorKit);
         setContentType("text/html");
     }
@@ -29,13 +28,5 @@ public class MarkdownPanel extends JEditorPane {
                 """
                         .formatted(html);
         super.setText(styledHtml);
-        // adjustSize();
-    }
-
-    private void adjustSize() {
-        // Force the content to layout and calculate preferred size
-        setSize(new Dimension(getWidth(), Short.MAX_VALUE));
-        int height = getPreferredSize().height;
-        setSize(new Dimension(getWidth(), height));
     }
 }

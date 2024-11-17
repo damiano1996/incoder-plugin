@@ -73,8 +73,7 @@ public class ContainerLlmClient implements LlmClient {
     }
 
     @Override
-    public TokenStream edit(
-            @NonNull Editor editor, @NonNull String editDescription) {
+    public TokenStream edit(@NonNull Editor editor, @NonNull String editDescription) {
         return null;
     }
 
