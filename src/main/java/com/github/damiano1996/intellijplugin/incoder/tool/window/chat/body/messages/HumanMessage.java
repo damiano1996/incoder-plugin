@@ -3,15 +3,17 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 import com.github.damiano1996.intellijplugin.incoder.llm.Llm;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
-import javax.swing.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
 
 public class HumanMessage implements MessageComponent {
 
     private JTextArea message;
 
-    @Getter private JPanel mainPanel;
+    @Getter
+    private JPanel mainPanel;
     private JLabel promptTypeLabel;
 
     public void setPromptTypeLabel(Llm.@NotNull PromptType promptType) {
@@ -20,7 +22,8 @@ public class HumanMessage implements MessageComponent {
     }
 
     @Override
-    public void setProject(Project project) {}
+    public void setProject(Project project) {
+    }
 
     @Override
     public void write(String token) {

@@ -2,7 +2,7 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 
 import static com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON;
 
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MarkdownPanel;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedLabel;
 import com.intellij.openapi.project.Project;
@@ -39,13 +39,18 @@ public class AiMessage implements MessageComponent {
 
     @Override
     public String getFullText() {
-        return "";
+        return markdownPanel.getFullText();
     }
 
     private void createUIComponents() {
+        mainPanel = new JPanel();
+        mainPanel.setFocusable(false);
+        mainPanel.setFocusTraversalPolicyProvider(false);
+
         scrollPane = new JBScrollPane();
 
         markdownPanel = new MarkdownPanel();
+
         aiIconLabel = new RoundedLabel(PLUGIN_ICON, 60, 60);
         aiIconLabel.setBackground(JBColor.namedColor("Label.background"));
         aiIconLabel.setForeground(JBColor.namedColor("Label.foreground"));

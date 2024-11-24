@@ -9,17 +9,19 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.output.Response;
-import java.util.Objects;
-import java.util.function.Consumer;
-import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+import java.util.Objects;
+import java.util.function.Consumer;
+
 @Slf4j
 public class Chat {
 
-    @Getter private JPanel mainPanel;
+    @Getter
+    private JPanel mainPanel;
     private JTextField prompt;
     private JProgressBar generating;
     private ChatBody chatBody;
@@ -44,11 +46,7 @@ public class Chat {
             HumanMessage userMessageComponent =
                     (HumanMessage)
                             chatBody.addMessage(
-                                    new ChatMessage(ChatMessage.Author.USER, prompt),
-                                    FileEditorManager.getInstance(project)
-                                            .getSelectedTextEditor()
-                                            .getVirtualFile()
-                                            .getFileType());
+                                    new ChatMessage(ChatMessage.Author.USER, prompt));
             isGenerating(true);
 
             LlmService.getInstance(project)

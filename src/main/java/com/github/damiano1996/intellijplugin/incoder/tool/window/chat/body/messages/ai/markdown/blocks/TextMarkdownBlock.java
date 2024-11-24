@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages;
+package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks;
 
 import com.intellij.ui.JBColor;
 import com.vladsch.flexmark.html.HtmlRenderer;
@@ -7,14 +7,14 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
 
-public class MarkdownEditorPane extends JEditorPane implements StreamWriter {
+public class TextMarkdownBlock extends JEditorPane implements MarkdownBlock {
 
     private final Parser parser = Parser.builder().build();
     private final HtmlRenderer renderer = HtmlRenderer.builder().build();
 
     private String body = "";
 
-    public MarkdownEditorPane() {
+    public TextMarkdownBlock() {
         setEditable(false);
         HTMLEditorKit editorKit = new HTMLEditorKit();
         setEditorKit(editorKit);
@@ -45,5 +45,10 @@ public class MarkdownEditorPane extends JEditorPane implements StreamWriter {
     @Override
     public String getFullText() {
         return body;
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return this;
     }
 }

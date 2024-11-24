@@ -4,15 +4,15 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.HumanMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.AiMessage;
-import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
-import java.awt.*;
-import javax.swing.*;
 import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import java.awt.*;
 
 @Getter
 public class ChatBody {
@@ -23,12 +23,6 @@ public class ChatBody {
     private DefaultListModel<MessageComponent> listModel;
     private JScrollPane scrollPane;
 
-    public static class FirableListModel<T> extends DefaultListModel<T> {
-        public void update(int index) {
-            fireContentsChanged(this, index, index);
-        }
-    }
-
     @Contract("_ -> new")
     public static @NotNull MessageComponent getMessageComponent(
             ChatMessage.@NonNull Author author) {
@@ -38,10 +32,10 @@ public class ChatBody {
         };
     }
 
-    public MessageComponent addMessage(@NotNull ChatMessage item, FileType fileType) {
+    public MessageComponent addMessage(@NotNull ChatMessage item) {
         var messageComponent = getMessageComponent(item.author());
         messageComponent.write(item.message());
-        listModel.insertElementAt(messageComponent, 0);
+        listModel.addElement(messageComponent);
         return messageComponent;
     }
 
@@ -54,6 +48,12 @@ public class ChatBody {
         messageList.setCellRenderer(new MessageComponentRenderer());
 
         scrollPane = new JBScrollPane(messageList);
+    }
+
+    public static class FirableListModel<T> extends DefaultListModel<T> {
+        public void update(int index) {
+            fireContentsChanged(this, index, index);
+        }
     }
 
     private static class MessageComponentRenderer implements ListCellRenderer<MessageComponent> {
