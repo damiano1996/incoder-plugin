@@ -1,35 +1,30 @@
 package com.github.damiano1996.intellijplugin.incoder.settings;
 
 import com.github.damiano1996.intellijplugin.incoder.InCoderActivity;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.ServerSettingsComponent;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.ServerSettingsConfigurable;
+import com.github.damiano1996.intellijplugin.incoder.language.model.langchain.settings.LangChainSettingsComponent;
+import com.github.damiano1996.intellijplugin.incoder.language.model.langchain.settings.LangChainSettingsConfigurable;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.UnnamedConfigurable;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.util.ui.FormBuilder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public final class PluginSettingsConfigurable implements Configurable {
 
     private final List<Configurable> configurables = new ArrayList<>();
 
     public PluginSettingsConfigurable() {
-        ServerSettingsComponent serverSettingsComponent = new ServerSettingsComponent();
-
-        configurables.add(new ServerSettingsConfigurable(serverSettingsComponent));
-        serverSettingsComponent
-                .getCustomServerSettingsComponents()
-                .forEach(
-                        customServerSettingsComponent ->
-                                configurables.add(customServerSettingsComponent.getConfigurable()));
+        LangChainSettingsComponent langChainSettingsComponent = new LangChainSettingsComponent();
+        configurables.add(new LangChainSettingsConfigurable(langChainSettingsComponent));
     }
 
     @Contract(pure = true)

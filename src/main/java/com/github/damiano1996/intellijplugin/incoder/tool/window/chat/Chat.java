@@ -1,6 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat;
 
-import com.github.damiano1996.intellijplugin.incoder.llm.LlmService;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessage;
@@ -49,7 +49,7 @@ public class Chat {
                                     new ChatMessage(ChatMessage.Author.USER, prompt));
             isGenerating(true);
 
-            LlmService.getInstance(project)
+            LanguageModelService.getInstance(project)
                     .classify(prompt)
                     .thenApply(
                             promptType -> {
@@ -65,7 +65,7 @@ public class Chat {
                                                 new TokenConsumer(
                                                         project, ChatMessage.Author.AI, chatBody);
 
-                                        LlmService.getInstance(project)
+                                        LanguageModelService.getInstance(project)
                                                 .edit(
                                                         Objects.requireNonNull(
                                                                 FileEditorManager.getInstance(
@@ -82,7 +82,7 @@ public class Chat {
                                                 new TokenConsumer(
                                                         project, ChatMessage.Author.AI, chatBody);
 
-                                        LlmService.getInstance(project)
+                                        LanguageModelService.getInstance(project)
                                                 .answer(
                                                         Objects.requireNonNull(
                                                                 FileEditorManager.getInstance(
@@ -99,7 +99,7 @@ public class Chat {
                                                 new TokenConsumer(
                                                         project, ChatMessage.Author.AI, chatBody);
 
-                                        LlmService.getInstance(project)
+                                        LanguageModelService.getInstance(project)
                                                 .chat(prompt)
                                                 .onNext(tokenConsumer)
                                                 .onComplete(onTokenStreamComplete())

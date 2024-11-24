@@ -1,7 +1,7 @@
 package com.github.damiano1996.intellijplugin.incoder;
 
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionService;
-import com.github.damiano1996.intellijplugin.incoder.llm.LlmService;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.intellijplugin.incoder.notification.NotificationService;
 import com.github.damiano1996.intellijplugin.incoder.settings.PluginSettings;
 import com.intellij.openapi.project.Project;
@@ -47,7 +47,7 @@ public class InCoderActivity implements ProjectActivity {
     public static void initServices(@NotNull Project project) {
         try {
             log.debug("Initializing services...");
-            LlmService.getInstance(project).init();
+            LanguageModelService.getInstance(project).init();
             CodeCompletionService.getInstance(project).init();
 
             log.debug("Services initialized");

@@ -1,6 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human;
 
-import com.github.damiano1996.intellijplugin.incoder.llm.Llm;
+import com.github.damiano1996.intellijplugin.incoder.language.model.PromptType;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedLabel;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedTextArea;
@@ -19,7 +19,7 @@ public class HumanMessage implements MessageComponent {
     private JPanel mainPanel;
     private JLabel promptTypeLabel;
 
-    public void setPromptTypeLabel(Llm.@NotNull PromptType promptType) {
+    public void setPromptTypeLabel(@NotNull PromptType promptType) {
         promptTypeLabel.setText(promptType.getName().toLowerCase());
         promptTypeLabel.setVisible(true);
     }
