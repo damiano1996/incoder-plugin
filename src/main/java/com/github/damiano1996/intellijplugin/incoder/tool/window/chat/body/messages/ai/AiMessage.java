@@ -14,6 +14,8 @@ import javax.swing.*;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
+
 @Getter
 public class AiMessage implements MessageComponent {
 
@@ -44,8 +46,6 @@ public class AiMessage implements MessageComponent {
 
     private void createUIComponents() {
         mainPanel = new JPanel();
-        mainPanel.setFocusable(false);
-        mainPanel.setFocusTraversalPolicyProvider(false);
 
         scrollPane = new JBScrollPane();
 

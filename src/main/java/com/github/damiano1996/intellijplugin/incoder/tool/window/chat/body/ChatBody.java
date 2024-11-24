@@ -4,8 +4,10 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.AiMessage;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
+import com.jgoodies.forms.layout.FormLayout;
 import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.Contract;
@@ -16,11 +18,8 @@ import java.awt.*;
 
 @Getter
 public class ChatBody {
-
     private JPanel mainPanel;
-
-    private JList<MessageComponent> messageList;
-    private DefaultListModel<MessageComponent> listModel;
+    private JPanel messagesPanel;
     private JScrollPane scrollPane;
 
     @Contract("_ -> new")
@@ -35,36 +34,50 @@ public class ChatBody {
     public MessageComponent addMessage(@NotNull ChatMessage item) {
         var messageComponent = getMessageComponent(item.author());
         messageComponent.write(item.message());
-        listModel.addElement(messageComponent);
+
+        var messageMainPanel = messageComponent.getMainPanel();
+        messagesPanel.add(messageMainPanel);
+        messageMainPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+
+        updateUI();
+
         return messageComponent;
     }
 
+    public void updateUI() {
+        messagesPanel.revalidate();
+        messagesPanel.repaint();
+        scrollToBottom();
+    }
+
+    public void scrollToBottom() {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            JScrollBar vertical = scrollPane.getVerticalScrollBar();
+            vertical.setValue(vertical.getMaximum());
+        });
+    }
+
     private void createUIComponents() {
-        mainPanel = new JPanel();
+        mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
 
-        listModel = new FirableListModel<>();
-        messageList = new JList<>(listModel);
-        messageList.setCellRenderer(new MessageComponentRenderer());
+        // Create messages panel with proper constraints
+        messagesPanel = new JPanel();
+        messagesPanel.setLayout(new BoxLayout(messagesPanel, BoxLayout.Y_AXIS));
+        messagesPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
+        messagesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        messagesPanel.setAlignmentY(Component.TOP_ALIGNMENT);
 
-        scrollPane = new JBScrollPane(messageList);
-    }
+        // Create a wrapper panel to hold messagesPanel
+        JPanel wrapperPanel = new JPanel(new BorderLayout());
+        wrapperPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
+        wrapperPanel.add(messagesPanel, BorderLayout.NORTH);
 
-    public static class FirableListModel<T> extends DefaultListModel<T> {
-        public void update(int index) {
-            fireContentsChanged(this, index, index);
-        }
-    }
+        // Create scroll pane
+        scrollPane = new JBScrollPane(wrapperPanel);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-    private static class MessageComponentRenderer implements ListCellRenderer<MessageComponent> {
-        @Override
-        public Component getListCellRendererComponent(
-                JList<? extends MessageComponent> list,
-                @NotNull MessageComponent value,
-                int index,
-                boolean isSelected,
-                boolean cellHasFocus) {
-            return value.getMainPanel();
-        }
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
     }
 }

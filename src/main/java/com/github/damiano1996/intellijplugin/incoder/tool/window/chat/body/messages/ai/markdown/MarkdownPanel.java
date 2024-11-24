@@ -2,9 +2,9 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 
 import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.StreamWriter;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.TextMarkdownBlock;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
 import com.intellij.icons.AllIcons;
 import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.*;
@@ -19,8 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,32 +47,17 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         addMarkdownEditorPane();
     }
 
+    public static @NotNull Language getLanguage(String languageName) {
+        var languages = Language.getRegisteredLanguages();
 
-    public @NotNull JComponent getJToolBarComponent(CodeMarkdownBlock codeBlock) {
-        JToolBar toolBar = new JToolBar();
+        for (Language language : languages) {
+            if (language.getID().equalsIgnoreCase(languageName)) {
+                return language;
+            }
+        }
 
-        // Create the "Merge..." button
-        JButton mergeButton = new JButton("Merge...", AllIcons.Vcs.Merge);
-        mergeButton.setToolTipText("Merge selected changes");
-
-        mergeButton.addActionListener((ActionEvent e) -> {
-            assert project != null;
-            CodeGenerationService.showDiff(
-                        project,
-                        codeBlock.getFullText(),
-                        Objects.requireNonNull(
-                                FileEditorManager.getInstance(project)
-                                        .getSelectedTextEditor()
-                        )
-                );
-
-        });
-
-        toolBar.add(mergeButton);
-
-        return toolBar;
+        throw new IllegalArgumentException("'%s' is not a valid coding language.".formatted(languageName));
     }
-
 
     public @NotNull JComponent getActionToolbarComponent(CodeMarkdownBlock codeBlock) {
         var actionGroup = new DefaultActionGroup();
@@ -97,6 +80,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         });
 
         var actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
+        actionToolbar.setMiniMode(false);
         return actionToolbar.getComponent();
     }
 
@@ -135,18 +119,6 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         return markdownBlocks.stream().map(StreamWriter::getFullText).collect(Collectors.joining("\n"));
     }
 
-    public static @NotNull Language getLanguage(String languageName) {
-        var languages = Language.getRegisteredLanguages();
-
-        for (Language language : languages) {
-            if (language.getID().equalsIgnoreCase(languageName)){
-                return language;
-            }
-        }
-
-        throw new IllegalArgumentException("'%s' is not a valid coding language.".formatted(languageName));
-    }
-
     private void addCodeEditorPanel(FileType fileType) {
         ApplicationManager.getApplication()
                 .invokeLater(
@@ -154,14 +126,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
                             var codeMarkdownBlock = new CodeMarkdownBlock(project, fileType, "");
                             addMarkdownBlock(codeMarkdownBlock);
 
-                            add(getJToolBarComponent(codeMarkdownBlock));
                             add(getActionToolbarComponent(codeMarkdownBlock));
-
-                            var button = new JButton("Hello");
-                            button.setEnabled(true);
-                            button.addActionListener(e -> log.info("Click"));
-                            button.setFocusable(true);
-                            add(button);
                         });
     }
 

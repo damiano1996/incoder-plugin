@@ -26,6 +26,9 @@ public class TokenConsumer implements Consumer<String> {
     public void accept(String token) {
         log.debug("New token received: {}", token);
         messageComponent.write(token);
-        ((ChatBody.FirableListModel<?>) chatBody.getListModel()).update(0);
+        // ((ChatBody.FirableListModel<?>) chatBody.getListModel()).update(0);
+
+        chatBody.updateUI();
+        chatBody.scrollToBottom();
     }
 }
