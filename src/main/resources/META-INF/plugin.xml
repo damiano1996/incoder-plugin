@@ -11,11 +11,15 @@
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="com.github.damiano1996.intellijplugin.incoder.InCoderActivity"/>
         <applicationConfigurable
-                parentId="tools"
+                parentId="chat"
                 instance="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
                 id="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
                 displayName="InCoder"/>
         <notificationGroup id="InCoder Notifications" displayType="BALLOON"/>
+
+        <toolWindow id="InCoder" secondary="true"
+                    icon="com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON" anchor="right"
+                    factoryClass="com.github.damiano1996.intellijplugin.incoder.tool.window.InCoderToolWindowFactory"/>
     </extensions>
 
     <applicationListeners>

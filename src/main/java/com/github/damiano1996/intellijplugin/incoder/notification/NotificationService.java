@@ -41,32 +41,32 @@ public final class NotificationService {
 
     private void notify(String message, NotificationType notificationType) {
         NotificationGroupManager.getInstance()
-                .getNotificationGroup(InCoderBundle.message("notification-group"))
+                .getNotificationGroup(InCoderBundle.message("notification.group"))
                 .createNotification(
-                        InCoderBundle.message("plugin-title"), message, notificationType)
+                        InCoderBundle.message("plugin.title"), message, notificationType)
                 .notify(project);
     }
 
     public void notifyWelcome() {
         NotificationGroupManager.getInstance()
-                .getNotificationGroup(InCoderBundle.message("notification-group"))
+                .getNotificationGroup(InCoderBundle.message("notification.group"))
                 .createNotification(
-                        InCoderBundle.message("plugin-title"),
-                        InCoderBundle.message("notification-welcome"),
+                        InCoderBundle.message("plugin.title"),
+                        InCoderBundle.message("notification.welcome"),
                         NotificationType.INFORMATION)
                 .notify(project);
     }
 
     public void notifyFirstConfiguration() {
         NotificationGroupManager.getInstance()
-                .getNotificationGroup(InCoderBundle.message("notification-group"))
+                .getNotificationGroup(InCoderBundle.message("notification.group"))
                 .createNotification(
-                        InCoderBundle.message("plugin-title"),
-                        InCoderBundle.message("notification-first-configuration"),
+                        InCoderBundle.message("plugin.title"),
+                        InCoderBundle.message("notification.config.description"),
                         NotificationType.INFORMATION)
                 .addAction(
                         NotificationAction.createSimple(
-                                InCoderBundle.message("notification-settings-button"),
+                                InCoderBundle.message("notification.settings.button.name"),
                                 () -> {
                                     log.debug("Opening settings via notification.");
                                     ShowSettingsUtil.getInstance()

@@ -11,20 +11,24 @@ import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.ServerS
 import com.github.damiano1996.intellijplugin.incoder.notification.NotificationService;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import dev.langchain4j.service.TokenStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 @Service(Service.Level.PROJECT)
-public final class LlmService implements Disposable {
+public final class LlmService implements Llm, Disposable {
 
     private final Project project;
 
@@ -51,7 +55,7 @@ public final class LlmService implements Disposable {
         ProgressManager.getInstance()
                 .run(
                         new Task.Backgroundable(
-                                project, InCoderBundle.message("plugin-title"), false) {
+                                project, InCoderBundle.message("plugin.title"), false) {
                             public void run(@NotNull ProgressIndicator indicator) {
                                 try {
 
@@ -119,6 +123,26 @@ public final class LlmService implements Disposable {
         }
     }
 
+    @Override
+    public TokenStream chat(String input) {
+        return client.chat(input);
+    }
+
+    @Override
+    public CompletableFuture<PromptType> classify(String prompt) {
+        return client.classify(prompt);
+    }
+
+    @Override
+    public TokenStream edit(@NonNull Editor editor, @NonNull String editDescription) {
+        return client.edit(editor, editDescription);
+    }
+
+    @Override
+    public TokenStream answer(@NonNull Editor editor, @NonNull String question) {
+        return client.answer(editor, question);
+    }
+
     private class RequestRunnable implements Runnable {
         @Override
         public void run() {
@@ -129,8 +153,8 @@ public final class LlmService implements Disposable {
                     CodeCompletionContext codeCompletionContext = queue.take();
 
                     try {
-                        // TODO: decide where to strip and split
-                        var prediction = client.codeComplete(codeCompletionContext);
+                        var prediction =
+                                client.codeComplete(codeCompletionContext).split("\n")[0].trim();
                         log.debug("Prediction received from service: {}", prediction);
 
                         if (queue.isEmpty()) {

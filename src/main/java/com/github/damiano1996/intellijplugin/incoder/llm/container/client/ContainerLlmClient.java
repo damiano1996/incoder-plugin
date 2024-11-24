@@ -7,9 +7,13 @@ import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionEx
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableException;
 import com.github.damiano1996.intellijplugin.incoder.initializable.InitializableListener;
 import com.github.damiano1996.intellijplugin.incoder.llm.LlmClient;
+import com.intellij.openapi.editor.Editor;
+import dev.langchain4j.service.TokenStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,4 +61,24 @@ public class ContainerLlmClient implements LlmClient {
 
     @Override
     public void close() {}
+
+    @Override
+    public TokenStream chat(String input) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<PromptType> classify(String prompt) {
+        return null;
+    }
+
+    @Override
+    public TokenStream edit(@NonNull Editor editor, @NonNull String editDescription) {
+        return null;
+    }
+
+    @Override
+    public TokenStream answer(@NonNull Editor editor, @NonNull String question) {
+        return null;
+    }
 }
