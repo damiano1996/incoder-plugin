@@ -3,7 +3,7 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat;
 import com.github.damiano1996.intellijplugin.incoder.llm.LlmService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.HumanMessage;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessage;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;

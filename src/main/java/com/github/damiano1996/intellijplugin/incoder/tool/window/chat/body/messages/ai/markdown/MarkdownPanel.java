@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -157,6 +158,8 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
                             add(getActionToolbarComponent(codeMarkdownBlock));
 
                             var button = new JButton("Hello");
+                            button.setEnabled(true);
+                            button.addActionListener(e -> log.info("Click"));
                             button.setFocusable(true);
                             add(button);
                         });

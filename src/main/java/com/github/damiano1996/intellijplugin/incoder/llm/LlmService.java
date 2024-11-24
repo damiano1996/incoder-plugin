@@ -55,7 +55,7 @@ public final class LlmService implements Llm, Disposable {
         ProgressManager.getInstance()
                 .run(
                         new Task.Backgroundable(
-                                project, InCoderBundle.message("plugin-title"), false) {
+                                project, InCoderBundle.message("plugin.title"), false) {
                             public void run(@NotNull ProgressIndicator indicator) {
                                 try {
 

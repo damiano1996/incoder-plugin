@@ -73,11 +73,11 @@ public final class ContainerSettings implements PersistentStateComponent<Contain
                 FACEBOOK_INCODER_1B(
                         "facebook/incoder-1B",
                         "Facebook InCoder 1B",
-                        InCoderBundle.message("model--facebook--incoder-1B-description")),
+                        InCoderBundle.message("model.facebook.incoder.1B.description")),
                 FACEBOOK_INCODER_6B(
                         "facebook/incoder-6B",
                         "Facebook InCoder 6B",
-                        InCoderBundle.message("model--facebook--incoder-6B-description"));
+                        InCoderBundle.message("model.facebook.incoder.6B.description"));
 
                 private final String repository;
                 private final String name;

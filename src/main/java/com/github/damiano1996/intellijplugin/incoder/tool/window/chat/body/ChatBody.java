@@ -1,7 +1,7 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body;
 
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.HumanMessage;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.AiMessage;
 import com.intellij.ui.JBColor;

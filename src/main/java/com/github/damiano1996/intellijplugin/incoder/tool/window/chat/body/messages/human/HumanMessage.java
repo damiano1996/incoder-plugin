@@ -1,6 +1,9 @@
-package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages;
+package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human;
 
 import com.github.damiano1996.intellijplugin.incoder.llm.Llm;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedLabel;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedTextArea;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import lombok.Getter;

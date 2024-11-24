@@ -14,7 +14,6 @@ public class TokenConsumer implements Consumer<String> {
 
     private final MessageComponent messageComponent;
     private final ChatBody chatBody;
-    private final List<String> acceptedTokens = new ArrayList<>();
 
     public TokenConsumer(Project project, ChatMessage.Author author, ChatBody chatBody) {
         this.chatBody = chatBody;
@@ -26,7 +25,6 @@ public class TokenConsumer implements Consumer<String> {
     @Override
     public void accept(String token) {
         log.debug("New token received: {}", token);
-        acceptedTokens.add(token);
         messageComponent.write(token);
         ((ChatBody.FirableListModel<?>) chatBody.getListModel()).update(0);
     }
