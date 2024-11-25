@@ -33,7 +33,8 @@ public interface LanguageModelClient {
                     If the line is partially written, complete it up to the first newline.
                     If the line is already at the end, return an empty response.
                     """)
-    TokenStream complete(@V("leftContext") String leftContext, @V("rightContext") String rightContext);
+    TokenStream complete(
+            @V("leftContext") String leftContext, @V("rightContext") String rightContext);
 
     @UserMessage(
             """
@@ -70,5 +71,4 @@ public interface LanguageModelClient {
                     """)
     TokenStream answer(
             @V("filePath") String filePath, @V("question") String question, @V("code") String code);
-
 }

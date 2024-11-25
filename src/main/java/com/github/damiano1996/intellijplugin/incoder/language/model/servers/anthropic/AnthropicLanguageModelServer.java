@@ -1,23 +1,23 @@
-package com.github.damiano1996.intellijplugin.incoder.language.model.servers.ollama;
+package com.github.damiano1996.intellijplugin.incoder.language.model.servers.anthropic;
 
 import com.github.damiano1996.intellijplugin.incoder.language.model.servers.BaseLanguageModelServer;
-import com.github.damiano1996.intellijplugin.incoder.language.model.servers.ollama.settings.OllamaSettings;
+import com.github.damiano1996.intellijplugin.incoder.language.model.servers.anthropic.settings.AnthropicSettings;
+import dev.langchain4j.model.anthropic.AnthropicChatModel;
+import dev.langchain4j.model.anthropic.AnthropicStreamingChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.ollama.OllamaChatModel;
-import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import org.apache.commons.lang.NotImplementedException;
 
-public class OllamaLanguageModelServer extends BaseLanguageModelServer {
+public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
 
-    private static OllamaSettings.State getState() {
-        return OllamaSettings.getInstance().getState();
+    private static AnthropicSettings.State getState() {
+        return AnthropicSettings.getInstance().getState();
     }
 
     @Override
     public ChatLanguageModel createChatLanguageModel() {
-        return OllamaChatModel.builder()
-                .baseUrl(getState().baseUrl)
+        return AnthropicChatModel.builder()
+                .baseUrl(getState().apiKey)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
                 .build();
@@ -25,8 +25,8 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
 
     @Override
     public StreamingChatLanguageModel createStreamingChatLanguageModel() {
-        return OllamaStreamingChatModel.builder()
-                .baseUrl(getState().baseUrl)
+        return AnthropicStreamingChatModel.builder()
+                .baseUrl(getState().apiKey)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
                 .build();

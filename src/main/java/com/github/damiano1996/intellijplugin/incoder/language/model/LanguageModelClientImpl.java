@@ -20,7 +20,6 @@ public class LanguageModelClientImpl implements LanguageModelClient {
                 AiServices.create(LanguageModelClient.class, streamingChatLanguageModel);
     }
 
-
     @Override
     public TokenStream complete(String leftContext, String rightContext) {
         return languageModelClientStream.complete(leftContext, rightContext);
@@ -29,8 +28,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     @Override
     public TokenStream editCode(String filePath, String prompt, String actualCode) {
         log.debug("Editing script");
-        return languageModelClientStream.editCode(
-                filePath, prompt, actualCode);
+        return languageModelClientStream.editCode(filePath, prompt, actualCode);
     }
 
     @Override
@@ -48,21 +46,6 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     @Override
     public TokenStream answer(String filePath, String question, String code) {
         log.debug("Answering code question");
-        return languageModelClientStream.answer(
-                filePath, question, code);
+        return languageModelClientStream.answer(filePath, question, code);
     }
-
-//    @Override
-//    public TokenStream edit(@NonNull Editor editor, @NonNull String editDescription) {
-//        log.debug("Editing script");
-//        return langChainCodeServiceStream.editCode(
-//                editor.getVirtualFile().getPath(), editDescription, editor.getDocument().getText());
-//    }
-//
-//    @Override
-//    public TokenStream answer(@NonNull Editor editor, @NonNull String question) {
-//        log.debug("Answering code question");
-//        return langChainCodeServiceStream.answer(
-//                editor.getVirtualFile().getPath(), question, editor.getDocument().getText());
-//    }
 }

@@ -4,5 +4,5 @@ public interface LanguageModelServer {
 
     boolean isHealthy();
 
-    LanguageModelClient createClient();
+    LanguageModelClient createClient() throws LanguageModelException;
 }

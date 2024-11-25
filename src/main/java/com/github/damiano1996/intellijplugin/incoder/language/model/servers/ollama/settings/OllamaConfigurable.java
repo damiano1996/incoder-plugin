@@ -1,31 +1,28 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.servers.ollama.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.settings.IServerSettingsComponent;
-import com.github.damiano1996.intellijplugin.incoder.language.model.settings.IServerSettingsConfigurable;
+import com.github.damiano1996.intellijplugin.incoder.language.model.servers.ServerType;
+import com.github.damiano1996.intellijplugin.incoder.language.model.settings.ServerComponent;
+import com.github.damiano1996.intellijplugin.incoder.language.model.settings.ServerConfigurable;
+import java.util.Objects;
+import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.util.Objects;
+public final class OllamaConfigurable implements ServerConfigurable {
 
-public final class OllamaSettingsConfigurable implements IServerSettingsConfigurable {
-
-    private OllamaSettingsComponent settingsComponent = new OllamaSettingsComponent();
+    private OllamaComponent settingsComponent = new OllamaComponent();
 
     private static OllamaSettings.@NotNull State getState() {
-        @NotNull
-        var state =
-                Objects.requireNonNull(OllamaSettings.getInstance().getState());
-        return state;
+        return Objects.requireNonNull(OllamaSettings.getInstance().getState());
     }
 
     @Contract(pure = true)
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public @NotNull String getDisplayName() {
-        return "Ollama Settings";
+        return getServerType().getDisplayName();
     }
 
     @Override
@@ -45,11 +42,7 @@ public final class OllamaSettingsConfigurable implements IServerSettingsConfigur
 
         return !settingsComponent.getBaseUrlField().getText().equals(state.baseUrl)
                 || !settingsComponent.getModelNameField().getText().equals(state.modelName)
-                || !Objects.equals(
-                settingsComponent.getTemperatureField().getText(),
-                state.temperature != null
-                        ? state.temperature
-                        : "");
+                || !settingsComponent.getTemperatureField().getValue().equals(state.temperature);
     }
 
     @Override
@@ -58,9 +51,7 @@ public final class OllamaSettingsConfigurable implements IServerSettingsConfigur
 
         state.baseUrl = settingsComponent.getBaseUrlField().getText();
         state.modelName = settingsComponent.getModelNameField().getText();
-
-        String temperatureText = settingsComponent.getTemperatureField().getText();
-        state.temperature = temperatureText.isEmpty() ? null : Double.parseDouble(temperatureText);
+        state.temperature = (Double) settingsComponent.getTemperatureField().getValue();
     }
 
     @Override
@@ -69,8 +60,7 @@ public final class OllamaSettingsConfigurable implements IServerSettingsConfigur
 
         settingsComponent.getBaseUrlField().setText(state.baseUrl);
         settingsComponent.getModelNameField().setText(state.modelName);
-        settingsComponent.getTemperatureField().setText(
-                state.temperature != null ? state.temperature.toString() : "");
+        settingsComponent.getTemperatureField().setValue(state.temperature);
     }
 
     @Override
@@ -79,7 +69,12 @@ public final class OllamaSettingsConfigurable implements IServerSettingsConfigur
     }
 
     @Override
-    public IServerSettingsComponent getComponent() {
+    public ServerType getServerType() {
+        return ServerType.OLLAMA;
+    }
+
+    @Override
+    public ServerComponent getComponent() {
         return settingsComponent;
     }
 }

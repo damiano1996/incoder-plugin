@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.language.model.servers.ollama.settings;
+package com.github.damiano1996.intellijplugin.incoder.language.model.servers.anthropic.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -12,14 +12,14 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @Service(Service.Level.APP)
 @State(
-        name = "OllamaSettings",
+        name = "AnthropicSettings",
         storages = {@Storage("InCoderSettings.xml")})
-public final class OllamaSettings implements PersistentStateComponent<OllamaSettings.State> {
+public final class AnthropicSettings implements PersistentStateComponent<AnthropicSettings.State> {
 
     private State state = new State();
 
-    public static OllamaSettings getInstance() {
-        return ApplicationManager.getApplication().getService(OllamaSettings.class);
+    public static AnthropicSettings getInstance() {
+        return ApplicationManager.getApplication().getService(AnthropicSettings.class);
     }
 
     @Override
@@ -30,7 +30,7 @@ public final class OllamaSettings implements PersistentStateComponent<OllamaSett
     @ToString
     public static class State {
 
-        public String baseUrl = "http://localhost:11434/";
+        public String apiKey = "";
         public String modelName = "";
         public Double temperature = 0.2;
     }

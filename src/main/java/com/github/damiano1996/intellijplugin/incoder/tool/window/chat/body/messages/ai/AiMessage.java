@@ -2,19 +2,18 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 
 import static com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON;
 
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedLabel;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
+import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
-
-import java.awt.*;
 
 @Getter
 public class AiMessage implements MessageComponent {

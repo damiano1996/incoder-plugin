@@ -8,7 +8,7 @@ public enum PromptType {
     @Description(
             """
                     The prompt describes how the user wants to edit the code.
-                    The user can ask to add, remove, update the code.""")
+                    The user can ask to add, remove or update the code.""")
     EDIT("edit"),
     @Description("The user is asking something about the code he is viewing.")
     CODE_QUESTION("code question"),

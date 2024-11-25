@@ -1,28 +1,31 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.settings;
 
 import com.github.damiano1996.intellijplugin.incoder.language.model.servers.ServerType;
-import com.github.damiano1996.intellijplugin.incoder.language.model.servers.ollama.settings.OllamaSettingsConfigurable;
-import com.github.damiano1996.intellijplugin.incoder.language.model.servers.openai.settings.OpenAiSettingsConfigurable;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.UnnamedConfigurable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.util.List;
-import java.util.Objects;
-
 public final class ServerSettingsConfigurable implements Configurable {
 
-    private final List<IServerSettingsConfigurable> configurableList;
+    private final List<ServerConfigurable> configurableList;
 
     private ServerSettingsComponent serverSettingsComponent;
 
     public ServerSettingsConfigurable() {
-        configurableList = List.of(new OllamaSettingsConfigurable(), new OpenAiSettingsConfigurable());
+        configurableList =
+                Arrays.stream(ServerType.values())
+                        .map(
+                                serverType ->
+                                        serverType.getServerAbstractFactory().createConfigurable())
+                        .toList();
         serverSettingsComponent = new ServerSettingsComponent(configurableList);
     }
 
@@ -53,29 +56,27 @@ public final class ServerSettingsConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-
         ServerSettings.@NotNull State state = getState();
 
-        return !serverSettingsComponent.getModelTypeComboBox().getItem().equals(state.modelType) ||
-                configurableList.stream().anyMatch(UnnamedConfigurable::isModified);
+        return !serverSettingsComponent.getModelTypeComboBox().getItem().equals(state.modelType)
+                || configurableList.stream().anyMatch(UnnamedConfigurable::isModified);
     }
 
     @Override
-    public void apply() {
+    public void apply() throws ConfigurationException {
         @NotNull ServerSettings.State state = getState();
 
         state.modelType =
-                (ServerType)
-                        serverSettingsComponent.getModelTypeComboBox().getSelectedItem();
+                (ServerType) serverSettingsComponent.getModelTypeComboBox().getSelectedItem();
 
-        configurableList.forEach(serverSettingsConfigurable -> {
+        for (ServerConfigurable serverSettingsConfigurable : configurableList) {
             try {
                 serverSettingsConfigurable.apply();
             } catch (ConfigurationException e) {
-                throw new RuntimeException(e);
+                throw new ConfigurationException(
+                        "Unable to apply changes. " + e.getMessage(), "Server Settings Error");
             }
-        });
-
+        }
     }
 
     @Override
@@ -84,7 +85,6 @@ public final class ServerSettingsConfigurable implements Configurable {
 
         serverSettingsComponent.getModelTypeComboBox().setSelectedItem(state.modelType);
         configurableList.forEach(UnnamedConfigurable::reset);
-
     }
 
     @Override
