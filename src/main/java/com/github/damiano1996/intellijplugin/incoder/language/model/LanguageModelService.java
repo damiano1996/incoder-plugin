@@ -3,7 +3,7 @@ package com.github.damiano1996.intellijplugin.incoder.language.model;
 import com.github.damiano1996.intellijplugin.incoder.InCoderBundle;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionListener;
-import com.github.damiano1996.intellijplugin.incoder.language.model.langchain.settings.LangChainSettings;
+import com.github.damiano1996.intellijplugin.incoder.language.model.settings.ServerSettings;
 import com.github.damiano1996.intellijplugin.incoder.notification.NotificationService;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.editor.Editor;
@@ -47,29 +47,23 @@ public final class LanguageModelService {
     }
 
     public void init() {
-        server = languageModelServerFactory.createServer(LangChainSettings.getInstance());
+        server = languageModelServerFactory.createServer(ServerSettings.getInstance());
 
         ProgressManager.getInstance()
                 .run(
                         new Task.Backgroundable(
                                 project, InCoderBundle.message("plugin.title"), false) {
                             public void run(@NotNull ProgressIndicator indicator) {
-                                try {
 
-                                    log.debug("Initializing the client");
-                                    client = server.createClient();
-                                    log.debug("Client initialized");
+                                log.debug("Initializing the client");
+                                client = server.createClient();
+                                log.debug("Client initialized");
 
-                                    NotificationService.getInstance(project)
-                                            .notifyInfo("InCoder client is ready");
-                                    log.debug("Starting a new thread to consume requests.");
-                                    new Thread(new RequestRunnable()).start();
+                                NotificationService.getInstance(project)
+                                        .notifyInfo("InCoder client is ready");
+                                log.debug("Starting a new thread to consume requests.");
+                                new Thread(new RequestRunnable()).start();
 
-                                } catch (ServerException e) {
-                                    log.error("Unable to initialize the client", e);
-                                    NotificationService.getInstance(project)
-                                            .notifyError(e.getMessage());
-                                }
                             }
                         });
     }
