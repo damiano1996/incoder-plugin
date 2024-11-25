@@ -11,7 +11,6 @@ plugins {
     id("org.jetbrains.changelog") version "2.0.0"
     kotlin("plugin.lombok") version "2.0.0"
     id("io.freefair.lombok") version "8.1.0"
-    id("org.openapi.generator") version "7.0.0"
     id("com.diffplug.spotless") version "6.19.0"
 }
 
@@ -24,26 +23,13 @@ repositories {
 
 dependencies {
     implementation("com.google.code.findbugs:jsr305:3.0.2")
-    implementation("javax.annotation:javax.annotation-api:1.2-b01")
     compileOnly("org.projectlombok:lombok:1.18.34")
-    implementation("org.openapitools:jackson-databind-nullable:0.2.6")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation("io.gsonfire:gson-fire:1.9.0")
     implementation("ch.qos.logback:logback-classic:1.5.6")
-    implementation("com.github.docker-java:docker-java:3.4.0")
-    implementation("dev.langchain4j:langchain4j-open-ai:0.35.0")
+
     implementation("dev.langchain4j:langchain4j:0.35.0")
     implementation("dev.langchain4j:langchain4j-ollama:0.35.0")
-}
-
-openApiGenerate {
-    generatorName.set("java")
-    inputSpec.set("$rootDir/src/main/resources/server/interface.json")
-    outputDir.set("$buildDir/generated")
-    apiPackage.set("$group.client.api")
-    modelPackage.set("$group.client.model")
-    invokerPackage.set("$group.client.invoker")
+    implementation("dev.langchain4j:langchain4j-open-ai:0.35.0")
+    implementation("dev.langchain4j:langchain4j-anthropic:0.35.0")
 }
 
 spotless {
@@ -56,18 +42,6 @@ spotless {
     java {
         googleJavaFormat().aosp().reflowLongStrings()
     }
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir(files("${openApiGenerate.outputDir.get()}/src/main"))
-        }
-    }
-}
-
-tasks.named("compileJava") {
-    dependsOn("openApiGenerate")
 }
 
 // Configure Gradle IntelliJ Plugin

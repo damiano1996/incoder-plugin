@@ -1,8 +1,8 @@
 package com.github.damiano1996.intellijplugin.incoder.settings;
 
 import com.github.damiano1996.intellijplugin.incoder.InCoderActivity;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.ServerSettingsComponent;
-import com.github.damiano1996.intellijplugin.incoder.llm.server.settings.ServerSettingsConfigurable;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
+import com.github.damiano1996.intellijplugin.incoder.language.model.settings.ServerSettingsConfigurable;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.UnnamedConfigurable;
@@ -19,17 +19,10 @@ import org.jetbrains.annotations.Nullable;
 
 public final class PluginSettingsConfigurable implements Configurable {
 
-    private final List<Configurable> configurables = new ArrayList<>();
+    private final List<Configurable> configurableList = new ArrayList<>();
 
     public PluginSettingsConfigurable() {
-        ServerSettingsComponent serverSettingsComponent = new ServerSettingsComponent();
-
-        configurables.add(new ServerSettingsConfigurable(serverSettingsComponent));
-        serverSettingsComponent
-                .getCustomServerSettingsComponents()
-                .forEach(
-                        customServerSettingsComponent ->
-                                configurables.add(customServerSettingsComponent.getConfigurable()));
+        configurableList.add(new ServerSettingsConfigurable());
     }
 
     @Contract(pure = true)
@@ -41,14 +34,14 @@ public final class PluginSettingsConfigurable implements Configurable {
 
     @Override
     public JComponent getPreferredFocusedComponent() {
-        return configurables.get(0).getPreferredFocusedComponent();
+        return configurableList.get(0).getPreferredFocusedComponent();
     }
 
     @Nullable
     @Override
     public JComponent createComponent() {
         var formBuilder = FormBuilder.createFormBuilder();
-        configurables.forEach(
+        configurableList.forEach(
                 configurable ->
                         formBuilder.addComponent(
                                 Objects.requireNonNull(configurable.createComponent())));
@@ -58,31 +51,31 @@ public final class PluginSettingsConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        return configurables.stream().anyMatch(UnnamedConfigurable::isModified);
+        return configurableList.stream().anyMatch(UnnamedConfigurable::isModified);
     }
 
     @Override
-    public void apply() {
-        configurables.forEach(
-                configurable -> {
-                    try {
-                        configurable.apply();
-                    } catch (ConfigurationException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+    public void apply() throws ConfigurationException {
+        for (Configurable configurable : configurableList) {
+            configurable.apply();
+        }
+
+        try {
+            InCoderActivity.initServices(ProjectManager.getInstance().getDefaultProject());
+        } catch (LanguageModelException e) {
+            throw new ConfigurationException(e.getMessage(), "Server Settings Error");
+        }
 
         Objects.requireNonNull(PluginSettings.getInstance().getState()).isPluginConfigured = true;
-        InCoderActivity.initServices(ProjectManager.getInstance().getDefaultProject());
     }
 
     @Override
     public void reset() {
-        configurables.forEach(UnnamedConfigurable::reset);
+        configurableList.forEach(UnnamedConfigurable::reset);
     }
 
     @Override
     public void disposeUIResources() {
-        configurables.forEach(UnnamedConfigurable::disposeUIResources);
+        configurableList.forEach(UnnamedConfigurable::disposeUIResources);
     }
 }

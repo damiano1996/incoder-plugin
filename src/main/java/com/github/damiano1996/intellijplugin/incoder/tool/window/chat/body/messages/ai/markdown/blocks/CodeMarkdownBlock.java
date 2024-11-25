@@ -9,9 +9,8 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.LightVirtualFile;
-import lombok.extern.slf4j.Slf4j;
-
 import javax.swing.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CodeMarkdownBlock implements MarkdownBlock {
@@ -22,10 +21,19 @@ public class CodeMarkdownBlock implements MarkdownBlock {
         LightVirtualFile virtualFile = new LightVirtualFile("temp", fileType, initialText);
         Document document = EditorFactory.getInstance().createDocument(initialText);
 
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            editor = EditorFactory.getInstance().createEditor(document, project, virtualFile, false, EditorKind.PREVIEW);
-            ((EditorEx) editor).setViewer(true);
-        });
+        ApplicationManager.getApplication()
+                .invokeAndWait(
+                        () -> {
+                            editor =
+                                    EditorFactory.getInstance()
+                                            .createEditor(
+                                                    document,
+                                                    project,
+                                                    virtualFile,
+                                                    false,
+                                                    EditorKind.PREVIEW);
+                            ((EditorEx) editor).setViewer(true);
+                        });
     }
 
     @Override
@@ -35,11 +43,15 @@ public class CodeMarkdownBlock implements MarkdownBlock {
 
     @Override
     public void write(String token) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            String currentText = editor.getDocument().getText();
-            String updatedText = currentText + token;
-            ApplicationManager.getApplication().runWriteAction(() -> editor.getDocument().setText(updatedText));
-        });
+        ApplicationManager.getApplication()
+                .invokeLater(
+                        () -> {
+                            String currentText = editor.getDocument().getText();
+                            String updatedText = currentText + token;
+                            ApplicationManager.getApplication()
+                                    .runWriteAction(
+                                            () -> editor.getDocument().setText(updatedText));
+                        });
     }
 
     @Override

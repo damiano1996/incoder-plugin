@@ -2,7 +2,7 @@ package com.github.damiano1996.intellijplugin.incoder.completion;
 
 import com.github.damiano1996.intellijplugin.incoder.completion.states.State;
 import com.github.damiano1996.intellijplugin.incoder.completion.states.idle.IdleState;
-import com.github.damiano1996.intellijplugin.incoder.llm.LlmService;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -50,7 +50,7 @@ public final class CodeCompletionService
         log.debug("Adding listeners for mouse");
         EditorFactory.getInstance().getEventMulticaster().addEditorMouseListener(this, this);
         log.debug("Subscribing to client service");
-        LlmService.getInstance(this.project).subscribe(this);
+        LanguageModelService.getInstance(this.project).subscribe(this);
     }
 
     public void next(@NotNull State state) {

@@ -3,7 +3,7 @@ package com.github.damiano1996.intellijplugin.incoder.completion.states.generati
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionService;
 import com.github.damiano1996.intellijplugin.incoder.completion.states.BaseState;
-import com.github.damiano1996.intellijplugin.incoder.llm.LlmService;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
@@ -24,7 +24,7 @@ public class StartGenerationState extends BaseState {
 
         CodeCompletionContext codeCompletionContext = createRequest(text, event.getOffset() + 1);
 
-        LlmService.getInstance(codeCompletionService.getProject())
+        LanguageModelService.getInstance(codeCompletionService.getProject())
                 .autocompletion(codeCompletionContext);
 
         log.debug("Going to wait state");

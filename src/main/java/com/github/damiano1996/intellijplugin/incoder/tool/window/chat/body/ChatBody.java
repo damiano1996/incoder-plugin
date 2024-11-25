@@ -1,20 +1,18 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body;
 
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.AiMessage;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessage;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
-import com.jgoodies.forms.layout.FormLayout;
+import java.awt.*;
+import javax.swing.*;
 import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.awt.*;
 
 @Getter
 public class ChatBody {
@@ -51,10 +49,12 @@ public class ChatBody {
     }
 
     public void scrollToBottom() {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            JScrollBar vertical = scrollPane.getVerticalScrollBar();
-            vertical.setValue(vertical.getMaximum());
-        });
+        ApplicationManager.getApplication()
+                .invokeLater(
+                        () -> {
+                            JScrollBar vertical = scrollPane.getVerticalScrollBar();
+                            vertical.setValue(vertical.getMaximum());
+                        });
     }
 
     private void createUIComponents() {

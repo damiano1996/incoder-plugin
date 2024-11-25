@@ -1,7 +1,8 @@
 package com.github.damiano1996.intellijplugin.incoder;
 
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionService;
-import com.github.damiano1996.intellijplugin.incoder.llm.LlmService;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.intellijplugin.incoder.notification.NotificationService;
 import com.github.damiano1996.intellijplugin.incoder.settings.PluginSettings;
 import com.intellij.openapi.project.Project;
@@ -16,20 +17,8 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class InCoderActivity implements ProjectActivity {
 
-    @Override
-    public Object execute(
-            @NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
-        log.debug("New project opened.");
-
-        EventQueue.invokeLater(
-                () -> {
-                    notifyWelcomeMessage(project);
-                    configureBeforeInitServices(project);
-                });
-        return null;
-    }
-
-    private static void configureBeforeInitServices(@NotNull Project project) {
+    private static void configureBeforeInitServices(@NotNull Project project)
+            throws LanguageModelException {
         if (Objects.requireNonNull(PluginSettings.getInstance().getState()).isPluginConfigured) {
             initServices(project);
         } else {
@@ -44,16 +33,29 @@ public class InCoderActivity implements ProjectActivity {
         }
     }
 
-    public static void initServices(@NotNull Project project) {
-        try {
-            log.debug("Initializing services...");
-            LlmService.getInstance(project).init();
-            CodeCompletionService.getInstance(project).init();
+    public static void initServices(@NotNull Project project) throws LanguageModelException {
+        log.debug("Initializing services...");
+        LanguageModelService.getInstance(project).init();
+        CodeCompletionService.getInstance(project).init();
 
-            log.debug("Services initialized");
-        } catch (Exception e) {
-            log.error("Error while initializing services", e);
-            NotificationService.getInstance(project).notifyError(e.getMessage());
-        }
+        log.debug("Services initialized");
+    }
+
+    @Override
+    public Object execute(
+            @NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
+        log.debug("New project opened.");
+
+        EventQueue.invokeLater(
+                () -> {
+                    try {
+                        notifyWelcomeMessage(project);
+                        configureBeforeInitServices(project);
+                    } catch (Exception e) {
+                        log.error("Error while initializing services", e);
+                        NotificationService.getInstance(project).notifyError(e.getMessage());
+                    }
+                });
+        return null;
     }
 }

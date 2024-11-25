@@ -13,16 +13,15 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.swing.*;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 public class MarkdownPanel extends JPanel implements StreamWriter {
@@ -31,12 +30,9 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
 
     private final List<MarkdownBlock> markdownBlocks;
 
-    @Setter
-    @Nullable
-    private Project project;
+    @Setter @Nullable private Project project;
     private boolean isWritingACodeBlock = false;
     private boolean nextIsLanguage = false;
-
 
     public MarkdownPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -56,30 +52,32 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
             }
         }
 
-        throw new IllegalArgumentException("'%s' is not a valid coding language.".formatted(languageName));
+        throw new IllegalArgumentException(
+                "'%s' is not a valid coding language.".formatted(languageName));
     }
 
     public @NotNull JComponent getActionToolbarComponent(CodeMarkdownBlock codeBlock) {
         var actionGroup = new DefaultActionGroup();
 
-        actionGroup.add(new AnAction("Merge...", "Merge selected changes", AllIcons.Vcs.Merge) {
-            @Override
-            public void actionPerformed(@NotNull AnActionEvent e) {
-                Project project = e.getProject();
-                if (project != null) {
-                    CodeGenerationService.showDiff(
-                            project,
-                            codeBlock.getFullText(),
-                            Objects.requireNonNull(
-                                    FileEditorManager.getInstance(project)
-                                            .getSelectedTextEditor()
-                            )
-                    );
-                }
-            }
-        });
+        actionGroup.add(
+                new AnAction("Merge...", "Merge selected changes", AllIcons.Vcs.Merge) {
+                    @Override
+                    public void actionPerformed(@NotNull AnActionEvent e) {
+                        Project project = e.getProject();
+                        if (project != null) {
+                            CodeGenerationService.showDiff(
+                                    project,
+                                    codeBlock.getFullText(),
+                                    Objects.requireNonNull(
+                                            FileEditorManager.getInstance(project)
+                                                    .getSelectedTextEditor()));
+                        }
+                    }
+                });
 
-        var actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
+        var actionToolbar =
+                ActionManager.getInstance()
+                        .createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
         actionToolbar.setMiniMode(false);
         return actionToolbar.getComponent();
     }
@@ -110,13 +108,14 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         } else {
 
             markdownBlocks.get(markdownBlocks.size() - 1).write(token);
-
         }
     }
 
     @Override
     public String getFullText() {
-        return markdownBlocks.stream().map(StreamWriter::getFullText).collect(Collectors.joining("\n"));
+        return markdownBlocks.stream()
+                .map(StreamWriter::getFullText)
+                .collect(Collectors.joining("\n"));
     }
 
     private void addCodeEditorPanel(FileType fileType) {
