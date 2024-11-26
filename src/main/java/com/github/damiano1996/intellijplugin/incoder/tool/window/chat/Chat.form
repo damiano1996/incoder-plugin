@@ -31,7 +31,9 @@
           </grid>
           <forms defaultalign-horz="false"/>
         </constraints>
-        <properties/>
+        <properties>
+          <margin top="2" left="0" bottom="2" right="6"/>
+        </properties>
       </component>
       <component id="528" class="javax.swing.JProgressBar" binding="generating" custom-create="true">
         <constraints>

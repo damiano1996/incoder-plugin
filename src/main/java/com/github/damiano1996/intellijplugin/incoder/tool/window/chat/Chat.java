@@ -46,6 +46,7 @@ public class Chat {
                             chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt));
             isGenerating(true);
 
+            log.debug("Classifying prompt");
             LanguageModelService.getInstance(project)
                     .classify(prompt)
                     .thenApply(
@@ -104,6 +105,16 @@ public class Chat {
                                                 .start();
                                     }
                                 }
+                            })
+                    .exceptionally(
+                            throwable -> {
+                                log.debug("Error while classifying the prompt.", throwable);
+                                isGenerating(false);
+                                chatBody.addMessage(
+                                        new ChatMessage(
+                                                ChatMessage.Author.AI,
+                                                "Error: %s".formatted(throwable.getMessage())));
+                                return null;
                             });
         }
     }
