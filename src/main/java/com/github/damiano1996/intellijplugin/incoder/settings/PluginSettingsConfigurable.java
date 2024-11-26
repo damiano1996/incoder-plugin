@@ -62,11 +62,11 @@ public final class PluginSettingsConfigurable implements Configurable {
 
         try {
             InCoderActivity.initServices(ProjectManager.getInstance().getDefaultProject());
+            Objects.requireNonNull(PluginSettings.getInstance().getState()).isPluginConfigured =
+                    true;
         } catch (LanguageModelException e) {
             throw new ConfigurationException(e.getMessage(), "Server Settings Error");
         }
-
-        Objects.requireNonNull(PluginSettings.getInstance().getState()).isPluginConfigured = true;
     }
 
     @Override
