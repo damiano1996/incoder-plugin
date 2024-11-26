@@ -1,21 +1,18 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown;
 
-import com.github.damiano1996.intellijplugin.incoder.generation.CodeGenerationService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.StreamWriter;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.TextMarkdownBlock;
-import com.intellij.icons.AllIcons;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.EditCodeAnAction;
 import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.swing.*;
 import lombok.Setter;
@@ -59,21 +56,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
     public @NotNull JComponent getActionToolbarComponent(CodeMarkdownBlock codeBlock) {
         var actionGroup = new DefaultActionGroup();
 
-        actionGroup.add(
-                new AnAction("Merge...", "Merge selected changes", AllIcons.Vcs.Merge) {
-                    @Override
-                    public void actionPerformed(@NotNull AnActionEvent e) {
-                        Project project = e.getProject();
-                        if (project != null) {
-                            CodeGenerationService.showDiff(
-                                    project,
-                                    codeBlock.getFullText(),
-                                    Objects.requireNonNull(
-                                            FileEditorManager.getInstance(project)
-                                                    .getSelectedTextEditor()));
-                        }
-                    }
-                });
+        actionGroup.add(new EditCodeAnAction(codeBlock));
 
         var actionToolbar =
                 ActionManager.getInstance()

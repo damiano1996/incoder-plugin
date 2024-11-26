@@ -27,10 +27,12 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.6")
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
 
-    implementation("dev.langchain4j:langchain4j:0.35.0")
-    implementation("dev.langchain4j:langchain4j-ollama:0.35.0")
-    implementation("dev.langchain4j:langchain4j-open-ai:0.35.0")
-    implementation("dev.langchain4j:langchain4j-anthropic:0.35.0")
+    implementation("dev.langchain4j:langchain4j:0.36.2")
+    // implementation("dev.langchain4j:langchain4j-easy-rag:0.36.2")
+
+    implementation("dev.langchain4j:langchain4j-ollama:0.36.2")
+    implementation("dev.langchain4j:langchain4j-open-ai:0.36.2")
+    implementation("dev.langchain4j:langchain4j-anthropic:0.36.2")
 }
 
 spotless {

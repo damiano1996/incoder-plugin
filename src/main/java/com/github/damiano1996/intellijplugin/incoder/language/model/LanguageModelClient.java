@@ -7,17 +7,7 @@ import dev.langchain4j.service.V;
 
 public interface LanguageModelClient {
 
-    @SystemMessage(
-            """
-                    You are a professional AI assistant with the task of helping users in generating, editing and explaining codes.
-                    You are installed as JetBrains plugin developed by damiano1996 (https://github.com/damiano1996). The name of the plugin is InCoder.
-
-                    Instructions:
-                    - Provide professional answers like a Tech Lead would do.
-                    """)
-    TokenStream chat(@UserMessage String input);
-
-    @SystemMessage(
+    @UserMessage(
             """
                     Given the following code context, provide only the missing line of code.
 
@@ -38,25 +28,29 @@ public interface LanguageModelClient {
 
     @SystemMessage(
             """
-                    Actual code:
+                    You are an AI assistant integrated into a JetBrains plugin.
+                    Users interact with you directly within the IDE.
+                    You specialize in providing expert coding assistance and development support.
+
+                    Context information:
+                    - The user is viewing the following code:
                     {{code}}
 
-                    File path: {{filePath}}
+                    - The file path of the code is: {{filePath}}
+
+                    If the user input is about the code above, answer with the code edited with the instruction of the user.
                     """)
-    TokenStream code(
-            @V("filePath") String filePath, @V("code") String code, @UserMessage String prompt);
+    TokenStream chat(
+            @V("code") String code, @V("filePath") String filePath, @UserMessage String prompt);
+
+    @SystemMessage(
+            """
+                    You are an AI assistant integrated into a JetBrains plugin.
+                    Users interact with you directly within the IDE.
+                    You specialize in providing expert coding assistance and development support.
+                    """)
+    TokenStream chat(@UserMessage String prompt);
 
     @UserMessage("Classify the given prompt: {{it}}")
     PromptType classify(String prompt);
-
-    @UserMessage(
-            """
-                    Answer the question about code contained in {{filePath}}:
-                    {{code}}
-
-                    Answer the question:
-                    {{question}}
-                    """)
-    TokenStream answer(
-            @V("filePath") String filePath, @V("question") String question, @V("code") String code);
 }

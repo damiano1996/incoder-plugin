@@ -4,12 +4,12 @@ import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageMode
 import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessage;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.output.Response;
-import java.util.Objects;
 import java.util.function.Consumer;
 import javax.swing.*;
 import lombok.Getter;
@@ -57,54 +57,22 @@ public class Chat {
                             })
                     .thenAccept(
                             promptType -> {
-                                switch (promptType) {
-                                    case EDIT -> {
-                                        var tokenConsumer =
-                                                new TokenConsumer(
-                                                        project, ChatMessage.Author.AI, chatBody);
+                                var tokenConsumer =
+                                        new TokenConsumer(project, ChatMessage.Author.AI, chatBody);
 
-                                        LanguageModelService.getInstance(project)
-                                                .edit(
-                                                        Objects.requireNonNull(
-                                                                FileEditorManager.getInstance(
-                                                                                project)
-                                                                        .getSelectedTextEditor()),
-                                                        prompt)
-                                                .onNext(tokenConsumer)
-                                                .onComplete(onTokenStreamComplete())
-                                                .onError(onTokenStreamError())
-                                                .start();
-                                    }
-                                    case CODE_QUESTION -> {
-                                        var tokenConsumer =
-                                                new TokenConsumer(
-                                                        project, ChatMessage.Author.AI, chatBody);
+                                Editor editor =
+                                        FileEditorManager.getInstance(project)
+                                                .getSelectedTextEditor();
 
-                                        LanguageModelService.getInstance(project)
-                                                .answer(
-                                                        Objects.requireNonNull(
-                                                                FileEditorManager.getInstance(
-                                                                                project)
-                                                                        .getSelectedTextEditor()),
-                                                        prompt)
-                                                .onNext(tokenConsumer)
-                                                .onComplete(onTokenStreamComplete())
-                                                .onError(onTokenStreamError())
-                                                .start();
-                                    }
-                                    default -> {
-                                        var tokenConsumer =
-                                                new TokenConsumer(
-                                                        project, ChatMessage.Author.AI, chatBody);
-
-                                        LanguageModelService.getInstance(project)
-                                                .chat(prompt)
-                                                .onNext(tokenConsumer)
-                                                .onComplete(onTokenStreamComplete())
-                                                .onError(onTokenStreamError())
-                                                .start();
-                                    }
-                                }
+                                (editor == null
+                                                ? LanguageModelService.getInstance(project)
+                                                        .chat(prompt)
+                                                : LanguageModelService.getInstance(project)
+                                                        .chat(editor, prompt))
+                                        .onNext(tokenConsumer)
+                                        .onComplete(onTokenStreamComplete())
+                                        .onError(onTokenStreamError())
+                                        .start();
                             })
                     .exceptionally(
                             throwable -> {

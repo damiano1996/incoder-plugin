@@ -41,7 +41,7 @@ public enum PromptType {
                 + " vulnerabilities, or best practices.""")
     ANALYZE("Analyze"),
 
-    @Description("General or unclassified prompt that does not fit into other categories.")
+    @Description("Generic, unknown or unclassified prompt that does not fit into other categories.")
     GENERAL("General");
 
     private final String displayName;

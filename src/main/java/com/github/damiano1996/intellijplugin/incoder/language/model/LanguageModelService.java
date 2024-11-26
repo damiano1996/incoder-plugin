@@ -78,23 +78,18 @@ public final class LanguageModelService {
         }
     }
 
-    public TokenStream chat(String input) {
-        return client.chat(input);
-    }
-
     @Contract("_ -> new")
     public @NotNull CompletableFuture<PromptType> classify(String prompt) {
         return CompletableFuture.supplyAsync(() -> client.classify(prompt));
     }
 
-    public TokenStream edit(@NonNull Editor editor, @NonNull String editDescription) {
-        return client.code(
-                editor.getVirtualFile().getPath(), editor.getDocument().getText(), editDescription);
+    public TokenStream chat(@NonNull Editor editor, @NonNull String editDescription) {
+        return client.chat(
+                editor.getDocument().getText(), editor.getVirtualFile().getPath(), editDescription);
     }
 
-    public TokenStream answer(@NonNull Editor editor, @NonNull String question) {
-        return client.answer(
-                editor.getVirtualFile().getPath(), question, editor.getDocument().getText());
+    public TokenStream chat(@NonNull String editDescription) {
+        return client.chat(editDescription);
     }
 
     private class RequestRunnable implements Runnable {
@@ -110,6 +105,7 @@ public final class LanguageModelService {
                     client.complete(
                                     codeCompletionContext.leftContext(),
                                     codeCompletionContext.rightContext())
+                            .onNext(s -> {})
                             .onComplete(
                                     aiMessageResponse -> {
                                         String completion =
@@ -128,6 +124,7 @@ public final class LanguageModelService {
                                             log.debug("Queue is not empty. Prediction is obsolete");
                                         }
                                     })
+                            .onError(throwable -> {})
                             .start();
                 }
             } catch (InterruptedException e) {
