@@ -88,8 +88,8 @@ public final class LanguageModelService {
     }
 
     public TokenStream edit(@NonNull Editor editor, @NonNull String editDescription) {
-        return client.editCode(
-                editor.getVirtualFile().getPath(), editDescription, editor.getDocument().getText());
+        return client.code(
+                editor.getVirtualFile().getPath(), editor.getDocument().getText(), editDescription);
     }
 
     public TokenStream answer(@NonNull Editor editor, @NonNull String question) {

@@ -31,5 +31,6 @@ public final class ServerSettings implements PersistentStateComponent<ServerSett
     @ToString
     public static class State {
         public ServerType modelType = ServerType.OLLAMA;
+
     }
 }

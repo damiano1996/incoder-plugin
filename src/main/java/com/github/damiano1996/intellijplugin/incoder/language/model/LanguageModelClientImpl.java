@@ -31,9 +31,9 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     }
 
     @Override
-    public TokenStream editCode(String filePath, String prompt, String actualCode) {
+    public TokenStream code(String filePath, String code, String prompt) {
         log.debug("Editing script");
-        return client.editCode(filePath, prompt, actualCode);
+        return client.code(filePath, code, prompt);
     }
 
     @Override

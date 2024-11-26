@@ -17,7 +17,7 @@ public interface LanguageModelClient {
                     """)
     TokenStream chat(@UserMessage String input);
 
-    @UserMessage(
+    @SystemMessage(
             """
                     Given the following code context, provide only the missing line of code.
 
@@ -36,27 +36,15 @@ public interface LanguageModelClient {
     TokenStream complete(
             @V("leftContext") String leftContext, @V("rightContext") String rightContext);
 
-    @UserMessage(
+    @SystemMessage(
             """
                     Actual code:
-                    {{actualCode}}
-
-                    Edit the actual code considering the following input:
-                    {{prompt}}
+                    {{code}}
 
                     File path: {{filePath}}
-
-                    Instructions:
-                    - Return only the edited code.
-                    - Keep the untouched code unaltered.
-                    - Keep the same coding language of the actual code.
-
-                    Edited code:
                     """)
-    TokenStream editCode(
-            @V("filePath") String filePath,
-            @V("prompt") String prompt,
-            @V("actualCode") String actualCode);
+    TokenStream code(
+            @V("filePath") String filePath, @V("code") String code, @UserMessage String prompt);
 
     @UserMessage("Classify the given prompt: {{it}}")
     PromptType classify(String prompt);

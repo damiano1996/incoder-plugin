@@ -18,7 +18,7 @@ public class HumanMessage implements MessageComponent {
     private JLabel promptTypeLabel;
 
     public void setPromptTypeLabel(@NotNull PromptType promptType) {
-        promptTypeLabel.setText(promptType.getName().toLowerCase());
+        promptTypeLabel.setText(promptType.getDisplayName());
         promptTypeLabel.setVisible(true);
     }
 

@@ -77,7 +77,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
 
         var actionToolbar =
                 ActionManager.getInstance()
-                        .createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
+                        .createActionToolbar("CodeBlockToolbar", actionGroup, true);
         actionToolbar.setMiniMode(false);
         return actionToolbar.getComponent();
     }
@@ -100,7 +100,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
             var language = getLanguage(token);
             log.info("Code block language: {}", language.getID());
 
-            var fileType = FileTypeManager.getInstance().getFileTypeByExtension(language.getID());
+            var fileType = FileTypeManager.getInstance().findFileTypeByLanguage(language);
 
             addCodeEditorPanel(fileType);
 
