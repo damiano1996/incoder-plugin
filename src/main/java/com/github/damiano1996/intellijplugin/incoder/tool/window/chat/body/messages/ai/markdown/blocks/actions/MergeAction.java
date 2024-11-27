@@ -9,21 +9,18 @@ import com.intellij.diff.merge.TextMergeRequest;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class MergeAction extends AnAction {
@@ -39,11 +36,14 @@ public class MergeAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
         var project = anActionEvent.getProject();
 
-        var editor = FileEditorManager.getInstance(Objects.requireNonNull(project))
-                .getSelectedTextEditor();
+        var editor =
+                FileEditorManager.getInstance(Objects.requireNonNull(project))
+                        .getSelectedTextEditor();
 
         if (editor == null) {
-            NotificationService.getInstance(project).notifyWarning("Unable to open a merge request when no file has been selected.");
+            NotificationService.getInstance(project)
+                    .notifyWarning(
+                            "Unable to open a merge request when no file has been selected.");
             return;
         }
 

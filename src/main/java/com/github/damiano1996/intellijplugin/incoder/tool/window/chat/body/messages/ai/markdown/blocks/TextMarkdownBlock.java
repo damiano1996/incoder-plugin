@@ -21,19 +21,26 @@ public class TextMarkdownBlock extends JEditorPane implements MarkdownBlock {
         setContentType("text/html");
         setOpaque(false);
         setBackground(new JBColor(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0)));
+
+        setDoubleBuffered(true);
     }
 
     @Override
     public void setText(String text) {
-        String html = renderer.render(parser.parse(text));
-        String styledHtml =
-                """
-                <html><head><style>
-                body { font-family: Arial, sans-serif; background: transparent; }
-                </style></head><body>%s</body></html>
-                """
-                        .formatted(html);
-        super.setText(styledHtml);
+        SwingUtilities.invokeLater(
+                () -> {
+                    String html = renderer.render(parser.parse(text));
+                    String styledHtml =
+                            """
+                    <html><head><style>
+                    body { font-family: Arial, sans-serif; background: transparent; }
+                    </style></head><body>%s</body></html>
+                    """
+                                    .formatted(html);
+                    super.setText(styledHtml);
+                    revalidate();
+                    repaint();
+                });
     }
 
     @Override

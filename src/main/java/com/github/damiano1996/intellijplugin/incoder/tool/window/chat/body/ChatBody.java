@@ -1,17 +1,12 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body;
 
-import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.AiMessage;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessage;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
-import lombok.NonNull;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
@@ -20,41 +15,45 @@ public class ChatBody {
     private JPanel messagesPanel;
     private JScrollPane scrollPane;
 
-    @Contract("_ -> new")
-    public static @NotNull MessageComponent getMessageComponent(
-            ChatMessage.@NonNull Author author) {
-        return switch (author) {
-            case AI -> new AiMessage();
-            case USER -> new HumanMessage();
-        };
-    }
-
-    public MessageComponent addMessage(@NotNull ChatMessage item) {
-        var messageComponent = getMessageComponent(item.author());
-        messageComponent.write(item.message());
-
+    public void addMessage(@NotNull MessageComponent messageComponent) {
         var messageMainPanel = messageComponent.getMainPanel();
         messagesPanel.add(messageMainPanel);
         messageMainPanel.setAlignmentY(Component.TOP_ALIGNMENT);
 
         updateUI();
-
-        return messageComponent;
     }
 
     public void updateUI() {
         messagesPanel.revalidate();
         messagesPanel.repaint();
-        scrollToBottom();
+        scrollToBottomSmoothly();
     }
 
-    public void scrollToBottom() {
+    private void scrollToBottom() {
         ApplicationManager.getApplication()
                 .invokeLater(
                         () -> {
                             JScrollBar vertical = scrollPane.getVerticalScrollBar();
                             vertical.setValue(vertical.getMaximum());
                         });
+    }
+
+    private void scrollToBottomSmoothly() {
+        JScrollBar vertical = scrollPane.getVerticalScrollBar();
+        if (vertical.getValue() + vertical.getVisibleAmount() >= vertical.getMaximum() - 20) {
+            Timer timer = new Timer(10, null);
+            timer.addActionListener(
+                    e -> {
+                        int currentValue = vertical.getValue();
+                        int targetValue = vertical.getMaximum() - vertical.getVisibleAmount();
+                        if (currentValue < targetValue) {
+                            vertical.setValue(Math.min(currentValue + 10, targetValue));
+                        } else {
+                            timer.stop();
+                        }
+                    });
+            timer.start();
+        }
     }
 
     private void createUIComponents() {

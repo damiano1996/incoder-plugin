@@ -8,9 +8,7 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import dev.langchain4j.service.TokenStream;
-
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -88,7 +86,10 @@ public final class LanguageModelService {
 
     public TokenStream chat(@NonNull Editor editor, @NonNull String editDescription) {
         return client.chat(
-                editor.getDocument().getText(), editor.getVirtualFile().getPath(), project.getBasePath(), editDescription);
+                editor.getDocument().getText(),
+                editor.getVirtualFile().getPath(),
+                project.getBasePath(),
+                editDescription);
     }
 
     public TokenStream chat(@NonNull String editDescription) {
@@ -96,7 +97,8 @@ public final class LanguageModelService {
     }
 
     public String createFilePath(String fileContent) {
-        String folderTreeStructure = FolderTree.getFolderPaths(Path.of(Objects.requireNonNull(project.getBasePath())));
+        String folderTreeStructure =
+                FolderTree.getFolderPaths(Path.of(Objects.requireNonNull(project.getBasePath())));
         log.debug("Folder tree structure:\n{}", folderTreeStructure);
         return client.createFilePath(fileContent, folderTreeStructure);
     }
@@ -111,30 +113,34 @@ public final class LanguageModelService {
                     CodeCompletionContext codeCompletionContext = queue.take();
 
                     // todo: improve it exploiting streaming
-//                    client.complete(
-//                                    codeCompletionContext.leftContext(),
-//                                    codeCompletionContext.rightContext())
-//                            .onNext(s -> {})
-//                            .onComplete(
-//                                    aiMessageResponse -> {
-//                                        String completion =
-//                                                aiMessageResponse
-//                                                        .content()
-//                                                        .text()
-//                                                        .split("\n")[0]
-//                                                        .trim();
-//
-//                                        if (queue.isEmpty()) {
-//                                            log.debug(
-//                                                    "Queue is empty, therefore this prediction is"
-//                                                            + " still useful");
-//                                            LanguageModelService.this.notify(completion);
-//                                        } else {
-//                                            log.debug("Queue is not empty. Prediction is obsolete");
-//                                        }
-//                                    })
-//                            .onError(throwable -> {})
-//                            .start();
+                    //                    client.complete(
+                    //                                    codeCompletionContext.leftContext(),
+                    //                                    codeCompletionContext.rightContext())
+                    //                            .onNext(s -> {})
+                    //                            .onComplete(
+                    //                                    aiMessageResponse -> {
+                    //                                        String completion =
+                    //                                                aiMessageResponse
+                    //                                                        .content()
+                    //                                                        .text()
+                    //                                                        .split("\n")[0]
+                    //                                                        .trim();
+                    //
+                    //                                        if (queue.isEmpty()) {
+                    //                                            log.debug(
+                    //                                                    "Queue is empty, therefore
+                    // this prediction is"
+                    //                                                            + " still
+                    // useful");
+                    //
+                    // LanguageModelService.this.notify(completion);
+                    //                                        } else {
+                    //                                            log.debug("Queue is not empty.
+                    // Prediction is obsolete");
+                    //                                        }
+                    //                                    })
+                    //                            .onError(throwable -> {})
+                    //                            .start();
                 }
             } catch (InterruptedException e) {
                 log.error("Error while processing queued request.", e);

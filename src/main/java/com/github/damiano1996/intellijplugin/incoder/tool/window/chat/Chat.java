@@ -1,15 +1,17 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat;
 
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.ChatMessage;
+import com.github.damiano1996.intellijplugin.incoder.notification.NotificationService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessage;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessageComponent;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.output.Response;
+import dev.langchain4j.service.TokenStream;
 import java.util.function.Consumer;
 import javax.swing.*;
 import lombok.Getter;
@@ -41,9 +43,9 @@ public class Chat {
             log.debug("Prompt: {}", prompt);
             this.prompt.setText("");
 
-            HumanMessage userMessageComponent =
-                    (HumanMessage)
-                            chatBody.addMessage(new ChatMessage(ChatMessage.Author.USER, prompt));
+            HumanMessageComponent humanMessageComponent = new HumanMessageComponent(prompt);
+            chatBody.addMessage(humanMessageComponent);
+
             isGenerating(true);
 
             log.debug("Classifying prompt");
@@ -52,24 +54,23 @@ public class Chat {
                     .thenApply(
                             promptType -> {
                                 log.debug("Prompt classified as: {}", promptType);
-                                userMessageComponent.setPromptTypeLabel(promptType);
+                                humanMessageComponent.setPromptTypeLabel(promptType);
                                 return promptType;
                             })
                     .thenAccept(
                             promptType -> {
-                                var tokenConsumer =
-                                        new TokenConsumer(project, ChatMessage.Author.AI, chatBody);
-
+                                var aiMessage = new AiMessageComponent(project);
+                                chatBody.addMessage(aiMessage);
                                 Editor editor =
                                         FileEditorManager.getInstance(project)
                                                 .getSelectedTextEditor();
 
-                                (editor == null
-                                                ? LanguageModelService.getInstance(project)
-                                                        .chat(prompt)
-                                                : LanguageModelService.getInstance(project)
-                                                        .chat(editor, prompt))
-                                        .onNext(tokenConsumer)
+                                getChatTokenStreamer(project, prompt, editor)
+                                        .onNext(
+                                                token -> {
+                                                    aiMessage.write(token);
+                                                    chatBody.updateUI();
+                                                })
                                         .onComplete(onTokenStreamComplete())
                                         .onError(onTokenStreamError())
                                         .start();
@@ -78,13 +79,18 @@ public class Chat {
                             throwable -> {
                                 log.debug("Error while classifying the prompt.", throwable);
                                 isGenerating(false);
-                                chatBody.addMessage(
-                                        new ChatMessage(
-                                                ChatMessage.Author.AI,
-                                                "Error: %s".formatted(throwable.getMessage())));
+                                NotificationService.getInstance(project)
+                                        .notifyError("Error: %s".formatted(throwable.getMessage()));
                                 return null;
                             });
         }
+    }
+
+    private static TokenStream getChatTokenStreamer(
+            Project project, @NotNull String prompt, Editor editor) {
+        return editor == null
+                ? LanguageModelService.getInstance(project).chat(prompt)
+                : LanguageModelService.getInstance(project).chat(editor, prompt);
     }
 
     private @NotNull Consumer<Throwable> onTokenStreamError() {

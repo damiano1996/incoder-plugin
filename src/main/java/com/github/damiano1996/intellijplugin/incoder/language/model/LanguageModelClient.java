@@ -38,10 +38,12 @@ public interface LanguageModelClient {
                     - Project base path: {{projectBasePath}}
 
                     If the user input pertains to the provided code, respond with the code edited according to the user's instructions.
-                    """
-    )
+                    """)
     TokenStream chat(
-            @V("code") String code, @V("filePath") String filePath, @V("projectBasePath") String projectBasePath, @UserMessage String prompt);
+            @V("code") String code,
+            @V("filePath") String filePath,
+            @V("projectBasePath") String projectBasePath,
+            @UserMessage String prompt);
 
     @SystemMessage(
             """
@@ -59,13 +61,13 @@ public interface LanguageModelClient {
             """
                     Define a file path based on the file content:
                     {{fileContent}}
-                    
+
                     Context:
                     - Project folder tree:
                     {{projectFolderTree}}
-                    
+
                     Return only the absolute file path. Nothing else.
-                    """
-    )
-    String createFilePath(@V("fileContent") String fileContent, @V("projectFolderTree") String projectFolderTree);
+                    """)
+    String createFilePath(
+            @V("fileContent") String fileContent, @V("projectFolderTree") String projectFolderTree);
 }

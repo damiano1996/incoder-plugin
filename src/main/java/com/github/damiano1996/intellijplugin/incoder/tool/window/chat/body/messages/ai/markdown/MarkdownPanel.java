@@ -12,28 +12,27 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 public class MarkdownPanel extends JPanel implements StreamWriter {
 
     public static final String MARKDOWN_CODE_BLOCK_DELIMITER = "```";
 
+    private final Project project;
     private final List<MarkdownBlock> markdownBlocks;
 
-    @Setter @Nullable private Project project;
     private boolean isWritingACodeBlock = false;
     private boolean nextIsLanguage = false;
 
-    public MarkdownPanel() {
+    public MarkdownPanel(Project project) {
+        this.project = project;
+
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setFocusable(false);
 
@@ -57,6 +56,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
 
     public @NotNull JComponent getActionToolbarComponent(CodeMarkdownBlock codeBlock) {
         var actionGroup = new DefaultActionGroup("Coding Group", true);
+        actionGroup.displayTextInToolbar();
 
         actionGroup.add(new MergeAction(codeBlock));
         actionGroup.add(new CreateCodeAction(codeBlock));
@@ -70,8 +70,6 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
 
     @Override
     public void write(@NotNull String token) {
-        if (project == null) return;
-
         if (token.startsWith(MARKDOWN_CODE_BLOCK_DELIMITER)) {
             nextIsLanguage = !isWritingACodeBlock;
 
