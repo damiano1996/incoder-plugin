@@ -31,20 +31,26 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     }
 
     @Override
-    public TokenStream chat(String code, String filePath, String prompt) {
+    public TokenStream chat(String code, String filePath, String projectBasePath, String prompt) {
         log.debug("Chatting about codes...");
-        return client.chat(code, filePath, prompt);
+        return client.chat(code, filePath, projectBasePath, prompt);
     }
 
     @Override
-    public TokenStream chat(String prompt) {
+    public TokenStream chat(String projectBasePath, String prompt) {
         log.debug("Chatting...");
-        return client.chat(prompt);
+        return client.chat(projectBasePath, prompt);
     }
 
     @Override
     public PromptType classify(String prompt) {
         log.debug("Classifying prompt: {}...", prompt);
         return client.classify(prompt);
+    }
+
+    @Override
+    public String createFilePath(String fileContent, String projectFolderTree) {
+        log.debug("Defining file path");
+        return client.createFilePath(fileContent, projectFolderTree).trim();
     }
 }

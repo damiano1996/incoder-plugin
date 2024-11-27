@@ -20,7 +20,7 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
     @Override
     public LanguageModelClient createClient() throws LanguageModelException {
         try {
-            ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
+            ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(2);
 
             return new LanguageModelClientImpl(
                     createChatLanguageModel(), createStreamingChatLanguageModel(), chatMemory);

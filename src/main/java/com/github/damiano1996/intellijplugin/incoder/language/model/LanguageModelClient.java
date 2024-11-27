@@ -28,29 +28,44 @@ public interface LanguageModelClient {
 
     @SystemMessage(
             """
-                    You are an AI assistant integrated into a JetBrains plugin.
-                    Users interact with you directly within the IDE.
-                    You specialize in providing expert coding assistance and development support.
+                    You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
 
-                    Context information:
-                    - The user is viewing the following code:
-                    {{code}}
+                    Context:
+                    - Current code being viewed by the user:
+                      {{code}}
 
-                    - The file path of the code is: {{filePath}}
+                    - File path: {{filePath}}
+                    - Project base path: {{projectBasePath}}
 
-                    If the user input is about the code above, answer with the code edited with the instruction of the user.
-                    """)
+                    If the user input pertains to the provided code, respond with the code edited according to the user's instructions.
+                    """
+    )
     TokenStream chat(
-            @V("code") String code, @V("filePath") String filePath, @UserMessage String prompt);
+            @V("code") String code, @V("filePath") String filePath, @V("projectBasePath") String projectBasePath, @UserMessage String prompt);
 
     @SystemMessage(
             """
-                    You are an AI assistant integrated into a JetBrains plugin.
-                    Users interact with you directly within the IDE.
-                    You specialize in providing expert coding assistance and development support.
+                    You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
+
+                    Context:
+                    - Project base path: {{projectBasePath}}
                     """)
-    TokenStream chat(@UserMessage String prompt);
+    TokenStream chat(@V("projectBasePath") String projectBasePath, @UserMessage String prompt);
 
     @UserMessage("Classify the given prompt: {{it}}")
     PromptType classify(String prompt);
+
+    @UserMessage(
+            """
+                    Define a file path based on the file content:
+                    {{fileContent}}
+                    
+                    Context:
+                    - Project folder tree:
+                    {{projectFolderTree}}
+                    
+                    Return only the absolute file path. Nothing else.
+                    """
+    )
+    String createFilePath(@V("fileContent") String fileContent, @V("projectFolderTree") String projectFolderTree);
 }

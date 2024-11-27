@@ -4,7 +4,8 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messa
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.TextMarkdownBlock;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.EditCodeAnAction;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.CreateCodeAction;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.MergeAction;
 import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
@@ -12,6 +13,7 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
@@ -35,7 +37,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setFocusable(false);
 
-        markdownBlocks = new ArrayList<>();
+        markdownBlocks = new LinkedList<>();
 
         addMarkdownEditorPane();
     }
@@ -49,14 +51,15 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
             }
         }
 
-        throw new IllegalArgumentException(
-                "'%s' is not a valid coding language.".formatted(languageName));
+        log.debug("Unable to infer the language from the language name");
+        return Language.ANY;
     }
 
     public @NotNull JComponent getActionToolbarComponent(CodeMarkdownBlock codeBlock) {
-        var actionGroup = new DefaultActionGroup();
+        var actionGroup = new DefaultActionGroup("Coding Group", true);
 
-        actionGroup.add(new EditCodeAnAction(codeBlock));
+        actionGroup.add(new MergeAction(codeBlock));
+        actionGroup.add(new CreateCodeAction(codeBlock));
 
         var actionToolbar =
                 ActionManager.getInstance()
@@ -103,7 +106,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
 
     private void addCodeEditorPanel(FileType fileType) {
         ApplicationManager.getApplication()
-                .invokeLater(
+                .invokeAndWait(
                         () -> {
                             var codeMarkdownBlock = new CodeMarkdownBlock(project, fileType, "");
                             addMarkdownBlock(codeMarkdownBlock);
@@ -114,7 +117,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
 
     private void addMarkdownEditorPane() {
         ApplicationManager.getApplication()
-                .invokeLater(
+                .invokeAndWait(
                         () -> {
                             var textMarkdownBlock = new TextMarkdownBlock();
                             addMarkdownBlock(textMarkdownBlock);
