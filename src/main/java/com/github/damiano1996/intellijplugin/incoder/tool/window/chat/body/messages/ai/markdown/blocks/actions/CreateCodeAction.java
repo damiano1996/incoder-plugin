@@ -1,11 +1,15 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions;
 
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
+import com.github.damiano1996.intellijplugin.incoder.notification.NotificationService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -34,20 +38,42 @@ public class CreateCodeAction extends AnAction {
         var project = anActionEvent.getProject();
         if (project == null) return;
 
-        var filePath =
-                Path.of(
+        try {
+            var selectedFolderPath = Path.of(chooseFolder(project).getPath());
+
+            Path filePath;
+
+            if (Files.isDirectory(selectedFolderPath)) {
+                var fileName =
                         LanguageModelService.getInstance(project)
-                                .createFilePath(codeBlock.getFullText()));
-        log.debug("Generated file path: {}", filePath);
+                                .createFileName(codeBlock.getFullText());
+                filePath = selectedFolderPath.resolve(fileName);
+            } else {
+                filePath = selectedFolderPath;
+            }
 
-        if (Files.exists(filePath)) {
-            log.debug("The file already exists. Going to propose a merge request");
-            new MergeAction(codeBlock).actionPerformed(anActionEvent);
-            return;
+            log.debug("Generated file path: {}", filePath);
+
+            if (Files.exists(filePath)) {
+                log.debug("The file already exists. Going to propose a merge request");
+                new MergeAction(codeBlock).actionPerformed(anActionEvent);
+                return;
+            }
+
+            log.debug("Going to create file with code block content");
+            createNewFile(project, filePath, codeBlock.getFullText());
+
+        } catch (Exception e) {
+            NotificationService.getInstance(project).notifyError(e.getMessage());
         }
+    }
 
-        log.debug("Going to create file with code block content");
-        createNewFile(project, filePath, codeBlock.getFullText());
+    private VirtualFile chooseFolder(@NotNull Project project) {
+        FileChooserDescriptor descriptor =
+                FileChooserDescriptorFactory.createSingleFolderDescriptor();
+        descriptor.setTitle("Select a Folder to Save Your File");
+        VirtualFile projectBaseDir = project.getBaseDir();
+        return FileChooser.chooseFile(descriptor, project, projectBaseDir);
     }
 
     private void createNewFile(Project project, Path filePath, String fileContent) {

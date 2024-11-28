@@ -1,5 +1,6 @@
-package com.github.damiano1996.intellijplugin.incoder.settings;
+package com.github.damiano1996.intellijplugin.incoder.language.model.server.settings;
 
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.ServerType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
@@ -12,24 +13,24 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @Service(Service.Level.APP)
 @State(
-        name = "PluginSettings",
+        name = "ServerSettings",
         storages = {@Storage("InCoderSettings.xml")})
-public final class PluginSettings implements PersistentStateComponent<PluginSettings.State> {
+public final class ServerSettings implements PersistentStateComponent<ServerSettings.State> {
 
     @NotNull private State state = new State();
 
-    public static PluginSettings getInstance() {
-        return ApplicationManager.getApplication().getService(PluginSettings.class);
+    public static ServerSettings getInstance() {
+        return ApplicationManager.getApplication().getService(ServerSettings.class);
     }
 
     @Override
-    public void loadState(@NotNull PluginSettings.State state) {
+    public void loadState(@NotNull State state) {
         this.state = state;
     }
 
     @ToString
     public static class State {
-        public boolean isFirstPluginRun = true;
-        public boolean isPluginConfigured = false;
+        public ServerType modelType = ServerType.OLLAMA;
+        public int chatMemoryMaxMessages = 10;
     }
 }

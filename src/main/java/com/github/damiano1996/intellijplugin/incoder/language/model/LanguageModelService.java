@@ -2,16 +2,17 @@ package com.github.damiano1996.intellijplugin.incoder.language.model;
 
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionListener;
-import com.github.damiano1996.intellijplugin.incoder.language.model.settings.ServerSettings;
+import com.github.damiano1996.intellijplugin.incoder.language.model.client.LanguageModelClient;
+import com.github.damiano1996.intellijplugin.incoder.language.model.client.prompt.PromptType;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.LanguageModelServer;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettings;
 import com.github.damiano1996.intellijplugin.incoder.notification.NotificationService;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import dev.langchain4j.service.TokenStream;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -30,6 +31,7 @@ public final class LanguageModelService {
 
     private final BlockingQueue<CodeCompletionContext> queue = new ArrayBlockingQueue<>(1);
 
+    private LanguageModelServer server;
     private LanguageModelClient client;
 
     public LanguageModelService(Project project) {
@@ -41,8 +43,9 @@ public final class LanguageModelService {
     }
 
     public void init() throws LanguageModelException {
-        LanguageModelServer server =
-                Objects.requireNonNull(ServerSettings.getInstance().getState())
+        server =
+                ServerSettings.getInstance()
+                        .getState()
                         .modelType
                         .getServerAbstractFactory()
                         .createServer();
@@ -79,6 +82,10 @@ public final class LanguageModelService {
         }
     }
 
+    public String getSelectedModelName() {
+        return server.getSelectedModelName();
+    }
+
     @Contract("_ -> new")
     public @NotNull CompletableFuture<PromptType> classify(String prompt) {
         return CompletableFuture.supplyAsync(() -> client.classify(prompt));
@@ -96,11 +103,8 @@ public final class LanguageModelService {
         return client.chat(project.getBasePath(), editDescription);
     }
 
-    public String createFilePath(String fileContent) {
-        String folderTreeStructure =
-                FolderTree.getFolderPaths(Path.of(Objects.requireNonNull(project.getBasePath())));
-        log.debug("Folder tree structure:\n{}", folderTreeStructure);
-        return client.createFilePath(fileContent, folderTreeStructure);
+    public String createFileName(String fileContent) {
+        return client.createFileName(fileContent);
     }
 
     private class RequestRunnable implements Runnable {

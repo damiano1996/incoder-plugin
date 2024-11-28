@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.settings;
+package com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -12,24 +12,26 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @Service(Service.Level.APP)
 @State(
-        name = "PluginSettings",
+        name = "OpenAiSettings",
         storages = {@Storage("InCoderSettings.xml")})
-public final class PluginSettings implements PersistentStateComponent<PluginSettings.State> {
+public final class OpenAiSettings implements PersistentStateComponent<OpenAiSettings.State> {
 
-    @NotNull private State state = new State();
+    private State state = new State();
 
-    public static PluginSettings getInstance() {
-        return ApplicationManager.getApplication().getService(PluginSettings.class);
+    public static OpenAiSettings getInstance() {
+        return ApplicationManager.getApplication().getService(OpenAiSettings.class);
     }
 
     @Override
-    public void loadState(@NotNull PluginSettings.State state) {
+    public void loadState(@NotNull State state) {
         this.state = state;
     }
 
     @ToString
     public static class State {
-        public boolean isFirstPluginRun = true;
-        public boolean isPluginConfigured = false;
+
+        public String apiKey = "";
+        public String modelName = "";
+        public Double temperature = 0.2;
     }
 }

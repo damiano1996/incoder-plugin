@@ -1,6 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.PromptType;
+import com.github.damiano1996.intellijplugin.incoder.language.model.client.prompt.PromptType;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedLabel;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedTextArea;

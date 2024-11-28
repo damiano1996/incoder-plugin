@@ -60,7 +60,9 @@ public class Chat {
                     .thenAccept(
                             promptType -> {
                                 var aiMessage = new AiMessageComponent(project);
+                                aiMessage.setModelName(LanguageModelService.getInstance(project).getSelectedModelName().toLowerCase());
                                 chatBody.addMessage(aiMessage);
+
                                 Editor editor =
                                         FileEditorManager.getInstance(project)
                                                 .getSelectedTextEditor();
@@ -118,7 +120,7 @@ public class Chat {
         mainPanel = new JPanel();
         mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
 
-        prompt = new PlaceholderTextField("Enter the prompt...");
+        prompt = new PlaceholderTextField("Enter a prompt...");
         generating = new JProgressBar();
         isGenerating(false);
     }

@@ -2,7 +2,7 @@ package com.github.damiano1996.intellijplugin.incoder.settings;
 
 import com.github.damiano1996.intellijplugin.incoder.InCoderActivity;
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.intellijplugin.incoder.language.model.settings.ServerSettingsConfigurable;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettingsConfigurable;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.UnnamedConfigurable;
@@ -62,8 +62,7 @@ public final class PluginSettingsConfigurable implements Configurable {
 
         try {
             InCoderActivity.initServices(ProjectManager.getInstance().getDefaultProject());
-            Objects.requireNonNull(PluginSettings.getInstance().getState()).isPluginConfigured =
-                    true;
+            PluginSettings.getInstance().getState().isPluginConfigured = true;
         } catch (LanguageModelException e) {
             throw new ConfigurationException(e.getMessage(), "Server Settings Error");
         }

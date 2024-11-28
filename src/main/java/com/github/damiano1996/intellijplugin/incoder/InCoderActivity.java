@@ -8,7 +8,6 @@ import com.github.damiano1996.intellijplugin.incoder.settings.PluginSettings;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
 import java.awt.*;
-import java.util.Objects;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,7 @@ public class InCoderActivity implements ProjectActivity {
 
     private static void configureBeforeInitServices(@NotNull Project project)
             throws LanguageModelException {
-        if (Objects.requireNonNull(PluginSettings.getInstance().getState()).isPluginConfigured) {
+        if (PluginSettings.getInstance().getState().isPluginConfigured) {
             initServices(project);
         } else {
             NotificationService.getInstance(project).notifyFirstConfiguration();
@@ -27,7 +26,7 @@ public class InCoderActivity implements ProjectActivity {
     }
 
     private static void notifyWelcomeMessage(@NotNull Project project) {
-        if (Objects.requireNonNull(PluginSettings.getInstance().getState()).isFirstPluginRun) {
+        if (PluginSettings.getInstance().getState().isFirstPluginRun) {
             NotificationService.getInstance(project).notifyWelcome();
             PluginSettings.getInstance().getState().isFirstPluginRun = false;
         }
