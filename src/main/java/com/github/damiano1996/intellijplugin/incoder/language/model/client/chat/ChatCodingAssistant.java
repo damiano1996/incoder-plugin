@@ -9,8 +9,6 @@ public interface ChatCodingAssistant {
 
     @SystemMessage(
             """
-                    You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
-
                     Context:
                     - Current code being viewed by the user:
                       {{code}}
@@ -18,9 +16,11 @@ public interface ChatCodingAssistant {
                     - File path: {{filePath}}
                     - Project base path: {{projectBasePath}}
 
-                    If the user input pertains to the provided code, respond with the code edited according to the user's instructions.
+                    Instructions:
+                    {{instructions}}
                     """)
     TokenStream chat(
+            @V("instructions") String instructions,
             @V("code") String code,
             @V("filePath") String filePath,
             @V("projectBasePath") String projectBasePath,
@@ -28,10 +28,12 @@ public interface ChatCodingAssistant {
 
     @SystemMessage(
             """
-                    You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
-
                     Context:
                     - Project base path: {{projectBasePath}}
+
+                    Instructions:
+                    {{instructions}}
                     """)
-    TokenStream chat(@V("projectBasePath") String projectBasePath, @UserMessage String prompt);
+    TokenStream chat(@V("instructions") String instructions,
+                     @V("projectBasePath") String projectBasePath, @UserMessage String prompt);
 }

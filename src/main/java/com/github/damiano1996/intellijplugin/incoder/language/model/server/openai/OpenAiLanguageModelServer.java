@@ -3,13 +3,11 @@ package com.github.damiano1996.intellijplugin.incoder.language.model.server.open
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiSettings;
-import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiLanguageModelName;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,12 +36,8 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public List<String> getAvailableModels() throws LanguageModelException {
-        try {
+    public List<String> getAvailableModels() {
             return Arrays.stream(OpenAiLanguageModelName.values()).map(Enum::name).toList();
-        } catch (Exception e) {
-            throw new LanguageModelException(e);
-        }
     }
 
     @Override

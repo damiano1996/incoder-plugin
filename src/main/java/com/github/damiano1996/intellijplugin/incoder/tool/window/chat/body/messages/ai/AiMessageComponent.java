@@ -2,7 +2,6 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 
 import static com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedLabel;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
@@ -25,7 +24,7 @@ public class AiMessageComponent implements MessageComponent {
         this.project = project;
     }
 
-    public void setModelName(String modelName){
+    public void setModelName(String modelName) {
         modelNameLabel.setText(modelName);
         modelNameLabel.setVisible(true);
     }

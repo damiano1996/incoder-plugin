@@ -3,6 +3,7 @@ package com.github.damiano1996.intellijplugin.incoder.language.model;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionListener;
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.LanguageModelClient;
+import com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.prompt.PromptType;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.LanguageModelServer;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettings;
@@ -47,7 +48,7 @@ public final class LanguageModelService {
                 ServerSettings.getInstance()
                         .getState()
                         .modelType
-                        .getServerAbstractFactory()
+                        .getServerFactory()
                         .createServer();
 
         log.debug("Initializing the client");
@@ -93,6 +94,7 @@ public final class LanguageModelService {
 
     public TokenStream chat(@NonNull Editor editor, @NonNull String editDescription) {
         return client.chat(
+                ChatSettings.getInstance().getState().systemMessageInstructionsWithCode,
                 editor.getDocument().getText(),
                 editor.getVirtualFile().getPath(),
                 project.getBasePath(),
@@ -100,7 +102,7 @@ public final class LanguageModelService {
     }
 
     public TokenStream chat(@NonNull String editDescription) {
-        return client.chat(project.getBasePath(), editDescription);
+        return client.chat(ChatSettings.getInstance().getState().systemMessageInstructions, project.getBasePath(), editDescription);
     }
 
     public String createFileName(String fileContent) {

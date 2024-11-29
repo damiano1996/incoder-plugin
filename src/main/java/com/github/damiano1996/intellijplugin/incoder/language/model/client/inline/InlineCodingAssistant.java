@@ -16,12 +16,10 @@ public interface InlineCodingAssistant {
                     Right context:
                     {{rightContext}}
 
-                    What is the single line of missing code between these contexts?
-                    Respond only with the necessary code to complete the line.
-                    Do not include markdown, comments, or additional explanations.
-                    If the line is partially written, complete it up to the first newline.
-                    If the line is already at the end, return an empty response.
+                    Instructions:
+                    {{instructions}}
                     """)
     TokenStream complete(
+            @V("instructions") String instructions,
             @V("leftContext") String leftContext, @V("rightContext") String rightContext);
 }

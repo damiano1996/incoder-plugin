@@ -1,6 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.server.ServerType;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.LanguageModelServerType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
@@ -30,7 +30,7 @@ public final class ServerSettings implements PersistentStateComponent<ServerSett
 
     @ToString
     public static class State {
-        public ServerType modelType = ServerType.OLLAMA;
+        public LanguageModelServerType modelType = LanguageModelServerType.OLLAMA;
         public int chatMemoryMaxMessages = 10;
     }
 }

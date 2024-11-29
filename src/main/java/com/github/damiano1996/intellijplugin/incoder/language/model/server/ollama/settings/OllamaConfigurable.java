@@ -1,15 +1,14 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.server.ServerType;
-import com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerComponent;
-import com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerConfigurable;
 import javax.swing.*;
+
+import com.intellij.openapi.options.Configurable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class OllamaConfigurable implements ServerConfigurable {
+public final class OllamaConfigurable implements Configurable {
 
     private OllamaComponent settingsComponent = new OllamaComponent();
 
@@ -21,7 +20,7 @@ public final class OllamaConfigurable implements ServerConfigurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public @NotNull String getDisplayName() {
-        return getServerType().getDisplayName();
+        return "Ollama Settings";
     }
 
     @Override
@@ -67,13 +66,4 @@ public final class OllamaConfigurable implements ServerConfigurable {
         settingsComponent = null;
     }
 
-    @Override
-    public ServerType getServerType() {
-        return ServerType.OLLAMA;
-    }
-
-    @Override
-    public ServerComponent getComponent() {
-        return settingsComponent;
-    }
 }

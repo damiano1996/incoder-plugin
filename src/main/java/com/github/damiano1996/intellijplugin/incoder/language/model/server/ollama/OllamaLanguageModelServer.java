@@ -6,7 +6,6 @@ import com.github.damiano1996.intellijplugin.incoder.language.model.server.ollam
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.ollama.*;
-
 import java.util.List;
 
 public class OllamaLanguageModelServer extends BaseLanguageModelServer {
@@ -34,12 +33,16 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public List<String> getAvailableModels() throws LanguageModelException {
-        try {
-            return OllamaModels.builder().baseUrl(getState().baseUrl).build().availableModels().content().stream().map(OllamaModel::getModel).toList();
-        } catch (Exception e) {
-            throw new LanguageModelException(e);
-        }
+    public List<String> getAvailableModels() {
+            return OllamaModels.builder()
+                    .baseUrl(getState().baseUrl)
+                    .build()
+                    .availableModels()
+                    .content()
+                    .stream()
+                    .map(OllamaModel::getModel)
+                    .toList();
+
     }
 
     @Override

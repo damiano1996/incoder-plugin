@@ -52,21 +52,21 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     }
 
     @Override
-    public TokenStream complete(String leftContext, String rightContext) {
+    public TokenStream complete(String instructions, String leftContext, String rightContext) {
         log.debug("Completing code...");
-        return inlineCodingAssistant.complete(leftContext, rightContext);
+        return inlineCodingAssistant.complete(instructions, leftContext, rightContext);
     }
 
     @Override
-    public TokenStream chat(String code, String filePath, String projectBasePath, String prompt) {
+    public TokenStream chat(String instructions, String code, String filePath, String projectBasePath, String prompt) {
         log.debug("Chatting about codes...");
-        return chatCodingAssistant.chat(code, filePath, projectBasePath, prompt);
+        return chatCodingAssistant.chat(instructions, code, filePath, projectBasePath, prompt);
     }
 
     @Override
-    public TokenStream chat(String projectBasePath, String prompt) {
+    public TokenStream chat(String instructions, String projectBasePath, String prompt) {
         log.debug("Chatting...");
-        return chatCodingAssistant.chat(projectBasePath, prompt);
+        return chatCodingAssistant.chat(instructions, projectBasePath, prompt);
     }
 
     @Override

@@ -60,7 +60,10 @@ public class Chat {
                     .thenAccept(
                             promptType -> {
                                 var aiMessage = new AiMessageComponent(project);
-                                aiMessage.setModelName(LanguageModelService.getInstance(project).getSelectedModelName().toLowerCase());
+                                aiMessage.setModelName(
+                                        LanguageModelService.getInstance(project)
+                                                .getSelectedModelName()
+                                                .toLowerCase());
                                 chatBody.addMessage(aiMessage);
 
                                 Editor editor =

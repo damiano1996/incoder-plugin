@@ -8,9 +8,6 @@ import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.anthropic.AnthropicStreamingChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.ollama.OllamaModel;
-import dev.langchain4j.model.ollama.OllamaModels;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,12 +36,8 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public List<String> getAvailableModels() throws LanguageModelException {
-        try {
+    public List<String> getAvailableModels() {
             return Arrays.stream(AnthropicChatModelName.values()).map(Enum::name).toList();
-        } catch (Exception e) {
-            throw new LanguageModelException(e);
-        }
     }
 
     @Override
