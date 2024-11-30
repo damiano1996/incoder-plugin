@@ -7,41 +7,32 @@ import lombok.Getter;
 public enum PromptType {
     @Description(
             """
-                    The prompt describes how the user wants to edit the code.
-                    The user can ask to add, remove, refactor, or update code.""")
+            The user wants to modify the code by adding, removing, updating, or refactoring it.
+            """)
     EDIT("Edit"),
 
     @Description(
             """
-                    The user is asking about the code they are viewing, such as understanding logic, debugging,
-                    or seeking clarification.""")
-    CODE_QUESTION("Code Question"),
+            The user needs help understanding, debugging, or analyzing the logic of the code.
+            """)
+    EXPLAIN("Explain"),
 
     @Description(
             """
-                    The user seeks assistance in generating new code, such as"
-                + " creating templates, stubs, or new features.""")
+            The user requests to generate new code, including templates, stubs, or new features.
+            """)
     GENERATE("Generate"),
 
     @Description(
             """
-                    The user requests optimization or performance improvements for"
-                + " the existing code.""")
+            The user seeks performance improvements or optimization of the code.
+            """)
     OPTIMIZE("Optimize"),
 
     @Description(
             """
-                    The user wants documentation or comments to be added, updated,"
-                + " or clarified in the code.""")
-    DOCUMENTATION("Documentation"),
-
-    @Description(
-            """
-                    The user requests an analysis of the code for potential errors,"
-                + " vulnerabilities, or best practices.""")
-    ANALYZE("Analyze"),
-
-    @Description("Generic, unknown or unclassified prompt that does not fit into other categories.")
+            Generic or unclassified prompt that does not fit into other specific categories, such as chat questions.
+            """)
     GENERAL("General");
 
     private final String displayName;

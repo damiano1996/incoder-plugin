@@ -16,7 +16,7 @@
       <opaque value="true"/>
     </properties>
     <border type="empty">
-      <size top="10" left="10" bottom="10" right="10"/>
+      <size top="10" left="0" bottom="10" right="10"/>
     </border>
     <children>
       <scrollpane id="2628c" binding="scrollPane" custom-create="true">
@@ -49,24 +49,32 @@
       <component id="7ea76" class="javax.swing.JLabel" binding="modelNameLabel" custom-create="true">
         <constraints>
           <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <forms top="0" left="0" bottom="0" right="10" defaultalign-horz="false" defaultalign-vert="false"/>
         </constraints>
         <properties>
+          <background color="-10855846"/>
+          <foreground color="-1"/>
+          <horizontalAlignment value="0"/>
+          <horizontalTextPosition value="0"/>
           <opaque value="false"/>
           <text value="Model Name"/>
+          <visible value="true"/>
         </properties>
       </component>
       <component id="fddd2" class="javax.swing.JLabel" binding="aiIconLabel" custom-create="true">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
           <forms defaultalign-horz="false" defaultalign-vert="false"/>
         </constraints>
         <properties>
+          <alignmentX value="0.0"/>
           <background color="-1"/>
           <enabled value="true"/>
           <focusable value="false"/>
           <horizontalAlignment value="0"/>
           <horizontalTextPosition value="0"/>
+          <iconTextGap value="0"/>
+          <maximumSize width="0" height="0"/>
           <opaque value="false"/>
           <text value=""/>
           <verticalAlignment value="0"/>

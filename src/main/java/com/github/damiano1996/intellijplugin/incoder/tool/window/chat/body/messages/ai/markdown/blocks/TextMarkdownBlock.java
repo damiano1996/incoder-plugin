@@ -23,7 +23,7 @@ public class TextMarkdownBlock extends JEditorPane implements MarkdownBlock {
         setContentType("text/html");
         setOpaque(false);
         setBackground(new JBColor(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0)));
-
+        setForeground(JBColor.namedColor("Label.foreground"));
         setDoubleBuffered(true);
     }
 

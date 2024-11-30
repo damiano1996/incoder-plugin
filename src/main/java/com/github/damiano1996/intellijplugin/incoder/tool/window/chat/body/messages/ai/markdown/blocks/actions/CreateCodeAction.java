@@ -39,7 +39,10 @@ public class CreateCodeAction extends AnAction {
         if (project == null) return;
 
         try {
-            var selectedFolderPath = Path.of(chooseFolder(project).getPath());
+            var selectedFolder = chooseFolder(project);
+            if (selectedFolder == null) return;
+
+            var selectedFolderPath = Path.of(selectedFolder.getPath());
 
             Path filePath;
 

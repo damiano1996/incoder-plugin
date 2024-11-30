@@ -7,6 +7,7 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messa
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import javax.swing.*;
 import lombok.Getter;
@@ -47,7 +48,7 @@ public class AiMessageComponent implements MessageComponent {
 
         markdownPanel = new MarkdownPanel(project);
 
-        aiIconLabel = new RoundedLabel(PLUGIN_ICON, 60, 60);
+        aiIconLabel = new JBLabel(PLUGIN_ICON);
         aiIconLabel.setBackground(JBColor.namedColor("Label.background"));
         aiIconLabel.setForeground(JBColor.namedColor("Label.foreground"));
 
