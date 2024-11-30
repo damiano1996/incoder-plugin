@@ -31,12 +31,12 @@ public final class InlineSettings implements PersistentStateComponent<InlineSett
     public static class State {
         public boolean enable = true;
 
-        public String systemMessageInstructions = """
-                    - What is the single line of missing code between these contexts?
-                    - Respond only with the necessary code to complete the line.
-                    - Do not include markdown, comments, or additional explanations.
-                    - If the line is partially written, complete it up to the first newline.
-                    - If the line is already at the end, return an empty response.
-                    """;
+        public String systemMessageInstructions =
+                """
+                - Respond only with the necessary code to complete the line.
+                - Do not include any markdown, comments, or unnecessary tokens.
+                - If the line is partially written, complete it up to the first newline.
+                - If the line is already complete, return an empty response.
+                """;
     }
 }

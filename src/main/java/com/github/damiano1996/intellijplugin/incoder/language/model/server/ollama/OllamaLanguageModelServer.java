@@ -1,15 +1,13 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaSettings;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.ollama.*;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Collections;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OllamaLanguageModelServer extends BaseLanguageModelServer {

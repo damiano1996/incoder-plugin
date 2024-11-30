@@ -34,6 +34,8 @@ public interface ChatCodingAssistant {
                     Instructions:
                     {{instructions}}
                     """)
-    TokenStream chat(@V("instructions") String instructions,
-                     @V("projectBasePath") String projectBasePath, @UserMessage String prompt);
+    TokenStream chat(
+            @V("instructions") String instructions,
+            @V("projectBasePath") String projectBasePath,
+            @UserMessage String prompt);
 }

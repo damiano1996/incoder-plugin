@@ -5,13 +5,10 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
+import java.util.List;
 import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;
 
 @Slf4j
 @Getter
@@ -26,13 +23,20 @@ public class OllamaComponent {
         SpinnerNumberModel temperatureModel = new SpinnerNumberModel(0.5, 0.0, 1.0, 0.1);
         temperatureField = new JSpinner(temperatureModel);
 
-        modelNameField = new ComboBox<>(new OllamaLanguageModelServer().getAvailableModels().toArray(new String[0]));
+        modelNameField =
+                new ComboBox<>(
+                        new OllamaLanguageModelServer()
+                                .getAvailableModels()
+                                .toArray(new String[0]));
 
-        baseUrlField.addActionListener(e -> {
-            List<String> availableModels = new OllamaLanguageModelServer().getAvailableModels(baseUrlField.getText());
-            modelNameField.removeAllItems();
-            availableModels.forEach(modelNameField::addItem);
-        });
+        baseUrlField.addActionListener(
+                e -> {
+                    List<String> availableModels =
+                            new OllamaLanguageModelServer()
+                                    .getAvailableModels(baseUrlField.getText());
+                    modelNameField.removeAllItems();
+                    availableModels.forEach(modelNameField::addItem);
+                });
 
         mainPanel =
                 FormBuilder.createFormBuilder()

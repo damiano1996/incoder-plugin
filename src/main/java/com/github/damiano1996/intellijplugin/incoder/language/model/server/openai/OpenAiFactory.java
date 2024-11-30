@@ -15,5 +15,4 @@ public class OpenAiFactory implements ServerFactory {
     public LanguageModelServer createServer() {
         return new OpenAiLanguageModelServer();
     }
-
 }

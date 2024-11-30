@@ -3,7 +3,6 @@ package com.github.damiano1996.intellijplugin.incoder.completion.states.decision
 import com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionService;
 import com.github.damiano1996.intellijplugin.incoder.completion.states.BaseState;
 import com.github.damiano1996.intellijplugin.incoder.completion.states.idle.IdleState;
-import com.github.damiano1996.intellijplugin.incoder.completion.states.preview.PreviewState;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;

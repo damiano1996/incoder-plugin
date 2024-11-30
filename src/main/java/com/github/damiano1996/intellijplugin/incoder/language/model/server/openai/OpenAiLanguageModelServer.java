@@ -36,7 +36,7 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
 
     @Override
     public List<String> getAvailableModels() {
-            return Arrays.stream(OpenAiLanguageModelName.values()).map(Enum::name).toList();
+        return Arrays.stream(OpenAiLanguageModelName.values()).map(Enum::name).toList();
     }
 
     @Override

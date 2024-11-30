@@ -8,5 +8,4 @@ public interface ServerFactory {
     Configurable createConfigurable();
 
     LanguageModelServer createServer() throws LanguageModelException;
-
 }

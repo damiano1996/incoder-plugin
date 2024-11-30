@@ -9,10 +9,9 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.testFramework.LightVirtualFile;
+import javax.swing.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
 
 @Slf4j
 public class CodeMarkdownBlock implements MarkdownBlock {
@@ -46,7 +45,6 @@ public class CodeMarkdownBlock implements MarkdownBlock {
                                     .runWriteAction(
                                             () -> editor.getDocument().setText(updatedText));
                         });
-
     }
 
     @Override
@@ -55,7 +53,9 @@ public class CodeMarkdownBlock implements MarkdownBlock {
                 .invokeLater(
                         () -> {
                             String currentText = editor.getDocument().getText();
-                            String updatedText = currentText.substring(0, currentText.length()-lastWrittenToken.length());
+                            String updatedText =
+                                    currentText.substring(
+                                            0, currentText.length() - lastWrittenToken.length());
 
                             ApplicationManager.getApplication()
                                     .runWriteAction(

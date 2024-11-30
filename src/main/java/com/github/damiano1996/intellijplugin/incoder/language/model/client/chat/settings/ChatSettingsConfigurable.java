@@ -1,12 +1,11 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings;
 
 import com.intellij.openapi.options.Configurable;
+import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
 
 public final class ChatSettingsConfigurable implements Configurable {
 
@@ -42,9 +41,15 @@ public final class ChatSettingsConfigurable implements Configurable {
     public boolean isModified() {
         var state = getState();
 
-        return !chatSettingsComponent.getMaxMessages().getValue().equals(state.maxMessages) ||
-                !chatSettingsComponent.getSystemMessageInstructionsWithCodeField().getText().equals(state.systemMessageInstructionsWithCode)
-                || !chatSettingsComponent.getSystemMessageInstructionsField().getText().equals(state.systemMessageInstructions);
+        return !chatSettingsComponent.getMaxMessages().getValue().equals(state.maxMessages)
+                || !chatSettingsComponent
+                        .getSystemMessageInstructionsWithCodeField()
+                        .getText()
+                        .equals(state.systemMessageInstructionsWithCode)
+                || !chatSettingsComponent
+                        .getSystemMessageInstructionsField()
+                        .getText()
+                        .equals(state.systemMessageInstructions);
     }
 
     @Override
@@ -52,9 +57,10 @@ public final class ChatSettingsConfigurable implements Configurable {
         var state = getState();
 
         state.maxMessages = (int) chatSettingsComponent.getMaxMessages().getValue();
-        state.systemMessageInstructionsWithCode = chatSettingsComponent.getSystemMessageInstructionsWithCodeField().getText();
-        state.systemMessageInstructions = chatSettingsComponent.getSystemMessageInstructionsField().getText();
-
+        state.systemMessageInstructionsWithCode =
+                chatSettingsComponent.getSystemMessageInstructionsWithCodeField().getText();
+        state.systemMessageInstructions =
+                chatSettingsComponent.getSystemMessageInstructionsField().getText();
     }
 
     @Override
@@ -62,8 +68,12 @@ public final class ChatSettingsConfigurable implements Configurable {
         var state = getState();
 
         chatSettingsComponent.getMaxMessages().setValue(state.maxMessages);
-        chatSettingsComponent.getSystemMessageInstructionsWithCodeField().setText(state.systemMessageInstructionsWithCode);
-        chatSettingsComponent.getSystemMessageInstructionsField().setText(state.systemMessageInstructions);
+        chatSettingsComponent
+                .getSystemMessageInstructionsWithCodeField()
+                .setText(state.systemMessageInstructionsWithCode);
+        chatSettingsComponent
+                .getSystemMessageInstructionsField()
+                .setText(state.systemMessageInstructions);
     }
 
     @Override

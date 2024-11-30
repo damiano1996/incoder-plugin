@@ -4,7 +4,6 @@ import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageMode
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.LanguageModelClient;
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.LanguageModelClientImpl;
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettings;
-import com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettings;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;

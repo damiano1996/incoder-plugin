@@ -11,13 +11,12 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import java.util.LinkedList;
+import java.util.List;
+import javax.swing.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.util.LinkedList;
-import java.util.List;
 
 @Slf4j
 public class MarkdownPanel extends JPanel implements StreamWriter {

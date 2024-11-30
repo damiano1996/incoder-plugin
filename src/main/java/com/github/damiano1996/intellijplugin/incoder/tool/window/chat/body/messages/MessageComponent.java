@@ -1,8 +1,7 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages;
 
-import org.apache.commons.lang.NotImplementedException;
-
 import javax.swing.*;
+import org.apache.commons.lang.NotImplementedException;
 
 public interface MessageComponent extends StreamWriter {
 

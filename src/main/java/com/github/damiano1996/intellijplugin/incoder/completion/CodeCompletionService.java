@@ -21,8 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.CompletableFuture;
-
 @Service(Service.Level.PROJECT)
 @Slf4j
 public final class CodeCompletionService
@@ -33,8 +31,7 @@ public final class CodeCompletionService
                 Disposable {
 
     @Getter private final Project project;
-    @Getter
-    private final CodeCompletionQueue codeCompletionQueue;
+    @Getter private final CodeCompletionQueue codeCompletionQueue;
     private State state;
 
     public CodeCompletionService(Project project) {

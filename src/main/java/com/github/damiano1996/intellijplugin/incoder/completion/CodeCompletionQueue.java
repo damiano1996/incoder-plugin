@@ -3,14 +3,15 @@ package com.github.damiano1996.intellijplugin.incoder.completion;
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings.InlineSettings;
 import com.intellij.openapi.project.Project;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CodeCompletionQueue {
+
+    public static final String MARKDOWN_CODE_BLOCK_DELIMITER = "```";
 
     private final Project project;
     private final CodeCompletionListener listener;
@@ -48,13 +49,15 @@ public class CodeCompletionQueue {
 
                     try {
                         String completion =
-                                LanguageModelService.getInstance(project).complete(codeCompletionContext)
+                                LanguageModelService.getInstance(project)
+                                        .complete(codeCompletionContext)
                                         .split("\n")[0]
                                         .trim();
 
+                        if (completion.startsWith(MARKDOWN_CODE_BLOCK_DELIMITER)) continue;
+
                         if (queue.isEmpty()) {
-                            log.debug(
-                                    "Queue is empty, therefore this prediction is still useful");
+                            log.debug("Queue is empty, therefore this prediction is still useful");
 
                             listener.onCodeCompletionPrediction(completion);
                         } else {

@@ -12,12 +12,11 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import dev.langchain4j.service.TokenStream;
+import java.util.concurrent.CompletableFuture;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service(Service.Level.PROJECT)
@@ -42,11 +41,7 @@ public final class LanguageModelService {
 
     public void init() throws LanguageModelException {
         server =
-                ServerSettings.getInstance()
-                        .getState()
-                        .modelType
-                        .getServerFactory()
-                        .createServer();
+                ServerSettings.getInstance().getState().modelType.getServerFactory().createServer();
 
         client = server.createClient();
 
@@ -58,9 +53,9 @@ public final class LanguageModelService {
     }
 
     public String complete(@NotNull CodeCompletionContext codeCompletionContext) {
-        return client.complete(InlineSettings.getInstance().getState().systemMessageInstructions,
-                codeCompletionContext.leftContext(),
-                codeCompletionContext.rightContext());
+        return client.complete(
+                InlineSettings.getInstance().getState().systemMessageInstructions,
+                codeCompletionContext.leftContext());
     }
 
     @Contract("_ -> new")
@@ -78,11 +73,13 @@ public final class LanguageModelService {
     }
 
     public TokenStream chat(@NonNull String editDescription) {
-        return client.chat(ChatSettings.getInstance().getState().systemMessageInstructions, project.getBasePath(), editDescription);
+        return client.chat(
+                ChatSettings.getInstance().getState().systemMessageInstructions,
+                project.getBasePath(),
+                editDescription);
     }
 
     public String createFileName(String fileContent) {
         return client.createFileName(fileContent);
     }
-
 }

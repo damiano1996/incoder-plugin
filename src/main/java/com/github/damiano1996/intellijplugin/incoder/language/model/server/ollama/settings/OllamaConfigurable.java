@@ -1,11 +1,10 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings;
 
-import javax.swing.*;
-
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
+import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -79,5 +78,4 @@ public final class OllamaConfigurable implements Configurable {
     public void disposeUIResources() {
         settingsComponent = null;
     }
-
 }

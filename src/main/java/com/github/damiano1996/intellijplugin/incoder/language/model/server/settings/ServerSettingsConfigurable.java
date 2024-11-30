@@ -4,10 +4,8 @@ import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageMode
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.LanguageModelServerType;
 import com.intellij.openapi.options.Configurable;
-
-import javax.swing.*;
-
 import com.intellij.openapi.options.ConfigurationException;
+import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +53,8 @@ public final class ServerSettingsConfigurable implements Configurable {
         ServerSettings.State state = getState();
 
         state.modelType =
-                (LanguageModelServerType) serverSettingsComponent.getServerTypeComboBox().getSelectedItem();
+                (LanguageModelServerType)
+                        serverSettingsComponent.getServerTypeComboBox().getSelectedItem();
 
         try {
             LanguageModelService.getInstance().init();

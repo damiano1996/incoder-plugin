@@ -15,5 +15,4 @@ public class OllamaFactory implements ServerFactory {
     public LanguageModelServer createServer() {
         return new OllamaLanguageModelServer();
     }
-
 }

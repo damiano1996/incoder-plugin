@@ -15,5 +15,4 @@ public class AnthropicFactory implements ServerFactory {
     public LanguageModelServer createServer() {
         return new AnthropicLanguageModelServer();
     }
-
 }

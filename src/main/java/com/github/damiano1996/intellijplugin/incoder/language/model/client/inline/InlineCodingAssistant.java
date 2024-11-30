@@ -7,18 +7,11 @@ public interface InlineCodingAssistant {
 
     @UserMessage(
             """
-                    Given the following code context, provide only the missing line of code.
-
-                    Left context:
-                    {{leftContext}}
-
-                    Right context:
-                    {{rightContext}}
-
                     Instructions:
                     {{instructions}}
+
+                    Code:
+                    {{leftContext}}
                     """)
-    String complete(
-            @V("instructions") String instructions,
-            @V("leftContext") String leftContext, @V("rightContext") String rightContext);
+    String complete(@V("instructions") String instructions, @V("leftContext") String leftContext);
 }

@@ -31,12 +31,14 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
     public static class State {
         public int maxMessages = 10;
 
-        public String systemMessageInstructionsWithCode = """
+        public String systemMessageInstructionsWithCode =
+                """
                     - You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
                     - If the user input pertains to the provided code, respond with the code edited according to the user's instructions.
                     """;
 
-        public String systemMessageInstructions = """
+        public String systemMessageInstructions =
+                """
                     - You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
                     """;
     }

@@ -3,11 +3,10 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 import com.intellij.ui.JBColor;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-import org.apache.commons.lang.NotImplementedException;
-
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
+import org.apache.commons.lang.NotImplementedException;
 
 public class TextMarkdownBlock extends JEditorPane implements MarkdownBlock {
 

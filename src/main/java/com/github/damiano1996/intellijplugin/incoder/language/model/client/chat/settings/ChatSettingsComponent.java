@@ -5,9 +5,8 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
-import lombok.Getter;
-
 import javax.swing.*;
+import lombok.Getter;
 
 @Getter
 public class ChatSettingsComponent {
@@ -33,21 +32,31 @@ public class ChatSettingsComponent {
         mainPanel =
                 FormBuilder.createFormBuilder()
                         .setFormLeftIndent(20)
-                        .addLabeledComponent(
-                                new JBLabel("Max messages:"), maxMessages, 1, false)
+                        .addLabeledComponent(new JBLabel("Max messages:"), maxMessages, 1, false)
                         .addComponent(new DescriptionLabel("Number of messages to keep in memory."))
                         .addVerticalGap(20)
                         .addLabeledComponent(
                                 new JBLabel("System message instructions with code:"),
-                                ScrollPaneFactory.createScrollPane(systemMessageInstructionsWithCodeField),
-                                1, true)
-                        .addComponent(new DescriptionLabel("System message template instructions when code context is included. These instructions will be added to the @SystemMessage."))
+                                ScrollPaneFactory.createScrollPane(
+                                        systemMessageInstructionsWithCodeField),
+                                1,
+                                true)
+                        .addComponent(
+                                new DescriptionLabel(
+                                        "System message template instructions when code context is"
+                                            + " included. These instructions will be added to the"
+                                            + " @SystemMessage."))
                         .addVerticalGap(20)
                         .addLabeledComponent(
                                 new JBLabel("System message instructions:"),
                                 ScrollPaneFactory.createScrollPane(systemMessageInstructionsField),
-                                1, true)
-                        .addComponent(new DescriptionLabel("System message template instructions for general questions. These instructions will be added to the @SystemMessage."))
+                                1,
+                                true)
+                        .addComponent(
+                                new DescriptionLabel(
+                                        "System message template instructions for general"
+                                            + " questions. These instructions will be added to the"
+                                            + " @SystemMessage."))
                         .setFormLeftIndent(0)
                         .addComponentFillVertically(new JPanel(), 0)
                         .getPanel();
