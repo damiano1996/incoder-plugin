@@ -13,44 +13,37 @@
 
         <applicationConfigurable
                 instance="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
-                displayName="InCoder"/>
+                id="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"/>
 
         <applicationConfigurable
                 parentId="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
                 instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettingsConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettingsConfigurable"
-                displayName="General"/>
+                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettingsConfigurable"/>
 
         <applicationConfigurable
                 parentId="com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettingsConfigurable"
                 instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaConfigurable"
-                displayName="Ollama"/>
+                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaConfigurable"/>
 
         <applicationConfigurable
                 parentId="com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettingsConfigurable"
                 instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiConfigurable"
-                displayName="Open AI"/>
+                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiConfigurable"/>
 
         <applicationConfigurable
                 parentId="com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettingsConfigurable"
                 instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
-                displayName="Anthropic"/>
+                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"/>
 
         <applicationConfigurable
                 parentId="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
                 instance="com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"
-                displayName="Chat"/>
+                id="com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"/>
 
         <applicationConfigurable
                 parentId="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
                 instance="com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings.InlineConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings.InlineConfigurable"
-                displayName="Inline"/>
+                id="com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings.InlineConfigurable"/>
 
 
         <notificationGroup id="InCoder Notifications" displayType="BALLOON"/>

@@ -24,7 +24,7 @@ public final class ChatSettingsConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public @NotNull String getDisplayName() {
-        return "Chat Settings";
+        return "Chat";
     }
 
     @Override

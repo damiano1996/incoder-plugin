@@ -11,6 +11,7 @@ import com.github.damiano1996.intellijplugin.incoder.notification.NotificationSe
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import dev.langchain4j.service.TokenStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,10 @@ public final class LanguageModelService {
 
     public static LanguageModelService getInstance(@NotNull Project project) {
         return project.getService(LanguageModelService.class);
+    }
+
+    public static LanguageModelService getInstance() {
+        return LanguageModelService.getInstance(ProjectManager.getInstance().getDefaultProject());
     }
 
     public void init() throws LanguageModelException {

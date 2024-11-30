@@ -3,6 +3,7 @@ package com.github.damiano1996.intellijplugin.incoder.language.model.server;
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.LanguageModelClient;
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.LanguageModelClientImpl;
+import com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettings;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -31,6 +32,6 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
 
     protected ChatMemory createChatMemory() {
         return MessageWindowChatMemory.withMaxMessages(
-                ServerSettings.getInstance().getState().chatMemoryMaxMessages);
+                ChatSettings.getInstance().getState().maxMessages);
     }
 }

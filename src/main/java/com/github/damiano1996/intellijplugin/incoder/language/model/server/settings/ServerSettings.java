@@ -31,6 +31,5 @@ public final class ServerSettings implements PersistentStateComponent<ServerSett
     @ToString
     public static class State {
         public LanguageModelServerType modelType = LanguageModelServerType.OLLAMA;
-        public int chatMemoryMaxMessages = 10;
     }
 }

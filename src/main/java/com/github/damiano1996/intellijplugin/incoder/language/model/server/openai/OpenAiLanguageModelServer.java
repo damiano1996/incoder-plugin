@@ -1,6 +1,5 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.openai;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiSettings;
 import dev.langchain4j.model.chat.ChatLanguageModel;

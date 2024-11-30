@@ -21,7 +21,7 @@ public final class InlineConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public @NotNull String getDisplayName() {
-        return "Inline Settings";
+        return "Inline";
     }
 
     @Override

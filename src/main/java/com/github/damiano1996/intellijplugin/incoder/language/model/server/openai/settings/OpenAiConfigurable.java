@@ -2,7 +2,10 @@ package com.github.damiano1996.intellijplugin.incoder.language.model.server.open
 
 import javax.swing.*;
 
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.options.ConfigurationException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +23,7 @@ public final class OpenAiConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public @NotNull String getDisplayName() {
-        return "Open AI Settings";
+        return "Open AI";
     }
 
     @Override
@@ -44,12 +47,18 @@ public final class OpenAiConfigurable implements Configurable {
     }
 
     @Override
-    public void apply() {
+    public void apply() throws ConfigurationException {
         var state = getState();
 
         state.apiKey = settingsComponent.getApiKeyField().getText();
         state.modelName = settingsComponent.getModelNameField().getItem();
         state.temperature = (Double) settingsComponent.getTemperatureField().getValue();
+
+        try {
+            LanguageModelService.getInstance().init();
+        } catch (LanguageModelException e) {
+            throw new ConfigurationException(e.getMessage(), "Server Error");
+        }
     }
 
     @Override

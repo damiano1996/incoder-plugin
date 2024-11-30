@@ -1,6 +1,5 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicSettings;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;

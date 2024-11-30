@@ -1,9 +1,13 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.settings;
 
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.LanguageModelServerType;
 import com.intellij.openapi.options.Configurable;
 
 import javax.swing.*;
+
+import com.intellij.openapi.options.ConfigurationException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +29,7 @@ public final class ServerSettingsConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public @NotNull String getDisplayName() {
-        return "Server Settings";
+        return "General";
     }
 
     @Override
@@ -43,23 +47,28 @@ public final class ServerSettingsConfigurable implements Configurable {
     public boolean isModified() {
         ServerSettings.State state = getState();
 
-        return !serverSettingsComponent.getModelTypeComboBox().getItem().equals(state.modelType);
+        return !serverSettingsComponent.getServerTypeComboBox().getItem().equals(state.modelType);
     }
 
     @Override
-    public void apply() {
+    public void apply() throws ConfigurationException {
         ServerSettings.State state = getState();
 
         state.modelType =
-                (LanguageModelServerType) serverSettingsComponent.getModelTypeComboBox().getSelectedItem();
+                (LanguageModelServerType) serverSettingsComponent.getServerTypeComboBox().getSelectedItem();
 
+        try {
+            LanguageModelService.getInstance().init();
+        } catch (LanguageModelException e) {
+            throw new ConfigurationException(e.getMessage(), "Server Error");
+        }
     }
 
     @Override
     public void reset() {
         ServerSettings.State state = getState();
 
-        serverSettingsComponent.getModelTypeComboBox().setSelectedItem(state.modelType);
+        serverSettingsComponent.getServerTypeComboBox().setSelectedItem(state.modelType);
     }
 
     @Override

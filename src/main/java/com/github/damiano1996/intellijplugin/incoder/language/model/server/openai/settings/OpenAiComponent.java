@@ -3,7 +3,6 @@ package com.github.damiano1996.intellijplugin.incoder.language.model.server.open
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.OpenAiLanguageModelServer;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import javax.swing.*;
 import lombok.Getter;
@@ -12,7 +11,7 @@ import lombok.Getter;
 public class OpenAiComponent {
 
     private final JPanel mainPanel;
-    private final JBTextField apiKeyField = new JBTextField();
+    private final JPasswordField apiKeyField = new JPasswordField();
     private final ComboBox<String> modelNameField;
     private final JSpinner temperatureField;
 
