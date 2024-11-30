@@ -10,6 +10,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import javax.swing.*;
 import lombok.Getter;
+import org.apache.commons.lang.NotImplementedException;
 
 public class AiMessageComponent implements MessageComponent {
 

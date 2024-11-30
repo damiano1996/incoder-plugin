@@ -4,5 +4,7 @@ public interface StreamWriter {
 
     void write(String token);
 
+    void undoLastWrite();
+
     String getFullText();
 }

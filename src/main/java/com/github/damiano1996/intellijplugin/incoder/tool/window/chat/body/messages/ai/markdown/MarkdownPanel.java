@@ -7,17 +7,17 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messa
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.CreateCodeAction;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.MergeAction;
 import com.intellij.lang.Language;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
-import javax.swing.*;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class MarkdownPanel extends JPanel implements StreamWriter {
@@ -30,6 +30,8 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
     private boolean isWritingACodeBlock = false;
     private boolean nextIsLanguage = false;
 
+    private String fullText = "";
+
     public MarkdownPanel(Project project) {
         this.project = project;
 
@@ -41,22 +43,8 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         addMarkdownEditorPane();
     }
 
-    public static @NotNull Language getLanguage(String languageName) {
-        var languages = Language.getRegisteredLanguages();
-
-        for (Language language : languages) {
-            if (language.getID().equalsIgnoreCase(languageName)) {
-                return language;
-            }
-        }
-
-        log.debug("Unable to infer the language from the language name");
-        return Language.ANY;
-    }
-
     public @NotNull JComponent getActionToolbarComponent(CodeMarkdownBlock codeBlock) {
         var actionGroup = new DefaultActionGroup("Coding Group", true);
-        actionGroup.displayTextInToolbar();
 
         actionGroup.add(new MergeAction(codeBlock));
         actionGroup.add(new CreateCodeAction(codeBlock));
@@ -64,51 +52,63 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         var actionToolbar =
                 ActionManager.getInstance()
                         .createActionToolbar("CodeBlockToolbar", actionGroup, true);
+        actionToolbar.setTargetComponent(codeBlock.getComponent());
+
         actionToolbar.setMiniMode(false);
         return actionToolbar.getComponent();
     }
 
     @Override
     public void write(@NotNull String token) {
-        if (token.startsWith(MARKDOWN_CODE_BLOCK_DELIMITER)) {
+        log.debug("Token received: {}", token);
+
+        fullText += token;
+
+        if (fullText.trim().endsWith(MARKDOWN_CODE_BLOCK_DELIMITER)) {
             nextIsLanguage = !isWritingACodeBlock;
 
             isWritingACodeBlock = !isWritingACodeBlock;
 
             if (!isWritingACodeBlock) {
+
+                if (!fullText.endsWith(MARKDOWN_CODE_BLOCK_DELIMITER)) {
+                    // There are tokenizers that split the code block delimiter in two sub-tokens.
+                    // E.g. `` and `\n\n
+                    // If the trimmed version of the fullText differs from the raw one,
+                    // we must undo the last write to clean the code block.
+                    markdownBlocks.get(markdownBlocks.size() - 1).undoLastWrite();
+                }
+
                 addMarkdownEditorPane();
             }
 
         } else if (nextIsLanguage) {
 
-            var language = getLanguage(token);
-            log.info("Code block language: {}", language.getID());
-
-            var fileType = FileTypeManager.getInstance().findFileTypeByLanguage(language);
-
-            addCodeEditorPanel(fileType);
-
+            var language = CodeMarkdownBlock.getLanguage(token);
+            addCodeEditorPanel(language);
             nextIsLanguage = false;
-        } else {
 
+        } else {
             markdownBlocks.get(markdownBlocks.size() - 1).write(token);
         }
     }
 
     @Override
-    public String getFullText() {
-        return markdownBlocks.stream()
-                .map(StreamWriter::getFullText)
-                .collect(Collectors.joining("\n"));
+    public void undoLastWrite() {
+        throw new NotImplementedException();
     }
 
-    private void addCodeEditorPanel(FileType fileType) {
+    @Override
+    public String getFullText() {
+        return fullText;
+    }
+
+    private void addCodeEditorPanel(Language language) {
         ApplicationManager.getApplication()
                 .invokeAndWait(
                         () -> {
-                            var codeMarkdownBlock = new CodeMarkdownBlock(project, fileType, "");
+                            var codeMarkdownBlock = new CodeMarkdownBlock(project, language);
                             addMarkdownBlock(codeMarkdownBlock);
-
                             add(getActionToolbarComponent(codeMarkdownBlock));
                         });
     }

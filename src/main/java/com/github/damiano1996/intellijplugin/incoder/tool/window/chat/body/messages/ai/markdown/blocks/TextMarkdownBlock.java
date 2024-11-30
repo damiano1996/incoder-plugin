@@ -3,6 +3,8 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 import com.intellij.ui.JBColor;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
+import org.apache.commons.lang.NotImplementedException;
+
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.text.html.HTMLEditorKit;
@@ -47,6 +49,11 @@ public class TextMarkdownBlock extends JEditorPane implements MarkdownBlock {
     public void write(String token) {
         body += token;
         setText(body);
+    }
+
+    @Override
+    public void undoLastWrite() {
+        throw new NotImplementedException();
     }
 
     @Override
