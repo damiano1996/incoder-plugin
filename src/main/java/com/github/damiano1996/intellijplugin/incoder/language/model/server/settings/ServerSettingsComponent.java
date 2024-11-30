@@ -40,7 +40,7 @@ public class ServerSettingsComponent {
                         .addComponent(new DescriptionLabel("Select the server to be used for interaction with language models."))
                         .addSeparator(20)
                         .addComponent(new JBLabel("Language model provider settings:"))
-                        .addComponent(new DescriptionLabel("Configure settings for the selected language model provider using the links below."))
+                        .addComponent(new DescriptionLabel("Configure settings for the selected language model provider:"))
                         .addComponent(linksPanel)
                         .setFormLeftIndent(0)
                         .addComponentFillVertically(new JPanel(), 0)

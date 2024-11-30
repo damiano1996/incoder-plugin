@@ -52,7 +52,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     }
 
     @Override
-    public TokenStream complete(String instructions, String leftContext, String rightContext) {
+    public String complete(String instructions, String leftContext, String rightContext) {
         log.debug("Completing code...");
         return inlineCodingAssistant.complete(instructions, leftContext, rightContext);
     }

@@ -50,7 +50,7 @@ public class InCoderActivity implements ProjectActivity {
                     try {
                         notifyWelcomeMessage(project);
                         configureBeforeInitServices(project);
-                    } catch (Exception e) {
+                    } catch (LanguageModelException e) {
                         log.error("Error while initializing services", e);
                         NotificationService.getInstance(project).notifyError(e.getMessage());
                     }

@@ -2,7 +2,6 @@ package com.github.damiano1996.intellijplugin.incoder.completion;
 
 import com.github.damiano1996.intellijplugin.incoder.completion.states.State;
 import com.github.damiano1996.intellijplugin.incoder.completion.states.idle.IdleState;
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -16,10 +15,13 @@ import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseListener;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service(Service.Level.PROJECT)
 @Slf4j
@@ -31,26 +33,30 @@ public final class CodeCompletionService
                 Disposable {
 
     @Getter private final Project project;
+    @Getter
+    private final CodeCompletionQueue codeCompletionQueue;
     private State state;
 
     public CodeCompletionService(Project project) {
         this.project = project;
         this.state = new IdleState(this);
+        codeCompletionQueue = new CodeCompletionQueue(project, this);
     }
 
     public static CodeCompletionService getInstance(@NotNull Project project) {
         return project.getService(CodeCompletionService.class);
     }
 
-    public void init() {
-        log.debug("Initializing ");
+    public static CodeCompletionService getInstance() {
+        return CodeCompletionService.getInstance(ProjectManager.getInstance().getDefaultProject());
+    }
 
+    public void init() {
+        log.debug("Initializing {}...", CodeCompletionService.class.getSimpleName());
         log.debug("Adding listener for document");
         EditorFactory.getInstance().getEventMulticaster().addDocumentListener(this, this);
         log.debug("Adding listeners for mouse");
         EditorFactory.getInstance().getEventMulticaster().addEditorMouseListener(this, this);
-        log.debug("Subscribing to client service");
-        LanguageModelService.getInstance(this.project).subscribe(this);
     }
 
     public void next(@NotNull State state) {

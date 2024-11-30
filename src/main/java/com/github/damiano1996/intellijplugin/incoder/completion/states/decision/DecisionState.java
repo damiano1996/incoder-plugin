@@ -78,13 +78,10 @@ public class DecisionState extends BaseState {
                     break;
                 case KeyEvent.VK_UP:
                 case KeyEvent.VK_DOWN:
+                case KeyEvent.VK_RIGHT:
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_ESCAPE:
                     ignorePrediction(anActionEvent);
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    log.debug("RIGHT event detected");
-                    keepPartialPrediction(project, editor);
                     break;
             }
         }
@@ -108,26 +105,6 @@ public class DecisionState extends BaseState {
                             .moveToOffset(editor.getCaretModel().getOffset() + prediction.length());
 
                     codeCompletionService.next(new IdleState(codeCompletionService));
-                });
-    }
-
-    private void keepPartialPrediction(Project project, Editor editor) {
-        log.debug("Going to keep partial prediction");
-        WriteCommandAction.runWriteCommandAction(
-                project,
-                () -> {
-                    editor.getDocument()
-                            .insertString(
-                                    editor.getCaretModel().getOffset(), prediction.substring(0, 1));
-
-                    String nextPrediction = prediction.substring(1);
-                    if (nextPrediction.isBlank()) {
-                        log.debug("The entire prediction has been accepted");
-                        codeCompletionService.next(new IdleState(codeCompletionService));
-                    } else {
-                        codeCompletionService.next(
-                                new PreviewState(codeCompletionService, nextPrediction));
-                    }
                 });
     }
 
