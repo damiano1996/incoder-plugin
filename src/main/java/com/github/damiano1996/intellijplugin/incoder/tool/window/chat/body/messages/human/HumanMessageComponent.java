@@ -1,10 +1,10 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human;
 
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.prompt.PromptType;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.ToolWindowColors;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.ui.components.RoundedLabel;
 import com.github.damiano1996.intellijplugin.incoder.ui.components.RoundedTextArea;
-import com.intellij.ui.JBColor;
 import javax.swing.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -39,13 +39,13 @@ public class HumanMessageComponent implements MessageComponent {
 
     private void createUIComponents() {
         promptTextArea = new RoundedTextArea(35, 35);
-        promptTextArea.setBackground(JBColor.namedColor("Label.foreground"));
-        promptTextArea.setForeground(JBColor.namedColor("Label.background"));
+        promptTextArea.setBackground(ToolWindowColors.USER_MESSAGE_BACKGROUND);
+        promptTextArea.setForeground(ToolWindowColors.USER_MESSAGE_FOREGROUND);
         promptTextArea.setText(userPrompt);
 
         promptTypeLabel = new RoundedLabel(20, 20, 15, 2);
-        promptTypeLabel.setBackground(JBColor.namedColor("Label.foreground"));
-        promptTypeLabel.setForeground(JBColor.namedColor("Label.background"));
+        promptTypeLabel.setBackground(ToolWindowColors.BADGE_BACKGROUND);
+        promptTypeLabel.setForeground(ToolWindowColors.BADGE_FOREGROUND);
         promptTypeLabel.setVisible(false);
     }
 }

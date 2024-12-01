@@ -1,6 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks;
 
-import com.intellij.ui.JBColor;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.ToolWindowColors;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import java.awt.*;
@@ -21,8 +21,8 @@ public class TextMarkdownBlock extends JEditorPane implements MarkdownBlock {
         setEditorKit(editorKit);
         setContentType("text/html");
         setOpaque(false);
-        setBackground(new JBColor(new Color(0, 0, 0, 0), new Color(0, 0, 0, 0)));
-        setForeground(JBColor.namedColor("Label.foreground"));
+        setBackground(ToolWindowColors.AI_MESSAGE_BACKGROUND);
+        setForeground(ToolWindowColors.AI_MESSAGE_FOREGROUND);
         setDoubleBuffered(true);
     }
 

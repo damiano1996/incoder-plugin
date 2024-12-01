@@ -1,5 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown;
 
+import com.github.damiano1996.intellijplugin.incoder.tool.window.ToolWindowColors;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.StreamWriter;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
@@ -35,6 +36,8 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         this.project = project;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBackground(ToolWindowColors.AI_MESSAGE_BACKGROUND);
+        setForeground(ToolWindowColors.AI_MESSAGE_FOREGROUND);
         setFocusable(false);
 
         markdownBlocks = new LinkedList<>();

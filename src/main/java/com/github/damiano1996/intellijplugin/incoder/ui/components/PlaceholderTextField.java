@@ -11,7 +11,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PlaceholderTextField extends JBTextField {
 
-    private String placeholder;
+    private final String placeholder;
+    private final int leftPadding;
+    private final int topPadding;
 
     @Override
     protected void paintComponent(final Graphics pG) {
@@ -24,9 +26,6 @@ public class PlaceholderTextField extends JBTextField {
         final Graphics2D g = (Graphics2D) pG;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setColor(getDisabledTextColor());
-        g.drawString(
-                placeholder,
-                getInsets().left + 10,
-                pG.getFontMetrics().getMaxAscent() + getInsets().top + 5);
+        g.drawString(placeholder, leftPadding, pG.getFontMetrics().getMaxAscent() + topPadding);
     }
 }

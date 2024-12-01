@@ -2,11 +2,11 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 
 import static com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON;
 
+import com.github.damiano1996.intellijplugin.incoder.tool.window.ToolWindowColors;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
 import com.github.damiano1996.intellijplugin.incoder.ui.components.RoundedLabel;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import javax.swing.*;
@@ -48,12 +48,10 @@ public class AiMessageComponent implements MessageComponent {
         markdownPanel = new MarkdownPanel(project);
 
         aiIconLabel = new JBLabel(PLUGIN_ICON);
-        aiIconLabel.setBackground(JBColor.namedColor("Label.background"));
-        aiIconLabel.setForeground(JBColor.namedColor("Label.foreground"));
 
         modelNameLabel = new RoundedLabel(20, 20, 15, 2);
-        modelNameLabel.setBackground(JBColor.namedColor("Label.background"));
-        modelNameLabel.setForeground(JBColor.namedColor("Label.foreground"));
+        modelNameLabel.setBackground(ToolWindowColors.BADGE_BACKGROUND);
+        modelNameLabel.setForeground(ToolWindowColors.BADGE_FOREGROUND);
         modelNameLabel.setVisible(false);
     }
 }
