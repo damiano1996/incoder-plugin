@@ -52,8 +52,6 @@
           <forms top="0" left="0" bottom="0" right="10" defaultalign-horz="false" defaultalign-vert="false"/>
         </constraints>
         <properties>
-          <background color="-10855846"/>
-          <foreground color="-1"/>
           <horizontalAlignment value="0"/>
           <horizontalTextPosition value="0"/>
           <opaque value="false"/>
@@ -68,7 +66,6 @@
         </constraints>
         <properties>
           <alignmentX value="0.0"/>
-          <background color="-1"/>
           <enabled value="true"/>
           <focusable value="false"/>
           <horizontalAlignment value="0"/>

@@ -50,13 +50,11 @@
           <forms top="0" left="20" bottom="0" right="20" defaultalign-horz="false" defaultalign-vert="false"/>
         </constraints>
         <properties>
-          <background color="-10855846"/>
           <enabled value="true"/>
           <focusCycleRoot value="true"/>
-          <foreground color="-1"/>
           <horizontalAlignment value="0"/>
           <horizontalTextPosition value="0"/>
-          <labelFor value="473ef"/>
+          <labelFor value=""/>
           <opaque value="false"/>
           <text resource-bundle="messages/bundle" key="prompt.label"/>
           <visible value="true"/>

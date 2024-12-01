@@ -44,8 +44,8 @@ public class HumanMessageComponent implements MessageComponent {
         promptTextArea.setText(userPrompt);
 
         promptTypeLabel = new RoundedLabel(20, 20, 15, 2);
-        promptTypeLabel.setBackground(JBColor.namedColor("Label.background"));
-        promptTypeLabel.setForeground(JBColor.namedColor("Label.foreground"));
+        promptTypeLabel.setBackground(JBColor.namedColor("Label.foreground"));
+        promptTypeLabel.setForeground(JBColor.namedColor("Label.background"));
         promptTypeLabel.setVisible(false);
     }
 }
