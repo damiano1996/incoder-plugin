@@ -3,8 +3,8 @@ package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.mess
 import static com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON;
 
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.MessageComponent;
-import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.RoundedLabel;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
+import com.github.damiano1996.intellijplugin.incoder.ui.components.RoundedLabel;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;

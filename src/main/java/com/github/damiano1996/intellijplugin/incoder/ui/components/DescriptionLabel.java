@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.settings.description.label;
+package com.github.damiano1996.intellijplugin.incoder.ui.components;
 
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.ui.JBColor;

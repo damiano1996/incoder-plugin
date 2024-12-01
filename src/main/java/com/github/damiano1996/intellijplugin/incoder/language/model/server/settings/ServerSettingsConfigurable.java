@@ -2,7 +2,6 @@ package com.github.damiano1996.intellijplugin.incoder.language.model.server.sett
 
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
-import com.github.damiano1996.intellijplugin.incoder.language.model.server.LanguageModelServerType;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import javax.swing.*;
@@ -27,7 +26,7 @@ public final class ServerSettingsConfigurable implements Configurable {
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public @NotNull String getDisplayName() {
-        return "General";
+        return "Server";
     }
 
     @Override
@@ -45,16 +44,14 @@ public final class ServerSettingsConfigurable implements Configurable {
     public boolean isModified() {
         ServerSettings.State state = getState();
 
-        return !serverSettingsComponent.getServerTypeComboBox().getItem().equals(state.modelType);
+        return !serverSettingsComponent.getServerTypeComboBox().getItem().equals(state.serverName);
     }
 
     @Override
     public void apply() throws ConfigurationException {
         ServerSettings.State state = getState();
 
-        state.modelType =
-                (LanguageModelServerType)
-                        serverSettingsComponent.getServerTypeComboBox().getSelectedItem();
+        state.serverName = serverSettingsComponent.getServerTypeComboBox().getItem();
 
         try {
             LanguageModelService.getInstance().init();
@@ -67,7 +64,7 @@ public final class ServerSettingsConfigurable implements Configurable {
     public void reset() {
         ServerSettings.State state = getState();
 
-        serverSettingsComponent.getServerTypeComboBox().setSelectedItem(state.modelType);
+        serverSettingsComponent.getServerTypeComboBox().setItem(state.serverName);
     }
 
     @Override

@@ -7,6 +7,11 @@ import com.intellij.openapi.options.Configurable;
 
 public class OllamaFactory implements ServerFactory {
     @Override
+    public String getName() {
+        return "Ollama";
+    }
+
+    @Override
     public Configurable createConfigurable() {
         return new OllamaConfigurable();
     }

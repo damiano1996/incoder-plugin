@@ -7,6 +7,11 @@ import com.intellij.openapi.options.Configurable;
 
 public class AnthropicFactory implements ServerFactory {
     @Override
+    public String getName() {
+        return "Anthropic";
+    }
+
+    @Override
     public Configurable createConfigurable() {
         return new AnthropicConfigurable();
     }

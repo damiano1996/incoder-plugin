@@ -1,6 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.settings.description.label.DescriptionLabel;
+import com.github.damiano1996.intellijplugin.incoder.ui.components.DescriptionLabel;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;

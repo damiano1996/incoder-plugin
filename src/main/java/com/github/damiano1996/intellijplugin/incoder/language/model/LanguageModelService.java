@@ -6,7 +6,9 @@ import com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings.InlineSettings;
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.prompt.PromptType;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.LanguageModelServer;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.ServerFactoryUtils;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettings;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
@@ -20,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 @Service(Service.Level.PROJECT)
-public final class LanguageModelService {
+public final class LanguageModelService implements Disposable {
 
     private final Project project;
 
@@ -40,8 +42,11 @@ public final class LanguageModelService {
     }
 
     public void init() throws LanguageModelException {
+        log.debug("Initializing {}...", LanguageModelService.class.getSimpleName());
+
         server =
-                ServerSettings.getInstance().getState().modelType.getServerFactory().createServer();
+                ServerFactoryUtils.findByName(ServerSettings.getInstance().getState().serverName)
+                        .createServer();
 
         client = server.createClient();
 
@@ -82,4 +87,7 @@ public final class LanguageModelService {
     public String createFileName(String fileContent) {
         return client.createFileName(fileContent);
     }
+
+    @Override
+    public void dispose() {}
 }

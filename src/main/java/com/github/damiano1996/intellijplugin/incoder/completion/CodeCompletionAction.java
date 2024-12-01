@@ -1,4 +1,3 @@
-
 package com.github.damiano1996.intellijplugin.incoder.completion;
 
 import com.intellij.openapi.actionSystem.AnAction;

@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages;
+package com.github.damiano1996.intellijplugin.incoder.ui.components;
 
 import java.awt.*;
 import javax.swing.*;

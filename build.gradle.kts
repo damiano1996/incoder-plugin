@@ -6,9 +6,9 @@ fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "1.8.10"
-    id("org.jetbrains.intellij") version "1.13.0"
-    id("org.jetbrains.changelog") version "2.0.0"
+    id("org.jetbrains.kotlin.jvm") version "2.1.0"
+    id("org.jetbrains.intellij") version "1.17.4"
+    id("org.jetbrains.changelog") version "2.2.1"
     kotlin("plugin.lombok") version "2.0.0"
     id("io.freefair.lombok") version "8.1.0"
     id("com.diffplug.spotless") version "6.19.0"
@@ -26,6 +26,9 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.34")
     implementation("ch.qos.logback:logback-classic:1.5.6")
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
+
+    // https://mvnrepository.com/artifact/org.reflections/reflections
+    implementation("org.reflections:reflections:0.10.2")
 
     implementation("dev.langchain4j:langchain4j:0.36.2")
     // implementation("dev.langchain4j:langchain4j-easy-rag:0.36.2")
@@ -52,9 +55,6 @@ spotless {
 intellij {
     version.set("2023.2.6")
     type.set("IC") // Target IDE Platform
-
-    plugins.set(listOf())
-
     // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
     plugins.set(properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) })
 }

@@ -5,6 +5,7 @@ import com.github.damiano1996.intellijplugin.incoder.notification.NotificationSe
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.human.HumanMessageComponent;
+import com.github.damiano1996.intellijplugin.incoder.ui.components.PlaceholderTextField;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
@@ -115,6 +116,7 @@ public class Chat {
     private void isGenerating(boolean generating) {
         log.debug("Is generating...");
         this.prompt.setEnabled(!generating);
+        if (!generating) this.prompt.requestFocusInWindow();
         this.generating.setIndeterminate(generating);
         this.generating.setVisible(generating);
     }

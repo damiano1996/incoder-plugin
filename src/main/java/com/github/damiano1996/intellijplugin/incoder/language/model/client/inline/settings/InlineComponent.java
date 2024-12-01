@@ -1,6 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.settings.description.label.DescriptionLabel;
+import com.github.damiano1996.intellijplugin.incoder.ui.components.DescriptionLabel;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;

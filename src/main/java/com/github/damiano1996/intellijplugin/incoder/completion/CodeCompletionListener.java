@@ -1,9 +1,6 @@
-
 package com.github.damiano1996.intellijplugin.incoder.completion;
 
-/**
- * Interface for handling code completion events in the InCoder plugin.
- */
+/** Interface for handling code completion events in the InCoder plugin. */
 public interface CodeCompletionListener {
 
     /**

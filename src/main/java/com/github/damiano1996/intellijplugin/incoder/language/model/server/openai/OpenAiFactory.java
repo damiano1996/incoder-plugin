@@ -7,6 +7,11 @@ import com.intellij.openapi.options.Configurable;
 
 public class OpenAiFactory implements ServerFactory {
     @Override
+    public String getName() {
+        return "Open AI";
+    }
+
+    @Override
     public Configurable createConfigurable() {
         return new OpenAiConfigurable();
     }

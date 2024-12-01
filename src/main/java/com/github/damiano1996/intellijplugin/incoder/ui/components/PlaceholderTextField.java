@@ -1,4 +1,4 @@
-package com.github.damiano1996.intellijplugin.incoder.tool.window.chat;
+package com.github.damiano1996.intellijplugin.incoder.ui.components;
 
 import com.intellij.ui.components.JBTextField;
 import java.awt.*;

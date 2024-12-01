@@ -5,6 +5,8 @@ import com.intellij.openapi.options.Configurable;
 
 public interface ServerFactory {
 
+    String getName();
+
     Configurable createConfigurable();
 
     LanguageModelServer createServer() throws LanguageModelException;

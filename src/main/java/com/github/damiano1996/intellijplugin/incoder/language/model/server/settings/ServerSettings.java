@@ -1,6 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.server.LanguageModelServerType;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.OllamaFactory;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
@@ -30,6 +30,6 @@ public final class ServerSettings implements PersistentStateComponent<ServerSett
 
     @ToString
     public static class State {
-        public LanguageModelServerType modelType = LanguageModelServerType.OLLAMA;
+        public String serverName = new OllamaFactory().getName();
     }
 }
