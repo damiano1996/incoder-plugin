@@ -57,13 +57,18 @@ public final class NotificationService {
                 .notify(project);
     }
 
-    public void notifyFirstConfiguration() {
+    public void notifyWithSettingsActionButton() {
+        notifyWithSettingsActionButton(
+                InCoderBundle.message("notification.config.description"),
+                NotificationType.INFORMATION);
+    }
+
+    public void notifyWithSettingsActionButton(
+            String description, NotificationType notificationType) {
         NotificationGroupManager.getInstance()
                 .getNotificationGroup(InCoderBundle.message("notification.group"))
                 .createNotification(
-                        InCoderBundle.message("plugin.title"),
-                        InCoderBundle.message("notification.config.description"),
-                        NotificationType.INFORMATION)
+                        InCoderBundle.message("plugin.title"), description, notificationType)
                 .addAction(
                         NotificationAction.createSimple(
                                 InCoderBundle.message("notification.settings.button.name"),

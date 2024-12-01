@@ -5,6 +5,7 @@ import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageMode
 import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.intellijplugin.incoder.notification.NotificationService;
 import com.github.damiano1996.intellijplugin.incoder.settings.PluginSettings;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
 import java.awt.*;
@@ -16,43 +17,34 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class InCoderActivity implements ProjectActivity {
 
-    private static void configureBeforeInitServices(@NotNull Project project)
-            throws LanguageModelException {
-        if (PluginSettings.getInstance().getState().isPluginConfigured) {
-            initServices(project);
-        } else {
-            NotificationService.getInstance(project).notifyFirstConfiguration();
-        }
-    }
-
-    private static void notifyWelcomeMessage(@NotNull Project project) {
-        if (PluginSettings.getInstance().getState().isFirstPluginRun) {
-            NotificationService.getInstance(project).notifyWelcome();
-            PluginSettings.getInstance().getState().isFirstPluginRun = false;
-        }
-    }
-
-    public static void initServices(@NotNull Project project) throws LanguageModelException {
-        log.debug("Initializing services...");
-        LanguageModelService.getInstance(project).init();
-        CodeCompletionService.getInstance(project).init();
-
-        log.debug("Services initialized");
-    }
-
     @Override
     public Object execute(
             @NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         log.debug("New project opened.");
 
+        if (PluginSettings.getInstance().getState().isFirstPluginRun) {
+            NotificationService.getInstance(project).notifyWelcome();
+            PluginSettings.getInstance().getState().isFirstPluginRun = false;
+        }
+
         EventQueue.invokeLater(
                 () -> {
                     try {
-                        notifyWelcomeMessage(project);
-                        configureBeforeInitServices(project);
+                        if (PluginSettings.getInstance().getState().isPluginConfigured) {
+                            log.debug("Initializing services...");
+                            LanguageModelService.getInstance(project).init();
+                            CodeCompletionService.getInstance(project).init();
+                            log.debug("Services initialized.");
+                        } else {
+                            log.debug("Sending first config notification.");
+                            NotificationService.getInstance(project)
+                                    .notifyWithSettingsActionButton();
+                        }
                     } catch (LanguageModelException e) {
                         log.error("Error while initializing services", e);
-                        NotificationService.getInstance(project).notifyError(e.getMessage());
+                        NotificationService.getInstance(project)
+                                .notifyWithSettingsActionButton(
+                                        e.getMessage(), NotificationType.ERROR);
                     }
                 });
         return null;
