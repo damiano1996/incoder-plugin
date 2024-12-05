@@ -8,6 +8,7 @@ import com.intellij.openapi.components.Storage;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Service(Service.Level.APP)
@@ -31,7 +32,7 @@ public final class OllamaSettings implements PersistentStateComponent<OllamaSett
     public static class State {
 
         public String baseUrl = "http://localhost:11434/";
-        public String modelName = "";
+        @Nullable public String modelName = null;
         public Double temperature = 0.2;
     }
 }

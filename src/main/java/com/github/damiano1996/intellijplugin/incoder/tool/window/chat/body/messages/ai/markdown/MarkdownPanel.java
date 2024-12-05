@@ -5,6 +5,7 @@ import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messa
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.TextMarkdownBlock;
+import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.CopyClipboardCodeAction;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.CreateCodeAction;
 import com.github.damiano1996.intellijplugin.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.MergeAction;
 import com.intellij.lang.Language;
@@ -50,6 +51,7 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
 
         actionGroup.add(new MergeAction(codeBlock));
         actionGroup.add(new CreateCodeAction(codeBlock));
+        actionGroup.add(new CopyClipboardCodeAction(codeBlock));
 
         var actionToolbar =
                 ActionManager.getInstance()

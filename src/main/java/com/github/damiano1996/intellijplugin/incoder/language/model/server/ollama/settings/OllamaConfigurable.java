@@ -1,16 +1,13 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
-import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.BaseServerConfigurable;
 import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class OllamaConfigurable implements Configurable {
+public final class OllamaConfigurable extends BaseServerConfigurable {
 
     private OllamaComponent settingsComponent = new OllamaComponent();
 
@@ -51,18 +48,12 @@ public final class OllamaConfigurable implements Configurable {
     }
 
     @Override
-    public void apply() throws ConfigurationException {
+    public void updateState() {
         var state = getState();
 
         state.baseUrl = settingsComponent.getBaseUrlField().getText();
         state.modelName = getModelName();
         state.temperature = (Double) settingsComponent.getTemperatureField().getValue();
-
-        try {
-            LanguageModelService.getInstance().init();
-        } catch (LanguageModelException e) {
-            throw new ConfigurationException(e.getMessage(), "Server Error");
-        }
     }
 
     @Override

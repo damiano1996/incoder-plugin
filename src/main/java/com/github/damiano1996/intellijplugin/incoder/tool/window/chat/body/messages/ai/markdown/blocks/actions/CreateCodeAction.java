@@ -27,7 +27,7 @@ public class CreateCodeAction extends AnAction {
 
     public CreateCodeAction(CodeMarkdownBlock codeBlock) {
         super(
-                "Create New File...",
+                "Create New File from Code Block",
                 "Creates a new file with the code block content",
                 AllIcons.Actions.AddFile);
         this.codeBlock = codeBlock;

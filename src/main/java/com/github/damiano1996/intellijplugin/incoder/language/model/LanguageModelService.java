@@ -13,7 +13,6 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import dev.langchain4j.service.TokenStream;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -38,10 +37,6 @@ public final class LanguageModelService implements Disposable {
 
     public static LanguageModelService getInstance(@NotNull Project project) {
         return project.getService(LanguageModelService.class);
-    }
-
-    public static LanguageModelService getInstance() {
-        return LanguageModelService.getInstance(ProjectManager.getInstance().getDefaultProject());
     }
 
     public void init() throws LanguageModelException {
@@ -105,7 +100,7 @@ public final class LanguageModelService implements Disposable {
                         editDescription);
     }
 
-    public String createFileName(String fileContent) throws LanguageModelException {
+    public String createFileName(String fileContent) {
         return Objects.requireNonNull(client, "Client must be initialized to create file name.")
                 .createFileName(fileContent);
     }

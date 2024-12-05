@@ -15,7 +15,6 @@ import com.intellij.openapi.editor.event.EditorMouseEvent;
 import com.intellij.openapi.editor.event.EditorMouseListener;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -42,10 +41,6 @@ public final class CodeCompletionService
 
     public static CodeCompletionService getInstance(@NotNull Project project) {
         return project.getService(CodeCompletionService.class);
-    }
-
-    public static CodeCompletionService getInstance() {
-        return CodeCompletionService.getInstance(ProjectManager.getInstance().getDefaultProject());
     }
 
     public void init() {

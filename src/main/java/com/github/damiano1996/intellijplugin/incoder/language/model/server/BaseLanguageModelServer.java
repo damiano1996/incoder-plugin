@@ -9,6 +9,8 @@ import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public abstract class BaseLanguageModelServer implements LanguageModelServer {
@@ -17,8 +19,9 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
 
     public abstract StreamingChatLanguageModel createStreamingChatLanguageModel();
 
+    @Contract(" -> new")
     @Override
-    public LanguageModelClient createClient() throws LanguageModelException {
+    public @NotNull LanguageModelClient createClient() throws LanguageModelException {
         try {
             ChatMemory chatMemory = createChatMemory();
 

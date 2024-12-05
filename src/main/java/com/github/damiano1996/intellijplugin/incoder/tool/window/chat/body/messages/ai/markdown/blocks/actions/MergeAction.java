@@ -28,7 +28,7 @@ public class MergeAction extends AnAction {
     private final CodeMarkdownBlock codeBlock;
 
     public MergeAction(CodeMarkdownBlock codeBlock) {
-        super("Merge...", "Merge selected changes", AllIcons.Vcs.Merge);
+        super("Merge with Current Document", "Merge selected changes", AllIcons.Vcs.Merge);
         this.codeBlock = codeBlock;
     }
 

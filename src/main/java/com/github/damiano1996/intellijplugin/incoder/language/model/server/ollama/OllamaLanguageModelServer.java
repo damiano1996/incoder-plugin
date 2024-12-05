@@ -8,11 +8,12 @@ import dev.langchain4j.model.ollama.*;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class OllamaLanguageModelServer extends BaseLanguageModelServer {
 
-    private static OllamaSettings.State getState() {
+    private static OllamaSettings.@NotNull State getState() {
         return OllamaSettings.getInstance().getState();
     }
 

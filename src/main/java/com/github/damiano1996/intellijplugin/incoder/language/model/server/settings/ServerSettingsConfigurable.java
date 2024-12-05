@@ -1,16 +1,13 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.settings;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
-import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.BaseServerConfigurable;
 import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class ServerSettingsConfigurable implements Configurable {
+public final class ServerSettingsConfigurable extends BaseServerConfigurable {
 
     private ServerSettingsComponent serverSettingsComponent;
 
@@ -48,16 +45,10 @@ public final class ServerSettingsConfigurable implements Configurable {
     }
 
     @Override
-    public void apply() throws ConfigurationException {
+    public void updateState() {
         ServerSettings.State state = getState();
 
         state.serverName = serverSettingsComponent.getServerTypeComboBox().getItem();
-
-        try {
-            LanguageModelService.getInstance().init();
-        } catch (LanguageModelException e) {
-            throw new ConfigurationException(e.getMessage(), "Server Error");
-        }
     }
 
     @Override
