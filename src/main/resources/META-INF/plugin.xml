@@ -11,66 +11,52 @@
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="com.github.damiano1996.intellijplugin.incoder.InCoderActivity"/>
 
-        <applicationConfigurable
-                instance="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
-                displayName="InCoder"/>
+        <groupConfigurable descriptionKey="plugin.group.description"
+                           displayNameKey="plugin.group.name"
+                           id="plugin.group"/>
 
-        <groupConfigurable descriptionKey="configurable.group.servers.settings.display.description"
-                           displayNameKey="configurable.group.servers.settings.display.name"
-                           id="incoder.group"
-                           parentId="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"/>
-
-        <groupConfigurable descriptionKey="configurable.group.servers.settings.display.description"
-                           displayNameKey="configurable.group.servers.settings.display.name"
-                           id="servers.group"
-                           parentId="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"/>
+        <groupConfigurable descriptionKey="server.group.description"
+                           displayNameKey="server.group.name"
+                           id="server.group"
+                           parentId="plugin.group"/>
 
         <applicationConfigurable
-                instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettingsConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettingsConfigurable"
-                parentId="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
-                groupId="incoder.group"
-                displayName="Server">
+                groupId="server.group"
+                instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
+                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
+                displayName="Anthropic"/>
 
-            <configurable
-                    groupId="servers.group"
-                    instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaConfigurable"
-                    id="com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaConfigurable"
-                    displayName="Ollama"/>
+        <applicationConfigurable
+                groupId="server.group"
+                instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaConfigurable"
+                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaConfigurable"
+                displayName="Ollama"/>
 
-            <configurable
-                    groupId="servers.group"
-                    instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiConfigurable"
-                    id="com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiConfigurable"
-                    displayName="Open AI"/>
-
-            <configurable
-                    groupId="servers.group"
-                    instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
-                    id="com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
-                    displayName="Anthropic"/>
-
-        </applicationConfigurable>
+        <applicationConfigurable
+                groupId="server.group"
+                instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiConfigurable"
+                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiConfigurable"
+                displayName="Open AI"/>
 
         <applicationConfigurable
                 instance="com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"
                 id="com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"
-                parentId="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
-                groupId="incoder.group"
+                parentId="plugin.group"
+                groupId="plugin.group"
                 displayName="Chat"/>
 
         <applicationConfigurable
                 instance="com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings.InlineConfigurable"
                 id="com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings.InlineConfigurable"
-                parentId="com.github.damiano1996.intellijplugin.incoder.settings.PluginSettingsConfigurable"
-                groupId="incoder.group"
+                parentId="plugin.group"
+                groupId="plugin.group"
                 displayName="Inline"/>
 
         <notificationGroup id="InCoder Notifications" displayType="BALLOON"/>
 
         <toolWindow id="InCoder" secondary="true"
-                    icon="com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON" anchor="right"
+                    icon="com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON"
+                    anchor="right"
                     factoryClass="com.github.damiano1996.intellijplugin.incoder.tool.window.InCoderToolWindowFactory"/>
     </extensions>
 

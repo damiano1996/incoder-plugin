@@ -1,6 +1,9 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings;
 
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.BaseServerConfigurable;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.OpenAiLanguageModelServer;
+import com.intellij.openapi.options.ConfigurationException;
 import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
@@ -49,6 +52,15 @@ public final class OpenAiConfigurable extends BaseServerConfigurable {
         state.apiKey = settingsComponent.getApiKeyField().getText();
         state.modelName = settingsComponent.getModelNameField().getItem();
         state.temperature = (Double) settingsComponent.getTemperatureField().getValue();
+    }
+
+    @Override
+    protected void verifySettings() throws ConfigurationException {
+        try {
+            new OpenAiLanguageModelServer().createClient();
+        } catch (LanguageModelException e) {
+            throw new ConfigurationException(e.getMessage());
+        }
     }
 
     @Override

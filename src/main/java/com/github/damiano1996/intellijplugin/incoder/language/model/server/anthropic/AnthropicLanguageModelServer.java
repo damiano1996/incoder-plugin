@@ -35,6 +35,11 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
+    public String getName() {
+        return "Anthropic";
+    }
+
+    @Override
     public List<String> getAvailableModels() {
         return Arrays.stream(AnthropicChatModelName.values()).map(Enum::name).toList();
     }

@@ -1,6 +1,9 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings;
 
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.BaseServerConfigurable;
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.OllamaLanguageModelServer;
+import com.intellij.openapi.options.ConfigurationException;
 import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
@@ -54,6 +57,15 @@ public final class OllamaConfigurable extends BaseServerConfigurable {
         state.baseUrl = settingsComponent.getBaseUrlField().getText();
         state.modelName = getModelName();
         state.temperature = (Double) settingsComponent.getTemperatureField().getValue();
+    }
+
+    @Override
+    protected void verifySettings() throws ConfigurationException {
+        try {
+            new OllamaLanguageModelServer().createClient();
+        } catch (LanguageModelException e) {
+            throw new ConfigurationException(e.getMessage());
+        }
     }
 
     @Override

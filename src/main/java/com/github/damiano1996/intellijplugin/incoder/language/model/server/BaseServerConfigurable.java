@@ -1,26 +1,24 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.server;
 
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
-import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
-import java.util.Objects;
 
 public abstract class BaseServerConfigurable implements Configurable {
 
     @Override
     public final void apply() throws ConfigurationException {
         updateState();
-
-        try {
-            LanguageModelService.getInstance(Objects.requireNonNull(ProjectUtil.getActiveProject()))
-                    .init();
-        } catch (LanguageModelException e) {
-            throw new ConfigurationException(
-                    e.getMessage(), "Unable to Initialize the Language Model Service.");
-        }
+        verifySettings();
     }
 
-    protected abstract void updateState() throws ConfigurationException;
+    /** Updates the server state based on the current configuration. */
+    protected abstract void updateState();
+
+    /**
+     * Verifies the configured settings and throws a {@link ConfigurationException} if any issues
+     * are found.
+     *
+     * @throws ConfigurationException if the settings are invalid.
+     */
+    protected abstract void verifySettings() throws ConfigurationException;
 }

@@ -28,7 +28,10 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
             return new LanguageModelClientImpl(
                     createChatLanguageModel(), createStreamingChatLanguageModel(), chatMemory);
         } catch (Exception e) {
-            throw new LanguageModelException("Unable to create the client. " + e.getMessage(), e);
+            throw new LanguageModelException(
+                    ("Unable to create the client for %s.\n" + "%s")
+                            .formatted(getName(), e.getMessage()),
+                    e);
         }
     }
 

@@ -7,7 +7,6 @@ import com.github.damiano1996.intellijplugin.incoder.language.model.client.inlin
 import com.github.damiano1996.intellijplugin.incoder.language.model.client.prompt.PromptType;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.LanguageModelServer;
 import com.github.damiano1996.intellijplugin.incoder.language.model.server.ServerFactoryUtils;
-import com.github.damiano1996.intellijplugin.incoder.language.model.server.settings.ServerSettings;
 import com.github.damiano1996.intellijplugin.incoder.settings.PluginSettings;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
@@ -43,7 +42,7 @@ public final class LanguageModelService implements Disposable {
         log.debug("Initializing {}...", LanguageModelService.class.getSimpleName());
 
         server =
-                ServerFactoryUtils.findByName(ServerSettings.getInstance().getState().serverName)
+                ServerFactoryUtils.findByName(ChatSettings.getInstance().getState().serverName)
                         .createServer();
 
         client = server.createClient();
@@ -67,7 +66,8 @@ public final class LanguageModelService implements Disposable {
         return Objects.requireNonNull(client, "Client must be initialized to complete the code.")
                 .complete(
                         InlineSettings.getInstance().getState().systemMessageInstructions,
-                        codeCompletionContext.leftContext());
+                        codeCompletionContext.leftContext(),
+                        codeCompletionContext.rightContext());
     }
 
     @Contract("_ -> new")

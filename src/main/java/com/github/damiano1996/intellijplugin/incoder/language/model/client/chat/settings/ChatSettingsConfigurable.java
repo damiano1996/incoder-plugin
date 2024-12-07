@@ -1,6 +1,11 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings;
 
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelException;
+import com.github.damiano1996.intellijplugin.incoder.language.model.LanguageModelService;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.options.ConfigurationException;
+import java.util.Objects;
 import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
@@ -41,7 +46,8 @@ public final class ChatSettingsConfigurable implements Configurable {
     public boolean isModified() {
         var state = getState();
 
-        return !chatSettingsComponent.getMaxMessages().getValue().equals(state.maxMessages)
+        return !chatSettingsComponent.getServerTypeComboBox().getItem().equals(state.serverName)
+                || !chatSettingsComponent.getMaxMessages().getValue().equals(state.maxMessages)
                 || !chatSettingsComponent
                         .getSystemMessageInstructionsWithCodeField()
                         .getText()
@@ -53,20 +59,30 @@ public final class ChatSettingsConfigurable implements Configurable {
     }
 
     @Override
-    public void apply() {
+    public void apply() throws ConfigurationException {
         var state = getState();
 
+        state.serverName = chatSettingsComponent.getServerTypeComboBox().getItem();
         state.maxMessages = (int) chatSettingsComponent.getMaxMessages().getValue();
         state.systemMessageInstructionsWithCode =
                 chatSettingsComponent.getSystemMessageInstructionsWithCodeField().getText();
         state.systemMessageInstructions =
                 chatSettingsComponent.getSystemMessageInstructionsField().getText();
+
+        try {
+            LanguageModelService.getInstance(Objects.requireNonNull(ProjectUtil.getActiveProject()))
+                    .init();
+        } catch (LanguageModelException e) {
+            throw new ConfigurationException(
+                    e.getMessage(), "Unable to Initialize the Language Model Service");
+        }
     }
 
     @Override
     public void reset() {
         var state = getState();
 
+        chatSettingsComponent.getServerTypeComboBox().setItem(state.serverName);
         chatSettingsComponent.getMaxMessages().setValue(state.maxMessages);
         chatSettingsComponent
                 .getSystemMessageInstructionsWithCodeField()

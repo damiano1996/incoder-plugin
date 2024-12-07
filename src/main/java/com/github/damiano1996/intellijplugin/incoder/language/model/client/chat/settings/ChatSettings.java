@@ -1,5 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings;
 
+import com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.OllamaFactory;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
@@ -29,6 +30,8 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
 
     @ToString
     public static class State {
+        public String serverName = new OllamaFactory().getName();
+
         public int maxMessages = 10;
 
         public String systemMessageInstructionsWithCode =

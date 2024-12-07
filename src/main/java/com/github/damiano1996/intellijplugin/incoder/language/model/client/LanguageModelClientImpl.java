@@ -52,9 +52,9 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     }
 
     @Override
-    public String complete(String instructions, String leftContext) {
+    public String complete(String instructions, String leftContext, String rightContext) {
         log.debug("Completing code...");
-        return inlineCodingAssistant.complete(instructions, leftContext);
+        return inlineCodingAssistant.complete(instructions, leftContext, rightContext);
     }
 
     @Override

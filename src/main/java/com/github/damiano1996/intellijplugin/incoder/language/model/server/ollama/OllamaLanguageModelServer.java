@@ -36,6 +36,11 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
+    public String getName() {
+        return "Ollama";
+    }
+
+    @Override
     public List<String> getAvailableModels() {
         return getAvailableModels(getState().baseUrl);
     }

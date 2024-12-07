@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface LanguageModelServer {
 
+    String getName();
+
     List<String> getAvailableModels();
 
     String getSelectedModelName();

@@ -54,6 +54,11 @@ public class CodeCompletionQueue {
                                         .split("\n")[0]
                                         .trim();
 
+                        log.debug(
+                                "{}\nContinues with:\n{}",
+                                codeCompletionContext.leftContext(),
+                                completion);
+
                         if (completion.startsWith(MARKDOWN_CODE_BLOCK_DELIMITER)) continue;
 
                         if (queue.isEmpty()) {
