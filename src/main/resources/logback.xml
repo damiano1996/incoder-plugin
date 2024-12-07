@@ -11,5 +11,5 @@
     </root>
 
     <!-- Set a specific logger to DEBUG level -->
-    <logger name="com.github.damiano1996.intellijplugin.incoder" level="DEBUG" />
+    <logger name="com.github.damiano1996.intellijplugin.incoder" level="INFO" />
 </configuration>

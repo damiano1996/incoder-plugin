@@ -1,5 +1,6 @@
 package com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings;
 
+import com.github.damiano1996.intellijplugin.incoder.InCoderBundle;
 import com.github.damiano1996.intellijplugin.incoder.ui.components.DescriptionLabel;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBCheckBox;
@@ -13,12 +14,13 @@ import lombok.Getter;
 public class InlineComponent {
 
     private final JPanel mainPanel;
-    private final JBTextArea systemMessageInstructionsField;
     private final JBCheckBox enableCheckbox;
+    private final JBCheckBox endLineCheckBox;
+    private final JBTextArea systemMessageInstructionsField;
 
     public InlineComponent() {
         enableCheckbox = new JBCheckBox("Inline coding assistant");
-        enableCheckbox.setSelected(true);
+        endLineCheckBox = new JBCheckBox("Trigger at end line");
 
         systemMessageInstructionsField = new JBTextArea(5, 20);
         systemMessageInstructionsField.setLineWrap(true);
@@ -27,10 +29,21 @@ public class InlineComponent {
         mainPanel =
                 FormBuilder.createFormBuilder()
                         .setFormLeftIndent(20)
+                        .addComponent(
+                                new DescriptionLabel(InCoderBundle.message("inline.description")))
+                        .addVerticalGap(20)
                         .addComponent(enableCheckbox)
                         .addComponent(
                                 new DescriptionLabel(
                                         "Enable the inline coding assistant functionality."))
+                        .addVerticalGap(20)
+                        .addComponent(endLineCheckBox)
+                        .addComponent(
+                                new DescriptionLabel(
+                                        "Activates code completion only when the caret is at the"
+                                                + " end of a line.\n"
+                                                + "If disabled, suggestions may also appear while"
+                                                + " typing in the middle of a line."))
                         .addVerticalGap(20)
                         .addLabeledComponent(
                                 new JBLabel("System message instructions:"),

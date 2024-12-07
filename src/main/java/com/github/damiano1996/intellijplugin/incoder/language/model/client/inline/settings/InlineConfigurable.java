@@ -38,6 +38,7 @@ public final class InlineConfigurable implements Configurable {
         var state = getState();
 
         return inlineComponent.getEnableCheckbox().isSelected() != state.enable
+                || inlineComponent.getEndLineCheckBox().isSelected() != state.triggerEndLine
                 || !inlineComponent
                         .getSystemMessageInstructionsField()
                         .getText()
@@ -49,6 +50,7 @@ public final class InlineConfigurable implements Configurable {
         var state = getState();
 
         state.enable = inlineComponent.getEnableCheckbox().isSelected();
+        state.triggerEndLine = inlineComponent.getEndLineCheckBox().isSelected();
         state.systemMessageInstructions =
                 inlineComponent.getSystemMessageInstructionsField().getText();
     }
@@ -57,7 +59,8 @@ public final class InlineConfigurable implements Configurable {
     public void reset() {
         var state = getState();
 
-        inlineComponent.getEnableCheckbox().setEnabled(state.enable);
+        inlineComponent.getEnableCheckbox().setSelected(state.enable);
+        inlineComponent.getEndLineCheckBox().setSelected(state.triggerEndLine);
         inlineComponent
                 .getSystemMessageInstructionsField()
                 .setText(state.systemMessageInstructions);

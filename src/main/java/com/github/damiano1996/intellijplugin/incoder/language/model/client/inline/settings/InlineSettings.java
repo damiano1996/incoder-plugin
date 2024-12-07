@@ -29,7 +29,8 @@ public final class InlineSettings implements PersistentStateComponent<InlineSett
 
     @ToString
     public static class State {
-        public boolean enable = true;
+        public boolean enable = false;
+        public boolean triggerEndLine = true;
 
         public String systemMessageInstructions =
                 """
