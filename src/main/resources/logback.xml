@@ -5,11 +5,10 @@
         </encoder>
     </appender>
 
-    <!-- Set root level to INFO -->
     <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 
-    <!-- Set a specific logger to DEBUG level -->
     <logger name="com.github.damiano1996.jetbrains.incoder" level="INFO" />
+    <logger name="com.github.damiano1996.jetbrains.incoder.completion" level="DEBUG" />
 </configuration>

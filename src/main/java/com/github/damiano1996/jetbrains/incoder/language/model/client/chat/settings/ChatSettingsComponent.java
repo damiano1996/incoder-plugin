@@ -28,6 +28,7 @@ public class ChatSettingsComponent {
                                 .map(ServerFactory::getName)
                                 .toList()
                                 .toArray(new String[0]));
+        serverTypeComboBox.addItem("");
 
         SpinnerNumberModel maxMessagesModel = new SpinnerNumberModel(10, 0, 50, 1);
         maxMessages = new JSpinner(maxMessagesModel);

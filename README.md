@@ -1,75 +1,78 @@
-# InCoder Plugin for JetBrains IDEs
+# InCoder: An LLM-Powered Plugin for JetBrains IDEs
 
 <!-- Plugin description -->
-**InCoder** is a plugin for JetBrains IDEs that provides advanced, AI-powered code completion using Hugging Face models. The plugin runs entirely on your local machine, ensuring privacy and efficiency without the need for external servers.
+**InCoder** is a powerful plugin designed for JetBrains IDEs, including IntelliJ IDEA, PyCharm, and others in the JetBrains ecosystem. 
+It seamlessly integrates advanced Large Language Models (LLMs) into your development workflow, providing you with code generation, understanding, and completion capabilities, all directly within your favorite IDE.
 <!-- Plugin description end -->
 
-## Features
+---
 
-- **Local AI-Powered Code Completion:** Leveraging Hugging Face models, all inference is performed locally in a Docker container.
-- **Multi-IDE Support:** Compatible with IntelliJ IDEA, PyCharm, WebStorm, and other JetBrains IDEs.
-- **Open Source:** Fully transparent and customizable to meet your specific needs.
-- **Language Agnostic:** Works with various programming languages supported by JetBrains IDEs.
-- **Privacy-Focused:** Your code never leaves your machine, ensuring complete data privacy.
+## Key Features
 
-## Installation
+### 1. **Interactive Chat for Code Assistance**
+- A dedicated **tool window** appears on the right panel of the IDE after installing the plugin.
+- Interact with an LLM to:
+  - **Generate code snippets** or solve coding challenges.
+  - **Understand code** by analyzing the file or specific lines you're viewing.
+  - Get contextual suggestions and explanations based on the active file you're working on, as the LLM has access to the current code.
 
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/damiano1996/incoder.git
-   ```
+### 2. **Inline Code Completion**
+- **Real-time suggestions** while you type in the editor.
+- Press **Tab** to accept the suggested code and insert it directly into your file.
+- Accelerate your coding workflow with intelligent autocompletion that understands the context of your project.
 
-2. **Build the Plugin:**
-    - Open the project in IntelliJ IDEA or your preferred JetBrains IDE.
-    - Build the project using `Build > Build Project`.
+### 3. **Support for Multiple LLM Providers**
+- InCoder supports **multiple LLM providers**, giving you flexibility and choice:
+  - **Ollama**: Utilize models running locally on your machine to preserve privacy.
+  - **OpenAI**: Access advanced cloud-based LLMs for high-quality suggestions and assistance.
+  - **Anthropic**: Integrate with this leading LLM provider for ethical and powerful AI capabilities.
+- All providers can be easily **configured** through the plugin's settings, allowing you to choose the one that best fits your needs.
 
-3. **Install the Plugin:**
-    - Go to `Settings/Preferences > Plugins > ⚙️ > Install Plugin from Disk...`
-    - Select the built plugin file (usually with a `.jar` extension).
-    - Restart your IDE to activate the plugin.
+### 4. **Privacy-Focused Local LLM Support**
+- By using **Ollama**, InCoder enables local LLM inference directly on your computer.
+- Keeps sensitive project data private and ensures compliance with internal security policies.
+- Ideal for developers who value privacy and want to avoid sending data to external servers.
 
-4. **Docker Setup:**
-    - Ensure Docker is installed and running on your system.
-    - The plugin will automatically manage the Docker container for local inference.
+## Settings
+The plugin is highly customizable through the **InCoder Settings** panel in your IDE. Access it via the settings/preferences menu under the section **InCoder**. 
+Configuration is divided into three main subsections:
 
-## Usage
+- **Chat**: Configure settings for the interactive chat window, such as history retention and UI preferences.
+- **Inline**: Enable or disable inline code completion and customize the behavior (e.g., auto-suggestions, Tab behavior).
+- **Server**: Set up your preferred LLM provider.
 
-1. After installation, configure the plugin via `Settings/Preferences > Tools > InCoder Plugin`.
-2. Start coding in your preferred JetBrains IDE.
-3. Experience enhanced, AI-powered code completion as you type!
+---
 
-## Configuration
+## Benefits of Using InCoder
+- **Boost productivity**: Generate boilerplate code, debug faster, and understand unfamiliar codebases more quickly.
+- **Enhanced contextual understanding**: The LLM has access to your active file, ensuring accurate and relevant suggestions tailored to your project.
+- **Customizable and flexible**: Easily switch between LLM providers to adapt to your workflow or organizational requirements.
+- **Seamless integration**: Designed specifically for JetBrains IDEs, ensuring an intuitive and native user experience.
 
-Customize InCoder to suit your workflow:
+## Experimental Features
+- **Inline code completion** is currently experimental but highly promising for real-time code assistance and efficiency. Feedback is welcome to improve this feature further.
 
-- **Model Selection:** Choose from a variety of Hugging Face models optimized for code completion.
-- **Performance Tuning:** Adjust memory and CPU allocation for the Docker container to balance performance and resource usage.
-- **Activation Settings:** Configure when and how the AI-powered completion activates.
-- **Language-Specific Settings:** Fine-tune the plugin's behavior for different programming languages.
+## Supported JetBrains IDEs
+While InCoder is primarily tested on **IntelliJ IDEA** and **PyCharm**, it is compatible with most JetBrains IDEs, making it a versatile choice for developers working in diverse environments.
 
-## Troubleshooting
+---
 
-- **Docker Issues:** Ensure Docker is running and you have sufficient permissions.
-- **Performance Concerns:** Adjust the resource allocation in the plugin settings.
-- **Compatibility Problems:** Check our [compatibility list](./COMPATIBILITY.md) for IDE version support.
+## Contribution
+Contributions are welcome! If you'd like to help improve InCoder, follow these steps:
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Commit your changes and submit a pull request.
+4. Open **issues** for suggestions, bug reports, or enhancements.
 
-## Contributing
+We follow a standard GitHub workflow, so feel free to contribute as you'd like!
 
-We welcome contributions from the community! Here's how you can help:
-
-1. Fork the repository and create your feature branch.
-2. Write clear, commented code and include unit tests where applicable.
-3. Ensure your code adheres to our style guidelines.
-4. Submit a pull request with a comprehensive description of your changes.
-
-For bug reports or feature requests, please open an issue in our GitHub repository.
+---
 
 ## License
+This project is licensed under the **MIT License**.  
+You are free to use, modify, and distribute the code. See the [LICENSE](LICENSE) file for more details.
 
-This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for full details.
+---
 
-## Acknowledgments
-
-- Thanks to the Hugging Face team for their incredible models.
-- Gratitude to the JetBrains team for their excellent IDE ecosystem.
-- Appreciation to all contributors who help make InCoder better.
+Empower your coding experience with **InCoder** and unlock the full potential of AI-driven development assistance. 
+Whether you're generating code, understanding complex algorithms, or seeking intelligent completions, InCoder is here to make your workflow smarter, faster, and more secure.

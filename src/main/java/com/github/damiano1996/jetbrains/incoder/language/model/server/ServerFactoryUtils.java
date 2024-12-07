@@ -3,6 +3,8 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +14,9 @@ import org.reflections.Reflections;
 @UtilityClass
 public class ServerFactoryUtils {
 
-    public ServerFactory findByName(String name) {
+    public ServerFactory findByName(@NotNull String name) throws LanguageModelException {
+        if (name.isBlank() || name.isEmpty()) throw new LanguageModelException("Server name must be defined.");
+
         return getServerFactories().stream()
                 .filter(serverFactory -> serverFactory.getName().equals(name))
                 .findFirst()

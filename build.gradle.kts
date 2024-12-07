@@ -53,8 +53,8 @@ spotless {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    version.set("2023.2.6")
-    type.set("IC") // Target IDE Platform
+    version.set(properties("platformVersion"))
+    type.set(properties("platformType"))
     // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
     plugins.set(properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) })
 }

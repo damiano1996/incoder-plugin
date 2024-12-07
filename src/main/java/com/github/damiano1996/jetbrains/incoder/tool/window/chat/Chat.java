@@ -42,8 +42,8 @@ public class Chat {
         if (!LanguageModelService.getInstance(project).isReady()) {
             NotificationService.getInstance(project)
                     .notifyWithSettingsActionButton(
-                            "The language model service is not ready. "
-                                    + "Please, configure the server from Settings.",
+                            "The Language Model Service is not ready. "
+                                    + "Please, configure the Chat and the Server from Settings.",
                             NotificationType.WARNING);
             return;
         }

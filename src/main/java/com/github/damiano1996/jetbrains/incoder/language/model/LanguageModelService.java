@@ -41,8 +41,10 @@ public final class LanguageModelService implements Disposable {
     public void init() throws LanguageModelException {
         log.debug("Initializing {}...", LanguageModelService.class.getSimpleName());
 
+        var serverName = ChatSettings.getInstance().getState().serverName;
+
         server =
-                ServerFactoryUtils.findByName(ChatSettings.getInstance().getState().serverName)
+                ServerFactoryUtils.findByName(serverName)
                         .createServer();
 
         client = server.createClient();

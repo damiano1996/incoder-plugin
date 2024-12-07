@@ -9,6 +9,7 @@ import com.intellij.openapi.components.Storage;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Service(Service.Level.APP)
@@ -30,7 +31,7 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
 
     @ToString
     public static class State {
-        public String serverName = new OllamaFactory().getName();
+        public String serverName = "";
 
         public int maxMessages = 10;
 
