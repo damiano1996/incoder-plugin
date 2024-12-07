@@ -1,6 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin require-restart="false">
-    <id>com.github.damiano1996.intellijplugin.incoder</id>
+    <id>com.github.damiano1996.jetbrains.incoder</id>
     <name>InCoder</name>
     <vendor email="damiano.derin@gmail.com">Damiano Derin</vendor>
 
@@ -9,7 +9,7 @@
     <resource-bundle>messages.bundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <postStartupActivity implementation="com.github.damiano1996.intellijplugin.incoder.InCoderActivity"/>
+        <postStartupActivity implementation="com.github.damiano1996.jetbrains.incoder.InCoderActivity"/>
 
         <groupConfigurable descriptionKey="plugin.group.description"
                            displayNameKey="plugin.group.name"
@@ -22,32 +22,32 @@
 
         <applicationConfigurable
                 groupId="server.group"
-                instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
+                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
+                id="com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
                 displayName="Anthropic"/>
 
         <applicationConfigurable
                 groupId="server.group"
-                instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.ollama.settings.OllamaConfigurable"
+                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings.OllamaConfigurable"
+                id="com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings.OllamaConfigurable"
                 displayName="Ollama"/>
 
         <applicationConfigurable
                 groupId="server.group"
-                instance="com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.server.openai.settings.OpenAiConfigurable"
+                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.openai.settings.OpenAiConfigurable"
+                id="com.github.damiano1996.jetbrains.incoder.language.model.server.openai.settings.OpenAiConfigurable"
                 displayName="Open AI"/>
 
         <applicationConfigurable
-                instance="com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"
+                instance="com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"
+                id="com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"
                 parentId="plugin.group"
                 groupId="plugin.group"
                 displayName="Chat"/>
 
         <applicationConfigurable
-                instance="com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings.InlineConfigurable"
-                id="com.github.damiano1996.intellijplugin.incoder.language.model.client.inline.settings.InlineConfigurable"
+                instance="com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineConfigurable"
+                id="com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineConfigurable"
                 parentId="plugin.group"
                 groupId="plugin.group"
                 displayName="Inline"/>
@@ -55,19 +55,19 @@
         <notificationGroup id="InCoder Notifications" displayType="BALLOON"/>
 
         <toolWindow id="InCoder" secondary="true"
-                    icon="com.github.damiano1996.intellijplugin.incoder.InCoderIcons.PLUGIN_ICON"
+                    icon="com.github.damiano1996.jetbrains.incoder.InCoderIcons.PLUGIN_ICON"
                     anchor="right"
-                    factoryClass="com.github.damiano1996.intellijplugin.incoder.tool.window.InCoderToolWindowFactory"/>
+                    factoryClass="com.github.damiano1996.jetbrains.incoder.tool.window.InCoderToolWindowFactory"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionAction"
+        <listener class="com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionAction"
                   topic="com.intellij.openapi.actionSystem.ex.AnActionListener"/>
     </applicationListeners>
 
     <actions>
-        <action id="com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionAction"
-                class="com.github.damiano1996.intellijplugin.incoder.completion.CodeCompletionAction"
+        <action id="com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionAction"
+                class="com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionAction"
                 text="ConfirmInCoderAction"
                 description="Confirm InCoder suggestion">
             <keyboard-shortcut keymap="$default" first-keystroke="TAB"/>
