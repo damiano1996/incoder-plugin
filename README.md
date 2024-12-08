@@ -14,9 +14,9 @@
 </div>
 
 <!-- Plugin description -->
-
 **InCoder** is a powerful plugin designed for JetBrains IDEs, including IntelliJ IDEA, PyCharm, and others in the JetBrains ecosystem.
 It seamlessly integrates advanced Large Language Models (LLMs) into your development workflow, providing you with code generation, understanding, and completion capabilities, all directly within your favorite IDE.
+<!-- Plugin description end -->
 
 <p align="center">
   <img src=".github/readme/demo-chat-hello-world-01.png" alt="Demo Chat Hello World 01" style="width: 45%; margin-right: 10px;">
@@ -82,8 +82,6 @@ Configuration is divided into three main subsections:
 
 ## Supported JetBrains IDEs
 While InCoder is primarily tested on **IntelliJ IDEA** and **PyCharm**, it is compatible with most JetBrains IDEs, making it a versatile choice for developers working in diverse environments.
-
-<!-- Plugin description end -->
 
 ---
 
