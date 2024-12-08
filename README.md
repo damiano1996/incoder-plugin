@@ -4,13 +4,12 @@
 
 # InCoder: An LLM-Powered Plugin for JetBrains IDEs
 
+[![jetbrains marketplace badge]][jetbrains marketplace link]
 [![latest release badge]][latest release link]
 [![CI checks on main badge]][CI checks on main link]
 [![latest commit to main badge]][latest commit to main link]
 [![license badge]][license link]
 [![paypal badge]][paypal link]
-
-<iframe width="245px" height="48px" src="https://plugins.jetbrains.com/embeddable/install/26037"></iframe>
 
 </div>
 
@@ -123,6 +122,8 @@ Thank you for your support! It means a lot and helps me dedicate more time to im
 Empower your coding experience with **InCoder** and unlock the full potential of AI-driven development assistance. 
 Whether you're generating code, understanding complex algorithms, or seeking intelligent completions, InCoder is here to make your workflow smarter, faster, and more secure.
 
+[jetbrains marketplace badge]: https://flat.badgen.net/badge/JETBRAINS%20Marketplace/Download/orange
+[jetbrains marketplace link]: https://plugins.jetbrains.com/plugin/26037-incoder
 [latest release badge]: https://flat.badgen.net/github/release/damiano1996/incoder-plugin/development?icon=github
 [latest release link]: https://github.com/damiano1996/incoder-plugin/releases/latest
 [CI checks on main badge]: https://flat.badgen.net/github/checks/damiano1996/incoder-plugin/main?label=CI%20status%20on%20main&cache=900&icon=github
@@ -131,5 +132,5 @@ Whether you're generating code, understanding complex algorithms, or seeking int
 [latest commit to main link]: https://github.com/damiano1996/incoder-plugin/commits/main
 [license badge]: https://flat.badgen.net/github/license/damiano1996/incoder-plugin
 [license link]: https://github.com/damiano1996/incoder-plugin/blob/main/LICENSE
-[paypal badge]: https://flat.badgen.net/badge/PayPal/donate/blue
+[paypal badge]: https://flat.badgen.net/badge/PayPal/Donate/blue
 [paypal link]: https://www.paypal.com/donate/?hosted_button_id=WB3T45XNXGNYU
