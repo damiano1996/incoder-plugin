@@ -1,15 +1,28 @@
+<div align="center">
+
+<img src="src/main/resources/META-INF/pluginIcon.svg" height="130" alt="InCoder">
+
 # InCoder: An LLM-Powered Plugin for JetBrains IDEs
 
+[![latest release badge]][latest release link]
+[![CI checks on main badge]][CI checks on main link]
+[![latest commit to main badge]][latest commit to main link]
+[![license badge]][license link]
+[![paypal badge]][paypal link]
+
+<iframe width="245px" height="48px" src="https://plugins.jetbrains.com/embeddable/install/26037"></iframe>
+
+</div>
+
 <!-- Plugin description -->
-**InCoder** is a powerful plugin designed for JetBrains IDEs, including IntelliJ IDEA, PyCharm, and others in the JetBrains ecosystem. 
+
+**InCoder** is a powerful plugin designed for JetBrains IDEs, including IntelliJ IDEA, PyCharm, and others in the JetBrains ecosystem.
 It seamlessly integrates advanced Large Language Models (LLMs) into your development workflow, providing you with code generation, understanding, and completion capabilities, all directly within your favorite IDE.
-<!-- Plugin description end -->
 
 <p align="center">
   <img src=".github/readme/demo-chat-hello-world-01.png" alt="Demo Chat Hello World 01" style="width: 45%; margin-right: 10px;">
   <img src=".github/readme/demo-chat-hello-world-02.png" alt="Demo Chat Hello World 02" style="width: 45%;">
 </p>
-
 
 ---
 
@@ -71,6 +84,8 @@ Configuration is divided into three main subsections:
 ## Supported JetBrains IDEs
 While InCoder is primarily tested on **IntelliJ IDEA** and **PyCharm**, it is compatible with most JetBrains IDEs, making it a versatile choice for developers working in diverse environments.
 
+<!-- Plugin description end -->
+
 ---
 
 ## Contribution
@@ -85,10 +100,36 @@ We follow a standard GitHub workflow, so feel free to contribute as you'd like!
 ---
 
 ## License
-This project is licensed under the **MIT License**.  
-You are free to use, modify, and distribute the code. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the **Apache License**.
+See the [LICENSE](LICENSE) file for more details.
+
+---
+
+## Support the Project
+
+If you find this project helpful and would like to support its development, consider buying me a coffee!
+Your donations will help keep the project alive and improve it over time.
+
+<div align="center">
+
+[![paypal badge]][paypal link]
+
+</div>
+
+Thank you for your support! It means a lot and helps me dedicate more time to improving the project. 🙏
 
 ---
 
 Empower your coding experience with **InCoder** and unlock the full potential of AI-driven development assistance. 
 Whether you're generating code, understanding complex algorithms, or seeking intelligent completions, InCoder is here to make your workflow smarter, faster, and more secure.
+
+[latest release badge]: https://flat.badgen.net/github/release/damiano1996/incoder-plugin/development?icon=github
+[latest release link]: https://github.com/damiano1996/incoder-plugin/releases/latest
+[CI checks on main badge]: https://flat.badgen.net/github/checks/damiano1996/incoder-plugin/main?label=CI%20status%20on%20main&cache=900&icon=github
+[CI checks on main link]: https://github.com/damiano1996/incoder-plugin/actions?query=branch%3Amain
+[latest commit to main badge]: https://flat.badgen.net/github/last-commit/damiano1996/incoder-plugin/main?icon=github&color=yellow&label=last%20dev%20commit&cache=900
+[latest commit to main link]: https://github.com/damiano1996/incoder-plugin/commits/main
+[license badge]: https://flat.badgen.net/github/license/damiano1996/incoder-plugin
+[license link]: https://github.com/damiano1996/incoder-plugin/blob/main/LICENSE
+[paypal badge]: https://flat.badgen.net/badge/PayPal/donate/blue
+[paypal link]: https://www.paypal.com/donate/?hosted_button_id=WB3T45XNXGNYU
