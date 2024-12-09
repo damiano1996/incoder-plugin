@@ -10,5 +10,4 @@
     </root>
 
     <logger name="com.github.damiano1996.jetbrains.incoder" level="INFO" />
-    <logger name="com.github.damiano1996.jetbrains.incoder.completion" level="DEBUG" />
 </configuration>

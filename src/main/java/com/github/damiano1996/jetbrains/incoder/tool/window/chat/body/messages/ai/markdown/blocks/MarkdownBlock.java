@@ -5,5 +5,5 @@ import javax.swing.*;
 
 public interface MarkdownBlock extends StreamWriter {
 
-    JComponent getComponent();
+    JComponent getMainPanel();
 }
