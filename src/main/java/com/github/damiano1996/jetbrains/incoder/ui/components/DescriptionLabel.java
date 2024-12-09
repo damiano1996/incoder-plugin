@@ -1,5 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.ui.components;
 
+import com.github.damiano1996.jetbrains.incoder.tool.window.ToolWindowColors;
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTextArea;
@@ -11,6 +12,7 @@ public class DescriptionLabel extends JBTextArea {
     public DescriptionLabel(@NotNull @NlsContexts.Label String text) {
         super(text);
         setForeground(JBColor.namedColor("Label.infoForeground"));
+        setBackground(ToolWindowColors.TRANSPARENT);
         setWrapStyleWord(true);
         setLineWrap(true);
         setEditable(false);
@@ -19,12 +21,10 @@ public class DescriptionLabel extends JBTextArea {
     }
 
     @Override
-    public void setCaretPosition(int position) {
-        // Prevent caret movement
-    }
+    public void setCaretPosition(int position) {}
 
     @Override
     public boolean isFocusable() {
-        return false; // Ensure no focus
+        return false;
     }
 }
