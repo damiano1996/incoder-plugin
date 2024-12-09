@@ -45,7 +45,7 @@ public final class AnthropicConfigurable extends BaseServerConfigurable {
     public boolean isModified() {
         var state = getState();
 
-        return !settingsComponent.getApiKeyField().getText().equals(state.apiKey)
+        return !new String(settingsComponent.getApiKeyField().getPassword()).equals(state.apiKey)
                 || !settingsComponent.getModelNameField().getItem().equals(state.modelName)
                 || !settingsComponent.getTemperatureField().getValue().equals(state.temperature);
     }
@@ -54,7 +54,7 @@ public final class AnthropicConfigurable extends BaseServerConfigurable {
     public void updateState() {
         var state = getState();
 
-        state.apiKey = settingsComponent.getApiKeyField().getText();
+        state.apiKey = new String(settingsComponent.getApiKeyField().getPassword());
         state.modelName = settingsComponent.getModelNameField().getItem();
         state.temperature = (Double) settingsComponent.getTemperatureField().getValue();
     }

@@ -12,6 +12,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import java.io.IOException;
@@ -58,8 +59,10 @@ public class CreateCodeAction extends AnAction {
             log.debug("Generated file path: {}", filePath);
 
             if (Files.exists(filePath)) {
-                log.debug("The file already exists. Going to propose a merge request");
-                new MergeAction(codeBlock).actionPerformed(anActionEvent);
+                NotificationService.getInstance(project)
+                        .notifyWarning(
+                                "File '%s' already exists in the selected folder."
+                                        .formatted(filePath.getFileName()));
                 return;
             }
 
@@ -75,7 +78,7 @@ public class CreateCodeAction extends AnAction {
         FileChooserDescriptor descriptor =
                 FileChooserDescriptorFactory.createSingleFolderDescriptor();
         descriptor.setTitle("Select a Folder to Save Your File");
-        VirtualFile projectBaseDir = project.getBaseDir();
+        VirtualFile projectBaseDir = ProjectUtil.guessProjectDir(project);
         return FileChooser.chooseFile(descriptor, project, projectBaseDir);
     }
 
