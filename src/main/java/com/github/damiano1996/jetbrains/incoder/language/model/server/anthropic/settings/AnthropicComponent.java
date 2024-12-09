@@ -28,6 +28,7 @@ public class AnthropicComponent {
                         new AnthropicLanguageModelServer()
                                 .getAvailableModels()
                                 .toArray(new String[0]));
+        modelNameField.addItem("");
         modelNameField.setPreferredSize(new Dimension(300, 30));
 
         mainPanel =

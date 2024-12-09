@@ -1,9 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactory;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactoryUtils;
 import com.github.damiano1996.jetbrains.incoder.ui.components.DescriptionLabel;
-import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
@@ -15,21 +12,11 @@ import lombok.Getter;
 public class ChatSettingsComponent {
 
     private final JPanel mainPanel;
-    private final ComboBox<String> serverTypeComboBox;
     private final JSpinner maxMessages;
     private final JBTextArea systemMessageInstructionsWithCodeField;
     private final JBTextArea systemMessageInstructionsField;
 
     public ChatSettingsComponent() {
-
-        serverTypeComboBox =
-                new ComboBox<>(
-                        ServerFactoryUtils.getServerFactories().stream()
-                                .map(ServerFactory::getName)
-                                .toList()
-                                .toArray(new String[0]));
-        serverTypeComboBox.addItem("");
-
         SpinnerNumberModel maxMessagesModel = new SpinnerNumberModel(10, 0, 50, 1);
         maxMessages = new JSpinner(maxMessagesModel);
 
@@ -44,13 +31,6 @@ public class ChatSettingsComponent {
         mainPanel =
                 FormBuilder.createFormBuilder()
                         .setFormLeftIndent(20)
-                        .addLabeledComponent(
-                                new JBLabel("Server type:"), serverTypeComboBox, 1, false)
-                        .addComponent(
-                                new DescriptionLabel(
-                                        "Select the server to be used for interaction with language"
-                                                + " models."))
-                        .addVerticalGap(20)
                         .addLabeledComponent(new JBLabel("Max messages:"), maxMessages, 1, false)
                         .addComponent(new DescriptionLabel("Number of messages to keep in memory."))
                         .addVerticalGap(20)

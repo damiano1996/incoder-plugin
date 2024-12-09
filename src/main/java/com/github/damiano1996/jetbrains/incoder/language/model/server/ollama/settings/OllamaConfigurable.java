@@ -46,13 +46,8 @@ public final class OllamaConfigurable extends BaseServerConfigurable {
         var state = getState();
 
         return !settingsComponent.getBaseUrlField().getText().equals(state.baseUrl)
-                || !getModelName().equals(state.modelName)
+                || !settingsComponent.getModelNameField().getItem().equals(state.modelName)
                 || !settingsComponent.getTemperatureField().getValue().equals(state.temperature);
-    }
-
-    private @NotNull String getModelName() {
-        var selectedModelName = settingsComponent.getModelNameField().getItem();
-        return (selectedModelName == null) ? "" : selectedModelName;
     }
 
     @Override
@@ -60,7 +55,7 @@ public final class OllamaConfigurable extends BaseServerConfigurable {
         var state = getState();
 
         state.baseUrl = settingsComponent.getBaseUrlField().getText();
-        state.modelName = getModelName();
+        state.modelName = settingsComponent.getModelNameField().getItem();
         state.temperature = (Double) settingsComponent.getTemperatureField().getValue();
     }
 

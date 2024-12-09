@@ -31,6 +31,7 @@ public class OllamaComponent {
                         new OllamaLanguageModelServer()
                                 .getAvailableModels()
                                 .toArray(new String[0]));
+        modelNameField.addItem("");
         modelNameField.setPreferredSize(new Dimension(300, 30));
 
         refreshButton = new JButton(AllIcons.Actions.Refresh);
