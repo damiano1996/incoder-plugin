@@ -17,6 +17,10 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class MarkdownPanel extends JPanel implements StreamWriter {
 
+    public static final String MARKDOWN_CODE_BLOCK_DELIMITER = "```";
+    public static final String MARKDOWN_CODE_BLOCK_START_REGEX = "(?m)^```(?:[a-zA-Z0-9]+)?\\n";
+    public static final String MARKDOWN_CODE_BLOCK_END_REGEX = "(?m)^```";
+
     @Getter private final Project project;
     private final List<MarkdownBlock> markdownBlocks;
 

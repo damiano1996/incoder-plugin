@@ -1,5 +1,8 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks;
 
+import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel.MARKDOWN_CODE_BLOCK_DELIMITER;
+import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel.MARKDOWN_CODE_BLOCK_START_REGEX;
+
 import com.github.damiano1996.jetbrains.incoder.tool.window.ToolWindowColors;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
 import com.vladsch.flexmark.html.HtmlRenderer;
@@ -12,9 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TextMarkdownBlock extends JEditorPane implements MarkdownBlock {
-
-    public static final String MARKDOWN_CODE_BLOCK_DELIMITER = "```";
-    public static final String MARKDOWN_CODE_BLOCK_START_REGEX = "(?m)^```(?:[a-zA-Z0-9]+)?\\n";
 
     private final MarkdownPanel markdownPanel;
 

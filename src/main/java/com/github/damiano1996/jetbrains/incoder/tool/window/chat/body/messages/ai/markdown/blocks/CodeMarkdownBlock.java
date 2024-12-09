@@ -1,5 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks;
 
+import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel.MARKDOWN_CODE_BLOCK_END_REGEX;
+
 import com.github.damiano1996.jetbrains.incoder.tool.window.ToolWindowColors;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions.CopyClipboardCodeAction;
@@ -23,8 +25,6 @@ import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class CodeMarkdownBlock extends JPanel implements MarkdownBlock {
-
-    public static final String MARKDOWN_CODE_BLOCK_END_REGEX = "(?m)^```\\n";
 
     private final MarkdownPanel markdownPanel;
     private Editor editor;
