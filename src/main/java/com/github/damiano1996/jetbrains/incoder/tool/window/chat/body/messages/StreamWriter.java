@@ -10,9 +10,6 @@ public interface StreamWriter {
      */
     void write(String token);
 
-    /** Undoes the last write operation, effectively removing the most recently added token. */
-    void undoLastWrite();
-
     /**
      * Retrieves the full text that has been written so far.
      *
