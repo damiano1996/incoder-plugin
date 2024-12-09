@@ -132,7 +132,7 @@ public class Chat {
         mainPanel = new JPanel();
         mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
 
-        prompt = new PlaceholderTextField("Enter a prompt...", 12, 8);
+        prompt = new PlaceholderTextField("Enter a prompt...", 10, 6);
         generating = new JProgressBar();
         isGenerating(false);
     }
