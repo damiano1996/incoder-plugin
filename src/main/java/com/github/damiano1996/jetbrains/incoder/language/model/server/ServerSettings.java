@@ -1,4 +1,4 @@
-package com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings;
+package com.github.damiano1996.jetbrains.incoder.language.model.server;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -12,26 +12,23 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @Service(Service.Level.APP)
 @State(
-        name = "OllamaSettings",
+        name = "ServerSettings",
         storages = {@Storage("InCoderSettings.xml")})
-public final class OllamaSettings implements PersistentStateComponent<OllamaSettings.State> {
+public final class ServerSettings implements PersistentStateComponent<ServerSettings.State> {
 
     @NotNull private State state = new State();
 
-    public static OllamaSettings getInstance() {
-        return ApplicationManager.getApplication().getService(OllamaSettings.class);
+    public static ServerSettings getInstance() {
+        return ApplicationManager.getApplication().getService(ServerSettings.class);
     }
 
     @Override
-    public void loadState(@NotNull State state) {
+    public void loadState(@NotNull ServerSettings.State state) {
         this.state = state;
     }
 
     @ToString
     public static class State {
-
-        public String baseUrl = "http://localhost:11434/";
-        public String modelName = "";
-        public Double temperature = 0.2;
+        public String activeServerName = "";
     }
 }

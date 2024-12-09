@@ -1,11 +1,15 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelService;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.openapi.util.ThrowableComputable;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -20,35 +24,50 @@ public abstract class BaseServerConfigurable implements Configurable {
 
     @Override
     public final void apply() throws ConfigurationException {
-        //noinspection DialogTitleCapitalization
-        ProgressManager.getInstance()
-                .runProcessWithProgressSynchronously(
-                        (ThrowableComputable<Void, ConfigurationException>)
-                                () -> {
-                                    updateState();
-                                    verifySettings();
-                                    return null;
-                                },
-                        "Verifying %s Settings".formatted(getDisplayName()),
-                        false,
-                        null);
+        updateState();
+
+
+        // Show dialog to ask user if they want to set the server as default
+        int result = Messages.showYesNoDialog(
+                "Do you want to set this server as the default?",
+                "Set Server as Default",
+                Messages.getQuestionIcon()
+        );
+
+        // Handle the user's response
+        if (result == Messages.YES) {
+            log.info("User chose to set the server as default.");
+            ServerSettings.getInstance().getState().activeServerName = getServerFactory().getName();
+
+            //noinspection DialogTitleCapitalization
+            ProgressManager.getInstance()
+                    .runProcessWithProgressSynchronously(
+                            (ThrowableComputable<Void, ConfigurationException>)
+                                    () -> {
+
+                                        restartLanguageModelService();
+
+                                        return null;
+                                    },
+                            "Restarting Language Model Service with Updated Settings for %s".formatted(getDisplayName()),
+                            false,
+                            null);
+
+        } else {
+            log.info("User chose not to set the server as default.");
+        }
     }
 
     /** Updates the server state based on the current configuration. */
     protected abstract void updateState();
 
-    /**
-     * Verifies the configured settings and throws a {@link ConfigurationException} if any issues
-     * are found.
-     *
-     * @throws ConfigurationException if the settings are invalid.
-     */
-    private void verifySettings() throws ConfigurationException {
+    private void restartLanguageModelService() throws ConfigurationException {
         try {
-            log.debug("Creating server and client to verify configurations");
-            getServerFactory().createServer().createClient().checkServerConnection();
+            LanguageModelService.getInstance(Objects.requireNonNull(ProjectUtil.getActiveProject()))
+                    .init(getServerFactory().createServer());
         } catch (LanguageModelException e) {
-            throw new ConfigurationException(e.getMessage());
+            throw new ConfigurationException(
+                    e.getMessage(), "Unable to Initialize the Language Model Service");
         }
     }
 }

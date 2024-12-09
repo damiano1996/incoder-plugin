@@ -1,5 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings.AnthropicComponent;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.OllamaLanguageModelServer;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.ComboBox;
@@ -31,6 +32,7 @@ public class OllamaComponent {
                         new OllamaLanguageModelServer()
                                 .getAvailableModels()
                                 .toArray(new String[0]));
+        modelNameField.addItem("");
         modelNameField.setPreferredSize(new Dimension(300, 30));
 
         refreshButton = new JButton(AllIcons.Actions.Refresh);

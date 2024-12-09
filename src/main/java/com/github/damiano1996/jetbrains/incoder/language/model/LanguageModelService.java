@@ -7,6 +7,7 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.set
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptType;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactoryUtils;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerSettings;
 import com.github.damiano1996.jetbrains.incoder.settings.PluginSettings;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
@@ -39,14 +40,23 @@ public final class LanguageModelService implements Disposable {
     }
 
     public void init() throws LanguageModelException {
+        init(
+                ServerFactoryUtils.findByName(
+                                ServerSettings.getInstance().getState().activeServerName)
+                        .createServer());
+    }
+
+    public void init(LanguageModelServer server) throws LanguageModelException {
         log.debug("Initializing {}...", LanguageModelService.class.getSimpleName());
 
-        var serverName = ChatSettings.getInstance().getState().serverName;
+        this.server = server;
 
-        server = ServerFactoryUtils.findByName(serverName).createServer();
-
-        client = server.createClient();
+        client = this.server.createClient();
         log.debug("Client created successfully!");
+
+        log.debug("Verifying server connection.");
+        client.checkServerConnection();
+        log.debug("Server connection verified.");
 
         PluginSettings.getInstance().getState().isPluginConfigured = true;
         log.debug("Client and server started. Plugin can be considered configured.");

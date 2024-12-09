@@ -1,12 +1,16 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelServer;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.AnthropicLanguageModelServer;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 @Getter
 public class AnthropicComponent {
@@ -28,6 +32,7 @@ public class AnthropicComponent {
                         new AnthropicLanguageModelServer()
                                 .getAvailableModels()
                                 .toArray(new String[0]));
+        modelNameField.addItem("");
         modelNameField.setPreferredSize(new Dimension(300, 30));
 
         mainPanel =
