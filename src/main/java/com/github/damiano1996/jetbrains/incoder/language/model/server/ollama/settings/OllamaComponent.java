@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings.AnthropicComponent;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.OllamaLanguageModelServer;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.ui.ComboBox;

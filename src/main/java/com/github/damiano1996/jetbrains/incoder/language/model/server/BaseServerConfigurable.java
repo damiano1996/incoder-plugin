@@ -26,48 +26,68 @@ public abstract class BaseServerConfigurable implements Configurable {
     public final void apply() throws ConfigurationException {
         updateState();
 
+        var serverName = getServerFactory().getName();
 
-        // Show dialog to ask user if they want to set the server as default
-        int result = Messages.showYesNoDialog(
-                "Do you want to set this server as the default?",
-                "Set Server as Default",
-                Messages.getQuestionIcon()
-        );
+        if (ServerSettings.getInstance().getState().activeServerName.equals(serverName)) {
+            log.debug(
+                    "{} is already the active server. Just restarting the Language Model"
+                            + " Service...",
+                    serverName);
+            restartLanguageModelService(serverName);
+            return;
+        }
 
-        // Handle the user's response
+        log.debug("{} is not the active server. Showing the dialog to the user...", serverName);
+        showDialogToSetThisAsDefaultServer(serverName);
+    }
+
+    private void showDialogToSetThisAsDefaultServer(String serverName)
+            throws ConfigurationException {
+        //noinspection DialogTitleCapitalization
+        int result =
+                Messages.showYesNoDialog(
+                        "Do you want to set %s as the default server?".formatted(serverName),
+                        "Set %s as Default".formatted(serverName),
+                        Messages.getQuestionIcon());
+
         if (result == Messages.YES) {
-            log.info("User chose to set the server as default.");
+            log.info("User chose to set {} as default.", serverName);
             ServerSettings.getInstance().getState().activeServerName = getServerFactory().getName();
 
-            //noinspection DialogTitleCapitalization
-            ProgressManager.getInstance()
-                    .runProcessWithProgressSynchronously(
-                            (ThrowableComputable<Void, ConfigurationException>)
-                                    () -> {
-
-                                        restartLanguageModelService();
-
-                                        return null;
-                                    },
-                            "Restarting Language Model Service with Updated Settings for %s".formatted(getDisplayName()),
-                            false,
-                            null);
+            restartLanguageModelService(serverName);
 
         } else {
-            log.info("User chose not to set the server as default.");
+            log.info("User chose not to set {} as default.", serverName);
         }
+    }
+
+    private void restartLanguageModelService(String serverName) throws ConfigurationException {
+        //noinspection DialogTitleCapitalization
+        ProgressManager.getInstance()
+                .runProcessWithProgressSynchronously(
+                        (ThrowableComputable<Void, ConfigurationException>)
+                                () -> {
+                                    try {
+                                        log.debug("Restarting Language Model Service");
+                                        LanguageModelService.getInstance(
+                                                        Objects.requireNonNull(
+                                                                ProjectUtil.getActiveProject()))
+                                                .init(getServerFactory().createServer());
+                                        return null;
+                                    } catch (LanguageModelException e) {
+                                        //noinspection DialogTitleCapitalization
+                                        throw new ConfigurationException(
+                                                e.getMessage(),
+                                                "Unable to Initialize the Language Model Service with New Settings for %s"
+                                                        .formatted(serverName));
+                                    }
+                                },
+                        "Restarting the Language Model Service with the New Settings for %s"
+                                .formatted(getDisplayName()),
+                        false,
+                        null);
     }
 
     /** Updates the server state based on the current configuration. */
     protected abstract void updateState();
-
-    private void restartLanguageModelService() throws ConfigurationException {
-        try {
-            LanguageModelService.getInstance(Objects.requireNonNull(ProjectUtil.getActiveProject()))
-                    .init(getServerFactory().createServer());
-        } catch (LanguageModelException e) {
-            throw new ConfigurationException(
-                    e.getMessage(), "Unable to Initialize the Language Model Service");
-        }
-    }
 }
