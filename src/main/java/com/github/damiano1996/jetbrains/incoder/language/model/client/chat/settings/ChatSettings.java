@@ -37,11 +37,23 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
                 """
                     - You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
                     - If the user input pertains to the provided code, respond with the code edited according to the user's instructions.
+                    - Always ensure your response is concise and adheres to the user's instructions.
+                    - Answers must be in Markdown and code blocks must be surrounded by triple backticks and specify the language.
+                    Example:
+                    ```java
+                    // java code
+                    ```
                     """;
 
         public String systemMessageInstructions =
                 """
                     - You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
+                    - Always ensure your response is concise and adheres to the user's instructions.
+                    - Answers must be in Markdown and code blocks must be surrounded by triple backticks and specify the language.
+                    Example:
+                    ```java
+                    // java code
+                    ```
                     """;
     }
 }

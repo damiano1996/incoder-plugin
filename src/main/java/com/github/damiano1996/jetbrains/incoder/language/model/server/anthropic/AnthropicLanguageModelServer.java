@@ -19,7 +19,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     @Override
     public ChatLanguageModel createChatLanguageModel() {
         return AnthropicChatModel.builder()
-                .baseUrl(getState().apiKey)
+                .apiKey(getState().apiKey)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
                 .build();
@@ -28,7 +28,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     @Override
     public StreamingChatLanguageModel createStreamingChatLanguageModel() {
         return AnthropicStreamingChatModel.builder()
-                .baseUrl(getState().apiKey)
+                .apiKey(getState().apiKey)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
                 .build();
