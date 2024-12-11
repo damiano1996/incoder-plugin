@@ -20,6 +20,9 @@ import com.intellij.testFramework.LightVirtualFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.*;
+
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,6 +30,8 @@ import org.jetbrains.annotations.NotNull;
 public class CodeMarkdownBlock extends JPanel implements MarkdownBlock {
 
     private final MarkdownPanel markdownPanel;
+
+    @Getter(AccessLevel.PROTECTED)
     private Editor editor;
     private final Language language;
 
