@@ -1,6 +1,6 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions;
+package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.actions;
 
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.CodeMarkdownBlock;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -28,7 +28,7 @@ public class CopyClipboardCodeAction extends AnAction {
         ApplicationManager.getApplication()
                 .invokeLater(
                         () -> {
-                            String code = codeBlock.getFullText();
+                            String code = codeBlock.getText();
                             CopyPasteManager.getInstance().setContents(new StringSelection(code));
                         });
     }

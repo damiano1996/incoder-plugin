@@ -15,5 +15,11 @@ public interface StreamWriter {
      *
      * @return A concatenated string of all tokens written to the buffer.
      */
-    String getFullText();
+    String getText();
+
+    /**
+     * Indicates that the stream has ended and no more tokens will be written. This method can be
+     * used to perform any necessary cleanup or finalization tasks.
+     */
+    void streamClosed();
 }

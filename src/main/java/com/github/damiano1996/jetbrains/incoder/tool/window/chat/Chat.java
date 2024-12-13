@@ -85,7 +85,7 @@ public class Chat {
                                                 aiMessage.write(token);
                                                 chatBody.updateUI();
                                             })
-                                    .onComplete(onTokenStreamComplete())
+                                    .onComplete(onTokenStreamComplete(aiMessage))
                                     .onError(onTokenStreamError())
                                     .start();
                         })
@@ -113,9 +113,11 @@ public class Chat {
         };
     }
 
-    private @NotNull Consumer<Response<AiMessage>> onTokenStreamComplete() {
+    private @NotNull Consumer<Response<AiMessage>> onTokenStreamComplete(
+            AiMessageComponent aiMessage) {
         return aiMessageResponse -> {
             log.debug("Stream completed.");
+            aiMessage.streamClosed();
             isGenerating(false);
         };
     }

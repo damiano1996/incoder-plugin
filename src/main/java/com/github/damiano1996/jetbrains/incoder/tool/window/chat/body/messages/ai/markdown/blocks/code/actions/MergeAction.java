@@ -1,7 +1,7 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions;
+package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.actions;
 
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.CodeMarkdownBlock;
 import com.intellij.diff.DiffManager;
 import com.intellij.diff.DiffRequestFactory;
 import com.intellij.diff.InvalidDiffRequestException;
@@ -47,7 +47,7 @@ public class MergeAction extends AnAction {
             return;
         }
 
-        showDiff(project, codeBlock.getFullText(), editor);
+        showDiff(project, codeBlock.getText(), editor);
     }
 
     private void showDiff(Project project, String newCode, @NotNull Editor editor) {
