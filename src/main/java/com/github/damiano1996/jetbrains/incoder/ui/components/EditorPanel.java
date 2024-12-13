@@ -10,7 +10,6 @@ import com.intellij.openapi.editor.EditorKind;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.NlsSafe;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.TextAccessor;
 import java.awt.*;
@@ -83,7 +82,7 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
     }
 
     @Override
-    public @NlsSafe String getText() {
+    public String getText() {
         return editor.getDocument().getText();
     }
 
