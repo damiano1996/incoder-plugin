@@ -1,8 +1,8 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.actions;
+package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.actions;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.CodeMarkdownBlock;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.CodeMarkdownBlock;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -50,7 +50,7 @@ public class CreateCodeAction extends AnAction {
             if (Files.isDirectory(selectedFolderPath)) {
                 var fileName =
                         LanguageModelService.getInstance(project)
-                                .createFileName(codeBlock.getFullText());
+                                .createFileName(codeBlock.getText());
                 filePath = selectedFolderPath.resolve(fileName);
             } else {
                 filePath = selectedFolderPath;
@@ -67,7 +67,7 @@ public class CreateCodeAction extends AnAction {
             }
 
             log.debug("Going to create file with code block content");
-            createNewFile(project, filePath, codeBlock.getFullText());
+            createNewFile(project, filePath, codeBlock.getText());
 
         } catch (Exception e) {
             NotificationService.getInstance(project).notifyError(e.getMessage());

@@ -33,9 +33,12 @@ public class HumanMessageComponent implements MessageComponent {
     }
 
     @Override
-    public String getFullText() {
+    public String getText() {
         return promptTextArea.getText();
     }
+
+    @Override
+    public void streamClosed() {}
 
     private void createUIComponents() {
         promptTextArea = new RoundedTextArea(35, 35);

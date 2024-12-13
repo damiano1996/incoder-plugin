@@ -3,13 +3,14 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.
 import com.github.damiano1996.jetbrains.incoder.tool.window.ToolWindowColors;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.StreamWriter;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.TextMarkdownBlock;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.text.TextMarkdownBlock;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,8 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
     public static final String MARKDOWN_CODE_BLOCK_END_REGEX = "(?m)^```";
 
     @Getter private final Project project;
+
+    @Getter(AccessLevel.PROTECTED)
     private final List<MarkdownBlock> markdownBlocks;
 
     public MarkdownPanel(Project project) {
@@ -41,15 +44,17 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
     @Override
     public void write(@NotNull String token) {
         log.debug("Token received: {}", token);
-
         markdownBlocks.get(markdownBlocks.size() - 1).write(token);
     }
 
     @Override
-    public String getFullText() {
-        return markdownBlocks.stream()
-                .map(StreamWriter::getFullText)
-                .collect(Collectors.joining("\n"));
+    public String getText() {
+        return markdownBlocks.stream().map(StreamWriter::getText).collect(Collectors.joining("\n"));
+    }
+
+    @Override
+    public void streamClosed() {
+        markdownBlocks.get(markdownBlocks.size() - 1).streamClosed();
     }
 
     public void next(MarkdownBlock markdownBlock) {

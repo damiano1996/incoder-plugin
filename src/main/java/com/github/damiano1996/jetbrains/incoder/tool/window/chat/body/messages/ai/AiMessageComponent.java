@@ -36,8 +36,13 @@ public class AiMessageComponent implements MessageComponent {
     }
 
     @Override
-    public String getFullText() {
-        return markdownPanel.getFullText();
+    public String getText() {
+        return markdownPanel.getText();
+    }
+
+    @Override
+    public void streamClosed() {
+        markdownPanel.streamClosed();
     }
 
     private void createUIComponents() {
