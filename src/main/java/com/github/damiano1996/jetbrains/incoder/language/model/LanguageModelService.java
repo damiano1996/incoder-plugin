@@ -3,6 +3,7 @@ package com.github.damiano1996.jetbrains.incoder.language.model;
 import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageModelClient;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.doc.settings.DocumentationSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptType;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelServer;
@@ -90,7 +91,7 @@ public final class LanguageModelService implements Disposable {
                                 .classify(prompt));
     }
 
-    public TokenStream chat(@NonNull Editor editor, @NonNull String editDescription) {
+    public TokenStream chat(@NonNull Editor editor, @NonNull String prompt) {
         return Objects.requireNonNull(
                         client, "Client must be initialized to chat with the language model.")
                 .chat(
@@ -98,21 +99,28 @@ public final class LanguageModelService implements Disposable {
                         editor.getDocument().getText(),
                         editor.getVirtualFile().getPath(),
                         project.getBasePath(),
-                        editDescription);
+                        prompt);
     }
 
-    public TokenStream chat(@NonNull String editDescription) {
+    public TokenStream chat(@NonNull String prompt) {
         return Objects.requireNonNull(
                         client, "Client must be initialized to chat with the language model.")
                 .chat(
                         ChatSettings.getInstance().getState().systemMessageInstructions,
                         project.getBasePath(),
-                        editDescription);
+                        prompt);
     }
 
-    public String createFileName(String fileContent) {
+    public String createFileName(String fileContent, @NotNull String language) {
         return Objects.requireNonNull(client, "Client must be initialized to create file name.")
-                .createFileName(fileContent);
+                .createFileName(fileContent, language);
+    }
+
+    public String document(String fileContent) {
+        return Objects.requireNonNull(client, "Client must be initialized to document files.")
+                .document(
+                        DocumentationSettings.getInstance().getState().documentationInstructions,
+                        fileContent);
     }
 
     @Override

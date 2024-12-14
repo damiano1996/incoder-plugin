@@ -50,7 +50,8 @@ public class CreateCodeAction extends AnAction {
             if (Files.isDirectory(selectedFolderPath)) {
                 var fileName =
                         LanguageModelService.getInstance(project)
-                                .createFileName(codeBlock.getText());
+                                .createFileName(
+                                        codeBlock.getText(), codeBlock.getLanguage().getID());
                 filePath = selectedFolderPath.resolve(fileName);
             } else {
                 filePath = selectedFolderPath;

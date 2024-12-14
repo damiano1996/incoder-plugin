@@ -2,6 +2,7 @@ package com.github.damiano1996.jetbrains.incoder.language.model.client;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatCodingAssistant;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.doc.DocumentationAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.file.FileManagerAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptClassifier;
@@ -19,6 +20,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     private final ChatLanguageModel chatLanguageModel;
 
     private final ChatCodingAssistant chatCodingAssistant;
+    private final DocumentationAssistant documentationAssistant;
     private final InlineCodingAssistant inlineCodingAssistant;
     private final FileManagerAssistant fileManagerAssistant;
     private final PromptClassifier promptClassifier;
@@ -35,6 +37,12 @@ public class LanguageModelClientImpl implements LanguageModelClient {
                         .streamingChatLanguageModel(streamingChatLanguageModel)
                         .chatLanguageModel(chatLanguageModel)
                         .chatMemory(chatMemory)
+                        .build();
+
+        documentationAssistant =
+                AiServices.builder(DocumentationAssistant.class)
+                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
                         .build();
 
         inlineCodingAssistant =
@@ -86,9 +94,9 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     }
 
     @Override
-    public String createFileName(String fileContent) {
+    public String createFileName(String fileContent, String language) {
         log.debug("Defining file path");
-        return fileManagerAssistant.createFileName(fileContent).trim();
+        return fileManagerAssistant.createFileName(fileContent, language).trim();
     }
 
     @Override
@@ -98,5 +106,10 @@ public class LanguageModelClientImpl implements LanguageModelClient {
         } catch (Exception e) {
             throw new LanguageModelException(e);
         }
+    }
+
+    @Override
+    public String document(String instructions, String code) {
+        return documentationAssistant.document(instructions, code);
     }
 }

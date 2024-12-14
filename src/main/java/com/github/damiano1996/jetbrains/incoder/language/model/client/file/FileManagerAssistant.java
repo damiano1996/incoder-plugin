@@ -10,8 +10,10 @@ public interface FileManagerAssistant {
                     Define an file name based on the file content:
                     {{fileContent}}
 
+                    The identified language is {{language}}
+
                     Return only the file name with the extension. Nothing else. No prefixes or suffixes.
                     It will be used to name and save the file content.
                     """)
-    String createFileName(@V("fileContent") String fileContent);
+    String createFileName(@V("fileContent") String fileContent, @V("language") String language);
 }
