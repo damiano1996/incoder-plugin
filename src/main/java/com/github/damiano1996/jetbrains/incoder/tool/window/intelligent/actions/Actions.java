@@ -47,7 +47,7 @@ public class Actions {
                                 new IntelligentActionComponent()
                                         .setTitle(intelligentAction.getName())
                                         .setDescription(intelligentAction.getDescription())
-                                        .setActionListener(intelligentAction.getActionListener())
+                                        .setExecutor(intelligentAction.getExecutor())
                                         .getMainPanel()));
     }
 }
