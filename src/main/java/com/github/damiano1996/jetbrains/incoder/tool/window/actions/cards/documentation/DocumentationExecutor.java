@@ -186,8 +186,7 @@ public class DocumentationExecutor implements IntelligentActionExecutor {
                     .setFormLeftIndent(0);
         }
 
-        var panel = formBuilder.getPanel();
-        return panel;
+        return formBuilder.getPanel();
     }
 
     private static void addTreeStructure(
