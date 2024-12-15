@@ -52,6 +52,13 @@
                 groupId="plugin.group"
                 displayName="Inline"/>
 
+        <applicationConfigurable
+                instance="com.github.damiano1996.jetbrains.incoder.language.model.client.doc.settings.DocumentationSettingsConfigurable"
+                id="com.github.damiano1996.jetbrains.incoder.language.model.client.doc.settings.DocumentationSettingsConfigurable"
+                parentId="plugin.group"
+                groupId="plugin.group"
+                displayName="Documentation"/>
+
         <notificationGroup id="InCoder Notifications" displayType="BALLOON"/>
 
         <toolWindow id="InCoder" secondary="true"

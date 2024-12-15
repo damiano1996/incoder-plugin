@@ -22,11 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
-public class CreateCodeAction extends AnAction {
+public class CreateFileAction extends AnAction {
 
     private final CodeMarkdownBlock codeBlock;
 
-    public CreateCodeAction(CodeMarkdownBlock codeBlock) {
+    public CreateFileAction(CodeMarkdownBlock codeBlock) {
         super(
                 "Create New File from Code Block",
                 "Creates a new file with the code block content",
@@ -50,7 +50,8 @@ public class CreateCodeAction extends AnAction {
             if (Files.isDirectory(selectedFolderPath)) {
                 var fileName =
                         LanguageModelService.getInstance(project)
-                                .createFileName(codeBlock.getText());
+                                .createFileName(
+                                        codeBlock.getText(), codeBlock.getLanguage().getID());
                 filePath = selectedFolderPath.resolve(fileName);
             } else {
                 filePath = selectedFolderPath;
@@ -79,6 +80,7 @@ public class CreateCodeAction extends AnAction {
                 FileChooserDescriptorFactory.createSingleFolderDescriptor();
         descriptor.setTitle("Select a Folder to Save Your File");
         VirtualFile projectBaseDir = ProjectUtil.guessProjectDir(project);
+        descriptor.setRoots(projectBaseDir);
         return FileChooser.chooseFile(descriptor, project, projectBaseDir);
     }
 

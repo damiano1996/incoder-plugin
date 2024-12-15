@@ -2,12 +2,17 @@ package com.github.damiano1996.jetbrains.incoder.language.model.client;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatCodingAssistant;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.doc.DocumentationAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.file.FileManagerAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptClassifier;
 
 public interface LanguageModelClient
-        extends ChatCodingAssistant, InlineCodingAssistant, FileManagerAssistant, PromptClassifier {
+        extends ChatCodingAssistant,
+                InlineCodingAssistant,
+                FileManagerAssistant,
+                PromptClassifier,
+                DocumentationAssistant {
 
     /**
      * Checks whether the connection is healthy.

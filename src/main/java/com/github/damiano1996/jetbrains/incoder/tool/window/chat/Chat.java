@@ -59,7 +59,7 @@ public class Chat {
         HumanMessageComponent humanMessageComponent = new HumanMessageComponent(prompt);
         chatBody.addMessage(humanMessageComponent);
 
-        isGenerating(true);
+        updateProgressStatus(true);
 
         log.debug("Classifying prompt");
         LanguageModelService.getInstance(project)
@@ -92,7 +92,7 @@ public class Chat {
                 .exceptionally(
                         throwable -> {
                             log.debug("Error while classifying the prompt.", throwable);
-                            isGenerating(false);
+                            updateProgressStatus(false);
                             NotificationService.getInstance(project)
                                     .notifyError("Error: %s".formatted(throwable.getMessage()));
                             return null;
@@ -109,7 +109,7 @@ public class Chat {
     private @NotNull Consumer<Throwable> onTokenStreamError() {
         return throwable -> {
             log.warn("Error during stream", throwable);
-            isGenerating(false);
+            updateProgressStatus(false);
         };
     }
 
@@ -118,16 +118,16 @@ public class Chat {
         return aiMessageResponse -> {
             log.debug("Stream completed.");
             aiMessage.streamClosed();
-            isGenerating(false);
+            updateProgressStatus(false);
         };
     }
 
-    private void isGenerating(boolean generating) {
+    private void updateProgressStatus(boolean isGenerating) {
         log.debug("Is generating...");
-        this.prompt.setEnabled(!generating);
-        if (!generating) this.prompt.requestFocusInWindow();
-        this.generating.setIndeterminate(generating);
-        this.generating.setVisible(generating);
+        this.prompt.setEnabled(!isGenerating);
+        if (!isGenerating) this.prompt.requestFocusInWindow();
+        this.generating.setIndeterminate(isGenerating);
+        this.generating.setVisible(isGenerating);
     }
 
     private void createUIComponents() {
@@ -136,6 +136,6 @@ public class Chat {
 
         prompt = new PlaceholderTextField("Enter a prompt...", 12, 8);
         generating = new JProgressBar();
-        isGenerating(false);
+        updateProgressStatus(false);
     }
 }

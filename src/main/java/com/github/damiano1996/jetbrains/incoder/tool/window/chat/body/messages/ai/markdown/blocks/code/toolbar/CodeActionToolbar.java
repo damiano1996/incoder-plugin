@@ -2,7 +2,7 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.
 
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.CodeMarkdownBlock;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.actions.CopyClipboardCodeAction;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.actions.CreateCodeAction;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.actions.CreateFileAction;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.actions.MergeAction;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -19,7 +19,7 @@ public class CodeActionToolbar {
         var actionGroup = new DefaultActionGroup("Coding Group", true);
 
         actionGroup.add(new MergeAction(codeMarkdownBlock));
-        actionGroup.add(new CreateCodeAction(codeMarkdownBlock));
+        actionGroup.add(new CreateFileAction(codeMarkdownBlock));
         actionGroup.add(new CopyClipboardCodeAction(codeMarkdownBlock));
 
         var actionToolbar =

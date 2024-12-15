@@ -20,13 +20,18 @@ public class ChatBody {
         messagesPanel.add(messageMainPanel);
         messageMainPanel.setAlignmentY(Component.TOP_ALIGNMENT);
 
-        updateUI();
+        repaint();
+        scrollToBottom();
     }
 
     public void updateUI() {
+        repaint();
+        scrollToBottomSmoothly();
+    }
+
+    private void repaint() {
         messagesPanel.revalidate();
         messagesPanel.repaint();
-        scrollToBottomSmoothly();
     }
 
     private void scrollToBottom() {

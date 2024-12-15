@@ -1,6 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.ui.components;
 
 import com.github.damiano1996.jetbrains.incoder.tool.window.ToolWindowColors;
+import com.intellij.ide.plugins.newui.EmptyCaret;
 import com.intellij.openapi.application.ApplicationManager;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
@@ -17,7 +18,6 @@ public class MarkdownEditorPane extends JEditorPane {
     private String markdown = "";
 
     public MarkdownEditorPane() {
-        setEditable(false);
         HTMLEditorKit editorKit = new HTMLEditorKit();
         setEditorKit(editorKit);
         setContentType("text/html");
@@ -25,6 +25,10 @@ public class MarkdownEditorPane extends JEditorPane {
         setBackground(ToolWindowColors.AI_MESSAGE_BACKGROUND);
         setForeground(ToolWindowColors.AI_MESSAGE_FOREGROUND);
         setDoubleBuffered(true);
+        setEditable(false);
+        setHighlighter(null);
+        setEnabled(true);
+        setCaret(new EmptyCaret());
     }
 
     @Override
