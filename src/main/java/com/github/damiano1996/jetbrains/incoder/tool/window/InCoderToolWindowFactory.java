@@ -1,7 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window;
 
+import com.github.damiano1996.jetbrains.incoder.tool.window.actions.Actions;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.Chat;
-import com.github.damiano1996.jetbrains.incoder.tool.window.intelligent.actions.Actions;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;

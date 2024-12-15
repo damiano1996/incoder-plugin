@@ -1,6 +1,8 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.intelligent.actions;
+package com.github.damiano1996.jetbrains.incoder.tool.window.actions;
 
 import com.github.damiano1996.jetbrains.incoder.ClassInstantiator;
+import com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards.IntelligentAction;
+import com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards.IntelligentActionCard;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.*;
@@ -44,10 +46,10 @@ public class Actions {
         intelligentActions.forEach(
                 intelligentAction ->
                         actionsPanel.add(
-                                new IntelligentActionComponent()
-                                        .setTitle(intelligentAction.getName())
+                                new IntelligentActionCard()
+                                        .setTitle(intelligentAction.getDisplayName())
                                         .setDescription(intelligentAction.getDescription())
-                                        .setExecutor(intelligentAction.getExecutor())
+                                        .setExecutor(intelligentAction.createExecutor())
                                         .getMainPanel()));
     }
 }

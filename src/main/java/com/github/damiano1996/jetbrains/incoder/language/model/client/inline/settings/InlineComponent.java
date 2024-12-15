@@ -1,7 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings;
 
 import com.github.damiano1996.jetbrains.incoder.InCoderBundle;
-import com.github.damiano1996.jetbrains.incoder.ui.components.DescriptionLabel;
+import com.intellij.openapi.ui.DescriptionLabel;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;

@@ -35,6 +35,8 @@ public final class DocumentationSettings
                 - Analyze the following code and add clear, concise documentation in the appropriate style for the language.
                 - Include descriptions for all functions, methods, classes, parameters, return values, and any complex or non-obvious logic.
                 - Ensure the documentation explains the purpose, inputs, outputs, and behavior of the code.
+                - No additional comments or markdown expressions.
+                - Skip ```java at the beginning or at the end.
                 """;
     }
 }
