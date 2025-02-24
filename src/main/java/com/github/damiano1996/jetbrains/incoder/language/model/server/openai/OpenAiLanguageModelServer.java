@@ -17,6 +17,7 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
     @Override
     public ChatLanguageModel createChatLanguageModel() {
         return OpenAiChatModel.builder()
+                .baseUrl(getState().baseUrl)
                 .apiKey(getState().apiKey)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
