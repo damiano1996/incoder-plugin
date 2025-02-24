@@ -3,6 +3,7 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server.openai.se
 import com.github.damiano1996.jetbrains.incoder.language.model.server.openai.OpenAiLanguageModelServer;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import java.awt.*;
 import javax.swing.*;
@@ -12,11 +13,14 @@ import lombok.Getter;
 public class OpenAiComponent {
 
     private final JPanel mainPanel;
+    private final JBTextField baseUrlField;
     private final JPasswordField apiKeyField;
     private final ComboBox<String> modelNameField;
     private final JSpinner temperatureField;
 
     public OpenAiComponent() {
+        baseUrlField = new JBTextField();
+
         apiKeyField = new JPasswordField();
         apiKeyField.setColumns(60);
 
@@ -34,6 +38,7 @@ public class OpenAiComponent {
         mainPanel =
                 FormBuilder.createFormBuilder()
                         .setFormLeftIndent(20)
+                        .addLabeledComponent(new JBLabel("Base URL:"), baseUrlField, 1, false)
                         .addLabeledComponent(new JBLabel("Api key:"), apiKeyField, 1, false)
                         .addLabeledComponent(new JBLabel("Model name:"), modelNameField, 1, false)
                         .addLabeledComponent(

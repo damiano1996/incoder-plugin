@@ -45,7 +45,9 @@ public final class OpenAiConfigurable extends BaseServerConfigurable {
     public boolean isModified() {
         var state = getState();
 
-        return !new String(settingsComponent.getApiKeyField().getPassword()).equals(state.apiKey)
+        return !settingsComponent.getBaseUrlField().getText().equals(state.baseUrl)
+                || !new String(settingsComponent.getApiKeyField().getPassword())
+                        .equals(state.apiKey)
                 || !settingsComponent.getModelNameField().getItem().equals(state.modelName)
                 || !settingsComponent.getTemperatureField().getValue().equals(state.temperature);
     }
@@ -54,6 +56,7 @@ public final class OpenAiConfigurable extends BaseServerConfigurable {
     public void updateState() {
         var state = getState();
 
+        state.baseUrl = settingsComponent.getBaseUrlField().getText();
         state.apiKey = new String(settingsComponent.getApiKeyField().getPassword());
         state.modelName = settingsComponent.getModelNameField().getItem();
         state.temperature = (Double) settingsComponent.getTemperatureField().getValue();
@@ -63,6 +66,7 @@ public final class OpenAiConfigurable extends BaseServerConfigurable {
     public void reset() {
         var state = getState();
 
+        settingsComponent.getBaseUrlField().setText(state.baseUrl);
         settingsComponent.getApiKeyField().setText(state.apiKey);
         settingsComponent.getModelNameField().setItem(state.modelName);
         settingsComponent.getTemperatureField().setValue(state.temperature);
