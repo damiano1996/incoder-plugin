@@ -3,6 +3,7 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards.docum
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards.IntelligentActionExecutor;
+import com.github.damiano1996.jetbrains.incoder.ui.components.DescriptionLabel;
 import com.intellij.diff.DiffManager;
 import com.intellij.diff.DiffRequestFactory;
 import com.intellij.diff.InvalidDiffRequestException;
@@ -12,7 +13,6 @@ import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DescriptionLabel;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
