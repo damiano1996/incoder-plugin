@@ -36,14 +36,14 @@ dependencies {
     testImplementation(libs.junit)
 
     implementation("com.google.code.findbugs:jsr305:3.0.2")
-    implementation("ch.qos.logback:logback-classic:1.5.6")
+    implementation("ch.qos.logback:logback-classic:1.5.13")
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
     implementation("org.reflections:reflections:0.10.2")
 
-    implementation("dev.langchain4j:langchain4j:0.36.2")
-    implementation("dev.langchain4j:langchain4j-ollama:0.36.2")
-    implementation("dev.langchain4j:langchain4j-open-ai:0.36.2")
-    implementation("dev.langchain4j:langchain4j-anthropic:0.36.2")
+    implementation("dev.langchain4j:langchain4j:1.0.0-rc1")
+    implementation("dev.langchain4j:langchain4j-ollama:1.0.0-beta4")
+    implementation("dev.langchain4j:langchain4j-open-ai:1.0.0-rc1")
+    implementation("dev.langchain4j:langchain4j-anthropic:1.0.0-beta4")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {

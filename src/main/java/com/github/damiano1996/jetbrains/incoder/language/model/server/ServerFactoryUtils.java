@@ -12,8 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public class ServerFactoryUtils {
 
     public ServerFactory findByName(@NotNull String name) throws LanguageModelException {
-        if (name.isBlank() || name.isEmpty())
-            throw new LanguageModelException("Server name must be defined.");
+        if (name.isBlank()) throw new LanguageModelException("Server name must be defined.");
 
         return getServerFactories().stream()
                 .filter(serverFactory -> serverFactory.getName().equals(name))

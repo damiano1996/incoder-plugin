@@ -2,8 +2,8 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server.openai;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.openai.settings.OpenAiSettings;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.*;
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +15,7 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public ChatLanguageModel createChatLanguageModel() {
+    public ChatModel createChatModel() {
         return OpenAiChatModel.builder()
                 .baseUrl(getState().baseUrl)
                 .apiKey(getState().apiKey)
@@ -25,7 +25,7 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public StreamingChatLanguageModel createStreamingChatLanguageModel() {
+    public StreamingChatModel createStreamingChatModel() {
         return OpenAiStreamingChatModel.builder()
                 .apiKey(getState().apiKey)
                 .modelName(getState().modelName)
