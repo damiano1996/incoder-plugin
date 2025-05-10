@@ -1,15 +1,15 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards;
+package com.github.damiano1996.jetbrains.incoder.tool.window.agents.cards;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.swing.*;
 
-/**
- * Represents an executor for intelligent actions. It provides methods to execute an action
- * asynchronously and cancel the execution if needed.
- */
-public interface IntelligentActionExecutor {
+public interface Agent {
+
+    String getDisplayName();
+
+    String getDescription();
 
     /**
      * Executes the intelligent action asynchronously.

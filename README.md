@@ -54,7 +54,7 @@ It seamlessly integrates advanced Large Language Models (LLMs) into your develop
 
 ### 3. **Intelligent Actions**
 
-Automate repetitive and time-consuming tasks with intelligent actions powered by LLMs.
+Automate repetitive and time-consuming tasks with intelligent agents powered by LLMs.
 
 <p align="center">
   <img src=".github/readme/demo-intelligent-actions.png" alt="Demo Intelligent Actions" style="width: 70%;">
@@ -145,7 +145,7 @@ Whether you're generating code, understanding complex algorithms, or seeking int
 [latest tag link]: https://github.com/damiano1996/incoder-plugin/tags
 
 [CI checks on main badge]: https://badgen.net/github/checks/damiano1996/incoder-plugin/main?label=CI%20status%20on%20main&cache=900&icon=github
-[CI checks on main link]: https://github.com/damiano1996/incoder-plugin/actions?query=branch%3Amain
+[CI checks on main link]: https://github.com/damiano1996/incoder-plugin/agents?query=branch%3Amain
 
 [latest commit to main badge]: https://badgen.net/github/last-commit/damiano1996/incoder-plugin/main?icon=github
 [latest commit to main link]: https://github.com/damiano1996/incoder-plugin/commits/main

@@ -1,4 +1,4 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards;
+package com.github.damiano1996.jetbrains.incoder.tool.window.agents.cards;
 
 import static com.github.damiano1996.jetbrains.incoder.InCoderIcons.PLUGIN_ICON;
 
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 @NoArgsConstructor
-public class IntelligentActionCard {
+public class AgentCard {
 
     private MarkdownEditorPane descriptionTextArea;
     private JButton chooseButton;
@@ -66,29 +66,21 @@ public class IntelligentActionCard {
         mainPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
-    public IntelligentActionCard setIcon(Icon icon) {
+    public AgentCard setIcon(Icon icon) {
         actionIcon.setIcon(icon);
         return this;
     }
 
-    public IntelligentActionCard setTitle(String title) {
-        titleLabel.setText(title);
-        return this;
-    }
-
-    public IntelligentActionCard setDescription(String description) {
-        descriptionTextArea.setText(description);
-        return this;
-    }
-
-    public IntelligentActionCard setExecutor(@NotNull IntelligentActionExecutor executor) {
+    public AgentCard setAgent(@NotNull Agent agent) {
+        titleLabel.setText(agent.getDisplayName());
+        descriptionTextArea.setText(agent.getDescription());
 
         chooseButton.addActionListener(
                 event -> {
                     updateButtons(true);
                     cancelExecution = false;
 
-                    executor.execute(
+                    agent.execute(
                                     component -> {
                                         bodyPanel.removeAll();
                                         bodyPanel.add(component);
