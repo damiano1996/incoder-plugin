@@ -11,8 +11,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.output.Response;
 import dev.langchain4j.service.TokenStream;
 import java.util.function.Consumer;
 import javax.swing.*;
@@ -80,12 +78,13 @@ public class Chat {
                                     FileEditorManager.getInstance(project).getSelectedTextEditor();
 
                             getChatTokenStreamer(project, prompt, editor)
-                                    .onNext(
+                                    .onPartialResponse(
                                             token -> {
                                                 aiMessage.write(token);
                                                 chatBody.updateUI();
                                             })
-                                    .onComplete(onTokenStreamComplete(aiMessage))
+                                    .onCompleteResponse(
+                                            chatResponse -> onTokenStreamComplete(aiMessage))
                                     .onError(onTokenStreamError())
                                     .start();
                         })
@@ -113,13 +112,10 @@ public class Chat {
         };
     }
 
-    private @NotNull Consumer<Response<AiMessage>> onTokenStreamComplete(
-            AiMessageComponent aiMessage) {
-        return aiMessageResponse -> {
-            log.debug("Stream completed.");
-            aiMessage.streamClosed();
-            updateProgressStatus(false);
-        };
+    private void onTokenStreamComplete(@NotNull AiMessageComponent aiMessage) {
+        log.debug("Stream completed.");
+        aiMessage.streamClosed();
+        updateProgressStatus(false);
     }
 
     private void updateProgressStatus(boolean isGenerating) {

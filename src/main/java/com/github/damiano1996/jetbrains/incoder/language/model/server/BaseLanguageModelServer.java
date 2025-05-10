@@ -6,8 +6,8 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageMo
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -15,9 +15,9 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public abstract class BaseLanguageModelServer implements LanguageModelServer {
 
-    public abstract ChatLanguageModel createChatLanguageModel();
+    public abstract ChatModel createChatModel();
 
-    public abstract StreamingChatLanguageModel createStreamingChatLanguageModel();
+    public abstract StreamingChatModel createStreamingChatModel();
 
     @Contract(" -> new")
     @Override
@@ -26,7 +26,7 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
             ChatMemory chatMemory = createChatMemory();
 
             return new LanguageModelClientImpl(
-                    createChatLanguageModel(), createStreamingChatLanguageModel(), chatMemory);
+                    createChatModel(), createStreamingChatModel(), chatMemory);
         } catch (Exception e) {
             throw new LanguageModelException(
                     ("Unable to create the client for %s.\n" + "%s")
