@@ -7,6 +7,7 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.file.FileM
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptClassifier;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptType;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.ListFilesTool;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -35,6 +36,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
                         .streamingChatModel(streamingChatModel)
                         .chatModel(chatModel)
                         .chatMemory(chatMemory)
+                        .tools(new ListFilesTool())
                         .build();
 
         documentationAssistant =
