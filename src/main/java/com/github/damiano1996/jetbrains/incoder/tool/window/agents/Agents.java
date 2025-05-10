@@ -1,8 +1,8 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.actions;
+package com.github.damiano1996.jetbrains.incoder.tool.window.agents;
 
 import com.github.damiano1996.jetbrains.incoder.ClassInstantiator;
-import com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards.IntelligentAction;
-import com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards.IntelligentActionCard;
+import com.github.damiano1996.jetbrains.incoder.tool.window.agents.cards.Agent;
+import com.github.damiano1996.jetbrains.incoder.tool.window.agents.cards.AgentCard;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.*;
@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Actions {
+public class Agents {
 
     @Getter private JPanel mainPanel;
 
@@ -41,15 +41,9 @@ public class Actions {
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        var intelligentActions = ClassInstantiator.findImplementations(IntelligentAction.class);
+        var intelligentActions = ClassInstantiator.findImplementations(Agent.class);
 
         intelligentActions.forEach(
-                intelligentAction ->
-                        actionsPanel.add(
-                                new IntelligentActionCard()
-                                        .setTitle(intelligentAction.getDisplayName())
-                                        .setDescription(intelligentAction.getDescription())
-                                        .setExecutor(intelligentAction.createExecutor())
-                                        .getMainPanel()));
+                agent -> actionsPanel.add(new AgentCard().setAgent(agent).getMainPanel()));
     }
 }

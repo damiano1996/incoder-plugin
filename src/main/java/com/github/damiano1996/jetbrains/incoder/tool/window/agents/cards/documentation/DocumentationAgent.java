@@ -1,8 +1,9 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards.documentation;
+package com.github.damiano1996.jetbrains.incoder.tool.window.agents.cards.documentation;
 
+import com.github.damiano1996.jetbrains.incoder.InCoderBundle;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelService;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
-import com.github.damiano1996.jetbrains.incoder.tool.window.actions.cards.IntelligentActionExecutor;
+import com.github.damiano1996.jetbrains.incoder.tool.window.agents.cards.Agent;
 import com.github.damiano1996.jetbrains.incoder.ui.components.DescriptionLabel;
 import com.intellij.diff.DiffManager;
 import com.intellij.diff.DiffRequestFactory;
@@ -31,7 +32,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
-public class DocumentationExecutor implements IntelligentActionExecutor {
+public class DocumentationAgent implements Agent {
+
+    @Override
+    public String getDisplayName() {
+        return "Documentation";
+    }
+
+    @Override
+    public String getDescription() {
+        return InCoderBundle.message("intelligent.agents.documentation.description");
+    }
 
     private static void createMergeRequest(
             VirtualFile file, @NotNull String documentedCode, Project project) {
