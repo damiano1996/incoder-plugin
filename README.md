@@ -52,7 +52,7 @@ It seamlessly integrates advanced Large Language Models (LLMs) into your develop
 - Press **Tab** to accept the suggested code and insert it directly into your file.
 - Accelerate your coding workflow with intelligent autocompletion that understands the context of your project.
 
-### 3. **Intelligent Actions**
+### 3. **Agents**
 
 Automate repetitive and time-consuming tasks with intelligent agents powered by LLMs.
 
@@ -60,7 +60,7 @@ Automate repetitive and time-consuming tasks with intelligent agents powered by 
   <img src=".github/readme/demo-intelligent-actions.png" alt="Demo Intelligent Actions" style="width: 70%;">
 </p>
 
-- Supported actions:
+- Available agents:
   - **Documentation**: Generate documentation automatically for all files in a target folder, review changes, and merge the new documentation seamlessly.
 
 ### 4. **Support for Multiple LLM Providers**
