@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.openai.settings;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.AnthropicLanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.openai.OpenAiLanguageModelServer;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBLabel;
