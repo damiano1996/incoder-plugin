@@ -7,7 +7,7 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.file.FileM
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptClassifier;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptType;
-import dev.langchain4j.memory.ChatMemory;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.service.AiServices;
@@ -25,8 +25,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     private final FileManagerAssistant fileManagerAssistant;
     private final PromptClassifier promptClassifier;
 
-    public LanguageModelClientImpl(
-            ChatModel chatModel, StreamingChatModel streamingChatModel, ChatMemory chatMemory) {
+    public LanguageModelClientImpl(ChatModel chatModel, StreamingChatModel streamingChatModel) {
 
         this.chatModel = chatModel;
 
@@ -34,7 +33,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
                 AiServices.builder(ChatCodingAssistant.class)
                         .streamingChatModel(streamingChatModel)
                         .chatModel(chatModel)
-                        .chatMemory(chatMemory)
+                        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
                         .build();
 
         documentationAssistant =
@@ -70,19 +69,22 @@ public class LanguageModelClientImpl implements LanguageModelClient {
 
     @Override
     public TokenStream chat(
+            int memoryId,
             String instructions,
             String code,
             String filePath,
             String projectBasePath,
             String prompt) {
         log.debug("Chatting about codes...");
-        return chatCodingAssistant.chat(instructions, code, filePath, projectBasePath, prompt);
+        return chatCodingAssistant.chat(
+                memoryId, instructions, code, filePath, projectBasePath, prompt);
     }
 
     @Override
-    public TokenStream chat(String instructions, String projectBasePath, String prompt) {
+    public TokenStream chat(
+            int memoryId, String instructions, String projectBasePath, String prompt) {
         log.debug("Chatting...");
-        return chatCodingAssistant.chat(instructions, projectBasePath, prompt);
+        return chatCodingAssistant.chat(memoryId, instructions, projectBasePath, prompt);
     }
 
     @Override

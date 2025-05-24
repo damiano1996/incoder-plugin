@@ -23,10 +23,7 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
     @Override
     public @NotNull LanguageModelClient createClient() throws LanguageModelException {
         try {
-            ChatMemory chatMemory = createChatMemory();
-
-            return new LanguageModelClientImpl(
-                    createChatModel(), createStreamingChatModel(), chatMemory);
+            return new LanguageModelClientImpl(createChatModel(), createStreamingChatModel());
         } catch (Exception e) {
             throw new LanguageModelException(
                     ("Unable to create the client for %s.\n" + "%s")
