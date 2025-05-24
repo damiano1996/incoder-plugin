@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-05-24
+
+### Added
+
+- Create new chat option.
+- Custom LLM names.
+
+### Changed
+
+- langchain4j dependency version.
+- JetBrains compatibility version updated.
+- `Actions` tab renamed to `Agents`.
+- Other minor changes.
+
 ## [0.1.1] - 2025-02-24
 
 ### Added
@@ -41,7 +55,8 @@
 
 - Qodana recommendations.
 
-[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/damiano1996/incoder-plugin/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/damiano1996/incoder-plugin/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/damiano1996/incoder-plugin/compare/v0.0.2...v0.1.0
 [0.0.2]: https://github.com/damiano1996/incoder-plugin/commits/v0.0.2
