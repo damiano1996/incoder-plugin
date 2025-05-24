@@ -8,11 +8,12 @@ import com.intellij.codeInsight.daemon.impl.HintRenderer;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.InlayModel;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
-import java.awt.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,26 +31,46 @@ public class PreviewState extends BaseState {
     }
 
     private void renderPrediction() {
-        EventQueue.invokeLater(
-                () -> {
-                    Editor editor = codeCompletionService.getEditor();
-                    if (editor == null) {
-                        log.debug("Editor was null, retuning");
-                        return;
-                    }
+        ApplicationManager.getApplication()
+                .invokeLater(
+                        () ->
+                                ApplicationManager.getApplication()
+                                        .runWriteAction(
+                                                () -> {
+                                                    Editor editor =
+                                                            codeCompletionService.getEditor();
+                                                    if (editor == null) {
+                                                        log.debug("Editor was null, returning");
+                                                        return;
+                                                    }
 
-                    InlayModel inlayModel = editor.getInlayModel();
+                                                    renderPrediction(editor);
+                                                }));
+    }
 
-                    int offset = editor.getCaretModel().getOffset();
-                    inlayModel.addInlineElement(offset, true, new PreviewInlayRenderer(prediction));
+    private void renderPrediction(Editor editor) {
+        try {
+            InlayModel inlayModel = editor.getInlayModel();
+            int offset = editor.getCaretModel().getOffset();
 
-                    int endLineOffset =
-                            Math.max(editor.getCaretModel().getVisualLineEnd() - 1, offset);
-                    inlayModel.addInlineElement(endLineOffset, true, new PreviewInlayRenderer(" "));
-                    inlayModel.addInlineElement(endLineOffset, true, new HintRenderer("Tab"));
-                    inlayModel.addInlineElement(
-                            endLineOffset, true, new PreviewInlayRenderer(" to complete"));
-                });
+            WriteCommandAction.runWriteCommandAction(
+                    editor.getProject(),
+                    () -> {
+                        inlayModel.addInlineElement(
+                                offset, true, new PreviewInlayRenderer(prediction));
+
+                        int endLineOffset =
+                                Math.max(editor.getCaretModel().getVisualLineEnd() - 1, offset);
+
+                        inlayModel.addInlineElement(
+                                endLineOffset, true, new PreviewInlayRenderer(" "));
+                        inlayModel.addInlineElement(endLineOffset, true, new HintRenderer("Tab"));
+                        inlayModel.addInlineElement(
+                                endLineOffset, true, new PreviewInlayRenderer(" to complete"));
+                    });
+        } catch (Exception e) {
+            log.error("Error rendering prediction inlay", e);
+        }
     }
 
     @Override
