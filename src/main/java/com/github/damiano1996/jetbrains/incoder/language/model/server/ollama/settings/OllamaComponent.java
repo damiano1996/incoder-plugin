@@ -17,12 +17,15 @@ import lombok.extern.slf4j.Slf4j;
 public class OllamaComponent {
 
     private final JPanel mainPanel;
-    private final JBTextField baseUrlField = new JBTextField();
+    private final JBTextField baseUrlField;
     private final ComboBox<String> modelNameField;
     private final JSpinner temperatureField;
     private final JButton refreshButton;
 
     public OllamaComponent() {
+        baseUrlField = new JBTextField();
+        baseUrlField.setColumns(40);
+
         SpinnerNumberModel temperatureModel = new SpinnerNumberModel(0.5, 0.0, 1.0, 0.1);
         temperatureField = new JSpinner(temperatureModel);
 
@@ -31,7 +34,7 @@ public class OllamaComponent {
                         new OllamaLanguageModelServer()
                                 .getAvailableModels()
                                 .toArray(new String[0]));
-        modelNameField.addItem("");
+        modelNameField.setEditable(true);
         modelNameField.setPreferredSize(new Dimension(300, 30));
 
         refreshButton = new JButton(AllIcons.Actions.Refresh);

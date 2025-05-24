@@ -46,7 +46,11 @@ public final class OllamaConfigurable extends BaseServerConfigurable {
         var state = getState();
 
         return !settingsComponent.getBaseUrlField().getText().equals(state.baseUrl)
-                || !settingsComponent.getModelNameField().getItem().equals(state.modelName)
+                || !settingsComponent
+                        .getModelNameField()
+                        .getEditor()
+                        .getItem()
+                        .equals(state.modelName)
                 || !settingsComponent.getTemperatureField().getValue().equals(state.temperature);
     }
 

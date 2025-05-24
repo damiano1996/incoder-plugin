@@ -46,7 +46,11 @@ public final class AnthropicConfigurable extends BaseServerConfigurable {
         var state = getState();
 
         return !new String(settingsComponent.getApiKeyField().getPassword()).equals(state.apiKey)
-                || !settingsComponent.getModelNameField().getItem().equals(state.modelName)
+                || !settingsComponent
+                        .getModelNameField()
+                        .getEditor()
+                        .getItem()
+                        .equals(state.modelName)
                 || !settingsComponent.getTemperatureField().getValue().equals(state.temperature);
     }
 

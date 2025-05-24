@@ -20,9 +20,10 @@ public class OpenAiComponent {
 
     public OpenAiComponent() {
         baseUrlField = new JBTextField();
+        baseUrlField.setColumns(40);
 
         apiKeyField = new JPasswordField();
-        apiKeyField.setColumns(60);
+        apiKeyField.setColumns(40);
 
         SpinnerNumberModel temperatureModel = new SpinnerNumberModel(0.5, 0.0, 1.0, 0.1);
         temperatureField = new JSpinner(temperatureModel);
@@ -32,7 +33,7 @@ public class OpenAiComponent {
                         new OpenAiLanguageModelServer()
                                 .getAvailableModels()
                                 .toArray(new String[0]));
-        modelNameField.addItem("");
+        modelNameField.setEditable(true);
         modelNameField.setPreferredSize(new Dimension(300, 30));
 
         mainPanel =
