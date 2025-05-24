@@ -15,18 +15,22 @@ import dev.langchain4j.service.TokenStream;
 import java.util.function.Consumer;
 import javax.swing.*;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class Chat {
 
+    @Setter @Getter private int chatId;
+
     @Getter private JPanel mainPanel;
     private JTextField prompt;
     private JProgressBar generating;
+
     private ChatBody chatBody;
 
-    public Chat setActionListeners(Project project) {
+    public Chat setPromptActionListener(Project project) {
         prompt.addActionListener(e -> handleAction(project));
         return this;
     }
@@ -98,11 +102,11 @@ public class Chat {
                         });
     }
 
-    private static TokenStream getChatTokenStreamer(
+    private TokenStream getChatTokenStreamer(
             Project project, @NotNull String prompt, Editor editor) {
         return editor == null
-                ? LanguageModelService.getInstance(project).chat(prompt)
-                : LanguageModelService.getInstance(project).chat(editor, prompt);
+                ? LanguageModelService.getInstance(project).chat(chatId, prompt)
+                : LanguageModelService.getInstance(project).chat(chatId, editor, prompt);
     }
 
     private @NotNull Consumer<Throwable> onTokenStreamError() {

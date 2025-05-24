@@ -1,9 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.chat;
 
-import dev.langchain4j.service.SystemMessage;
-import dev.langchain4j.service.TokenStream;
-import dev.langchain4j.service.UserMessage;
-import dev.langchain4j.service.V;
+import dev.langchain4j.service.*;
 
 public interface ChatCodingAssistant {
 
@@ -20,6 +17,7 @@ public interface ChatCodingAssistant {
                     {{instructions}}
                     """)
     TokenStream chat(
+            @MemoryId int memoryId,
             @V("instructions") String instructions,
             @V("code") String code,
             @V("filePath") String filePath,
@@ -35,6 +33,7 @@ public interface ChatCodingAssistant {
                     {{instructions}}
                     """)
     TokenStream chat(
+            @MemoryId int memoryId,
             @V("instructions") String instructions,
             @V("projectBasePath") String projectBasePath,
             @UserMessage String prompt);
