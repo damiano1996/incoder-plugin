@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,7 +80,6 @@ public final class LanguageModelService implements Disposable {
                         codeCompletionContext.rightContext());
     }
 
-    @Contract("_ -> new")
     public @NotNull CompletableFuture<PromptType> classify(String prompt) {
         return CompletableFuture.supplyAsync(
                 () ->
@@ -91,10 +89,11 @@ public final class LanguageModelService implements Disposable {
                                 .classify(prompt));
     }
 
-    public TokenStream chat(@NonNull Editor editor, @NonNull String prompt) {
+    public TokenStream chat(int memoryId, @NonNull Editor editor, @NonNull String prompt) {
         return Objects.requireNonNull(
                         client, "Client must be initialized to chat with the language model.")
                 .chat(
+                        memoryId,
                         ChatSettings.getInstance().getState().systemMessageInstructionsWithCode,
                         editor.getDocument().getText(),
                         editor.getVirtualFile().getPath(),
@@ -102,10 +101,11 @@ public final class LanguageModelService implements Disposable {
                         prompt);
     }
 
-    public TokenStream chat(@NonNull String prompt) {
+    public TokenStream chat(int memoryId, @NonNull String prompt) {
         return Objects.requireNonNull(
                         client, "Client must be initialized to chat with the language model.")
                 .chat(
+                        memoryId,
                         ChatSettings.getInstance().getState().systemMessageInstructions,
                         project.getBasePath(),
                         prompt);

@@ -1,7 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window;
 
 import com.github.damiano1996.jetbrains.incoder.tool.window.agents.Agents;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.Chat;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.container.ChatContainer;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -18,8 +18,9 @@ public final class InCoderToolWindowFactory implements ToolWindowFactory, DumbAw
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 
-        Chat chat = new Chat().setActionListeners(project);
-        addContent(chat.getMainPanel(), "Chat", toolWindow);
+        ChatContainer chatContainer = new ChatContainer();
+        chatContainer.setProject(project);
+        addContent(chatContainer.getMainPanel(), "Chat", toolWindow);
 
         Agents agents = new Agents();
         addContent(agents.getMainPanel(), "Agents", toolWindow);

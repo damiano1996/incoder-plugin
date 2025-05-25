@@ -48,7 +48,11 @@ public final class OpenAiConfigurable extends BaseServerConfigurable {
         return !settingsComponent.getBaseUrlField().getText().equals(state.baseUrl)
                 || !new String(settingsComponent.getApiKeyField().getPassword())
                         .equals(state.apiKey)
-                || !settingsComponent.getModelNameField().getItem().equals(state.modelName)
+                || !settingsComponent
+                        .getModelNameField()
+                        .getEditor()
+                        .getItem()
+                        .equals(state.modelName)
                 || !settingsComponent.getTemperatureField().getValue().equals(state.temperature);
     }
 
