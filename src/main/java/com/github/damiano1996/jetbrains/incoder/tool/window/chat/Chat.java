@@ -81,16 +81,26 @@ public class Chat {
                             Editor editor =
                                     FileEditorManager.getInstance(project).getSelectedTextEditor();
 
-                            getChatTokenStreamer(project, prompt, editor)
-                                    .onPartialResponse(
-                                            token -> {
-                                                aiMessage.write(token);
-                                                chatBody.updateUI();
-                                            })
-                                    .onCompleteResponse(
-                                            chatResponse -> onTokenStreamComplete(aiMessage))
-                                    .onError(onTokenStreamError())
-                                    .start();
+                            String answer =
+                                    LanguageModelService.getInstance(project).chat(chatId, prompt);
+
+                            aiMessage.write(answer);
+                            chatBody.updateUI();
+                            onTokenStreamComplete(aiMessage);
+
+                            //                            getChatTokenStreamer(project, prompt,
+                            // editor)
+                            //                                    .onPartialResponse(
+                            //                                            token -> {
+                            //
+                            // aiMessage.write(token);
+                            //                                                chatBody.updateUI();
+                            //                                            })
+                            //                                    .onCompleteResponse(
+                            //                                            chatResponse ->
+                            // onTokenStreamComplete(aiMessage))
+                            //                                    .onError(onTokenStreamError())
+                            //                                    .start();
                         })
                 .exceptionally(
                         throwable -> {
@@ -105,8 +115,8 @@ public class Chat {
     private TokenStream getChatTokenStreamer(
             Project project, @NotNull String prompt, Editor editor) {
         return editor == null
-                ? LanguageModelService.getInstance(project).chat(chatId, prompt)
-                : LanguageModelService.getInstance(project).chat(chatId, editor, prompt);
+                ? LanguageModelService.getInstance(project).streamChat(chatId, prompt)
+                : LanguageModelService.getInstance(project).streamChat(chatId, editor, prompt);
     }
 
     private @NotNull Consumer<Throwable> onTokenStreamError() {

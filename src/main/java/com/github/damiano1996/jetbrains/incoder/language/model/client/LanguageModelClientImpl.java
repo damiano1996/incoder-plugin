@@ -70,7 +70,20 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     }
 
     @Override
-    public TokenStream chat(
+    public TokenStream streamChat(
+            int memoryId,
+            String instructions,
+            String code,
+            String filePath,
+            String projectBasePath,
+            String prompt) {
+        log.debug("Chatting about codes...");
+        return chatCodingAssistant.streamChat(
+                memoryId, instructions, code, filePath, projectBasePath, prompt);
+    }
+
+    @Override
+    public String chat(
             int memoryId,
             String instructions,
             String code,
@@ -83,8 +96,14 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     }
 
     @Override
-    public TokenStream chat(
+    public TokenStream streamChat(
             int memoryId, String instructions, String projectBasePath, String prompt) {
+        log.debug("Chatting...");
+        return chatCodingAssistant.streamChat(memoryId, instructions, projectBasePath, prompt);
+    }
+
+    @Override
+    public String chat(int memoryId, String instructions, String projectBasePath, String prompt) {
         log.debug("Chatting...");
         return chatCodingAssistant.chat(memoryId, instructions, projectBasePath, prompt);
     }

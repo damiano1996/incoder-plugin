@@ -89,7 +89,19 @@ public final class LanguageModelService implements Disposable {
                                 .classify(prompt));
     }
 
-    public TokenStream chat(int memoryId, @NonNull Editor editor, @NonNull String prompt) {
+    public TokenStream streamChat(int memoryId, @NonNull Editor editor, @NonNull String prompt) {
+        return Objects.requireNonNull(
+                        client, "Client must be initialized to chat with the language model.")
+                .streamChat(
+                        memoryId,
+                        ChatSettings.getInstance().getState().systemMessageInstructionsWithCode,
+                        editor.getDocument().getText(),
+                        editor.getVirtualFile().getPath(),
+                        project.getBasePath(),
+                        prompt);
+    }
+
+    public String chat(int memoryId, @NonNull Editor editor, @NonNull String prompt) {
         return Objects.requireNonNull(
                         client, "Client must be initialized to chat with the language model.")
                 .chat(
@@ -101,7 +113,17 @@ public final class LanguageModelService implements Disposable {
                         prompt);
     }
 
-    public TokenStream chat(int memoryId, @NonNull String prompt) {
+    public TokenStream streamChat(int memoryId, @NonNull String prompt) {
+        return Objects.requireNonNull(
+                        client, "Client must be initialized to chat with the language model.")
+                .streamChat(
+                        memoryId,
+                        ChatSettings.getInstance().getState().systemMessageInstructions,
+                        project.getBasePath(),
+                        prompt);
+    }
+
+    public String chat(int memoryId, @NonNull String prompt) {
         return Objects.requireNonNull(
                         client, "Client must be initialized to chat with the language model.")
                 .chat(
