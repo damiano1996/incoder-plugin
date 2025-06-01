@@ -32,17 +32,6 @@ repositories {
     }
 }
 
-configurations.all {
-    exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-kotlin")
-    exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-kotlin-reflect")
-
-    resolutionStrategy {
-        force("com.fasterxml.jackson.core:jackson-core:2.15.2")
-        force("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-        force("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
-    }
-}
-
 dependencies {
     testImplementation(libs.junit)
 
@@ -51,15 +40,10 @@ dependencies {
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
     implementation("org.reflections:reflections:0.10.2")
 
-    // Explicitly add Jackson without Kotlin module
-    implementation("com.fasterxml.jackson.core:jackson-core:2.15.2")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
-
-    implementation("dev.langchain4j:langchain4j:1.0.1")
-    implementation("dev.langchain4j:langchain4j-ollama:1.0.1-beta6")
-    implementation("dev.langchain4j:langchain4j-open-ai:1.0.1")
-    implementation("dev.langchain4j:langchain4j-anthropic:1.0.1-beta6")
+    implementation("dev.langchain4j:langchain4j:1.0.0-beta2")
+    implementation("dev.langchain4j:langchain4j-ollama:1.0.0-beta2")
+    implementation("dev.langchain4j:langchain4j-open-ai:1.0.0-beta2")
+    implementation("dev.langchain4j:langchain4j-anthropic:1.0.0-beta2")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {

@@ -5,8 +5,8 @@ import com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.anthropic.AnthropicStreamingChatModel;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public ChatModel createChatModel() {
+    public ChatLanguageModel createChatLanguageModel() {
         return AnthropicChatModel.builder()
                 .apiKey(getState().apiKey)
                 .modelName(getState().modelName)
@@ -26,7 +26,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public StreamingChatModel createStreamingChatModel() {
+    public StreamingChatLanguageModel createStreamingChatLanguageModel() {
         return AnthropicStreamingChatModel.builder()
                 .apiKey(getState().apiKey)
                 .modelName(getState().modelName)

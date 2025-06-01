@@ -7,10 +7,12 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.file.FileM
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptClassifier;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptType;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.ListFilesTool;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.CurrentCodeTool;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.FilesTool;
+import com.intellij.openapi.project.Project;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LanguageModelClientImpl implements LanguageModelClient {
 
-    private final ChatModel chatModel;
+    private final ChatLanguageModel chatLanguageModel;
 
     private final ChatCodingAssistant chatCodingAssistant;
     private final DocumentationAssistant documentationAssistant;
@@ -26,40 +28,42 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     private final FileManagerAssistant fileManagerAssistant;
     private final PromptClassifier promptClassifier;
 
-    public LanguageModelClientImpl(ChatModel chatModel, StreamingChatModel streamingChatModel) {
+    public LanguageModelClientImpl(
+            Project project, ChatLanguageModel chatLanguageModel,
+            StreamingChatLanguageModel streamingChatLanguageModel) {
 
-        this.chatModel = chatModel;
+        this.chatLanguageModel = chatLanguageModel;
 
         chatCodingAssistant =
                 AiServices.builder(ChatCodingAssistant.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
+                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
                         .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
-                        .tools(new ListFilesTool())
+                        .tools(new CurrentCodeTool(project), new FilesTool())
                         .build();
 
         documentationAssistant =
                 AiServices.builder(DocumentationAssistant.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
+                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
                         .build();
 
         inlineCodingAssistant =
                 AiServices.builder(InlineCodingAssistant.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
+                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
                         .build();
 
         fileManagerAssistant =
                 AiServices.builder(FileManagerAssistant.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
+                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
                         .build();
 
         promptClassifier =
                 AiServices.builder(PromptClassifier.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
+                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
                         .build();
     }
 
@@ -123,7 +127,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     @Override
     public void checkServerConnection() throws LanguageModelException {
         try {
-            chatModel.chat("Hello!");
+            chatLanguageModel.chat("Hello!");
         } catch (Exception e) {
             throw new LanguageModelException(e);
         }

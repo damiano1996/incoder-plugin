@@ -51,7 +51,7 @@ public final class LanguageModelService implements Disposable {
 
         this.server = server;
 
-        client = this.server.createClient();
+        client = this.server.createClient(project);
         log.debug("Client created successfully!");
 
         log.debug("Verifying server connection.");

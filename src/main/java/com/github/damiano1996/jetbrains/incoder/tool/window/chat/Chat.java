@@ -78,29 +78,18 @@ public class Chat {
                                             .toLowerCase());
                             chatBody.addMessage(aiMessage);
 
-                            Editor editor =
-                                    FileEditorManager.getInstance(project).getSelectedTextEditor();
 
-                            String answer =
-                                    LanguageModelService.getInstance(project).chat(chatId, prompt);
 
-                            aiMessage.write(answer);
-                            chatBody.updateUI();
-                            onTokenStreamComplete(aiMessage);
-
-                            //                            getChatTokenStreamer(project, prompt,
-                            // editor)
-                            //                                    .onPartialResponse(
-                            //                                            token -> {
-                            //
-                            // aiMessage.write(token);
-                            //                                                chatBody.updateUI();
-                            //                                            })
-                            //                                    .onCompleteResponse(
-                            //                                            chatResponse ->
-                            // onTokenStreamComplete(aiMessage))
-                            //                                    .onError(onTokenStreamError())
-                            //                                    .start();
+                            getChatTokenStreamer(project, prompt, editor)
+                                    .onPartialResponse(
+                                            token -> {
+                                                aiMessage.write(token);
+                                                chatBody.updateUI();
+                                            })
+                                    .onCompleteResponse(
+                                            chatResponse -> onTokenStreamComplete(aiMessage))
+                                    .onError(onTokenStreamError())
+                                    .start();
                         })
                 .exceptionally(
                         throwable -> {
