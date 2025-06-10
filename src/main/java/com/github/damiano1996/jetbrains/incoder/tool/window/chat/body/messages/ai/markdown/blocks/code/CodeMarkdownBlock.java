@@ -97,7 +97,7 @@ public class CodeMarkdownBlock implements MarkdownBlock, Disposable {
 
     private void lookForNextTextBlock(String code) throws PatternFinder.PatternNotFound {
         int delimiterIndex =
-                new PatternFinder().getFistMatchIndex(MARKDOWN_CODE_BLOCK_END_REGEX, code);
+                new PatternFinder().getFirstMatchIndex(MARKDOWN_CODE_BLOCK_END_REGEX, code);
 
         log.debug("Text block found at index: {}", delimiterIndex);
 
