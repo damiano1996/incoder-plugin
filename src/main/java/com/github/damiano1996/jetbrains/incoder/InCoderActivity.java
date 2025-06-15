@@ -2,7 +2,7 @@ package com.github.damiano1996.jetbrains.incoder;
 
 import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionService;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelService;
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.settings.PluginSettings;
 import com.intellij.notification.NotificationType;
@@ -36,7 +36,7 @@ public class InCoderActivity implements ProjectActivity {
                 () -> {
                     try {
                         log.debug("Initializing services...");
-                        LanguageModelService.getInstance(project).init();
+                        LanguageModelServiceImpl.getInstance(project).init();
                         CodeCompletionService.getInstance(project).init();
                         log.debug("Services initialized.");
                     } catch (LanguageModelException e) {

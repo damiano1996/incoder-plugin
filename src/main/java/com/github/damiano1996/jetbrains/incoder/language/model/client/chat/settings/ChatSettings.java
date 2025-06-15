@@ -7,8 +7,14 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
+@Slf4j
 @Getter
 @Service(Service.Level.APP)
 @State(
@@ -31,27 +37,18 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
     public static class State {
         public int maxMessages = 10;
 
-        public String systemMessageInstructionsWithCode =
-                """
-                    - You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
-                    - If the user input pertains to the provided code, respond with the code edited according to the user's instructions.
-                    - Always ensure your response is concise and adheres to the user's instructions.
-                    - Answers must be in Markdown and code blocks must be surrounded by triple backticks and specify the language.
-                    Example:
-                    ```java
-                    // java code
-                    ```
-                    """;
+        public String systemMessageInstructions = loadSystemPrompt();
 
-        public String systemMessageInstructions =
-                """
-                    - You are an AI assistant integrated into a JetBrains plugin, providing expert coding assistance and development support directly within the IDE.
-                    - Always ensure your response is concise and adheres to the user's instructions.
-                    - Answers must be in Markdown and code blocks must be surrounded by triple backticks and specify the language.
-                    Example:
-                    ```java
-                    // java code
-                    ```
-                    """;
+        private static @NotNull String loadSystemPrompt() {
+            try (InputStream inputStream = State.class.getClassLoader()
+                    .getResourceAsStream("prompts/system_prompt.txt")) {
+                if (inputStream != null) {
+                    return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                }
+            } catch (IOException e) {
+                log.error("Unable to read system prompt.", e);
+            }
+            return "";
+        }
     }
 }

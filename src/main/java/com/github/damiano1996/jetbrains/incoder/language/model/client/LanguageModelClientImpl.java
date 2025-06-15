@@ -2,13 +2,10 @@ package com.github.damiano1996.jetbrains.incoder.language.model.client;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatCodingAssistant;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.doc.DocumentationAssistant;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.file.FileManagerAssistant;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptClassifier;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptType;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.CurrentCodeTool;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.FilesTool;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.EditorTool;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.FileTool;
 import com.intellij.openapi.project.Project;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -23,10 +20,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     private final ChatLanguageModel chatLanguageModel;
 
     private final ChatCodingAssistant chatCodingAssistant;
-    private final DocumentationAssistant documentationAssistant;
     private final InlineCodingAssistant inlineCodingAssistant;
-    private final FileManagerAssistant fileManagerAssistant;
-    private final PromptClassifier promptClassifier;
 
     public LanguageModelClientImpl(
             Project project, ChatLanguageModel chatLanguageModel,
@@ -38,30 +32,12 @@ public class LanguageModelClientImpl implements LanguageModelClient {
                 AiServices.builder(ChatCodingAssistant.class)
                         .streamingChatLanguageModel(streamingChatLanguageModel)
                         .chatLanguageModel(chatLanguageModel)
-                        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
-                        .tools(new CurrentCodeTool(project), new FilesTool())
-                        .build();
-
-        documentationAssistant =
-                AiServices.builder(DocumentationAssistant.class)
-                        .streamingChatLanguageModel(streamingChatLanguageModel)
-                        .chatLanguageModel(chatLanguageModel)
+                        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(ChatSettings.getInstance().getState().maxMessages))
+                        .tools(new FileTool(), new EditorTool(project))
                         .build();
 
         inlineCodingAssistant =
                 AiServices.builder(InlineCodingAssistant.class)
-                        .streamingChatLanguageModel(streamingChatLanguageModel)
-                        .chatLanguageModel(chatLanguageModel)
-                        .build();
-
-        fileManagerAssistant =
-                AiServices.builder(FileManagerAssistant.class)
-                        .streamingChatLanguageModel(streamingChatLanguageModel)
-                        .chatLanguageModel(chatLanguageModel)
-                        .build();
-
-        promptClassifier =
-                AiServices.builder(PromptClassifier.class)
                         .streamingChatLanguageModel(streamingChatLanguageModel)
                         .chatLanguageModel(chatLanguageModel)
                         .build();
@@ -74,54 +50,8 @@ public class LanguageModelClientImpl implements LanguageModelClient {
     }
 
     @Override
-    public TokenStream streamChat(
-            int memoryId,
-            String instructions,
-            String code,
-            String filePath,
-            String projectBasePath,
-            String prompt) {
-        log.debug("Chatting about codes...");
-        return chatCodingAssistant.streamChat(
-                memoryId, instructions, code, filePath, projectBasePath, prompt);
-    }
-
-    @Override
-    public String chat(
-            int memoryId,
-            String instructions,
-            String code,
-            String filePath,
-            String projectBasePath,
-            String prompt) {
-        log.debug("Chatting about codes...");
-        return chatCodingAssistant.chat(
-                memoryId, instructions, code, filePath, projectBasePath, prompt);
-    }
-
-    @Override
-    public TokenStream streamChat(
-            int memoryId, String instructions, String projectBasePath, String prompt) {
-        log.debug("Chatting...");
-        return chatCodingAssistant.streamChat(memoryId, instructions, projectBasePath, prompt);
-    }
-
-    @Override
-    public String chat(int memoryId, String instructions, String projectBasePath, String prompt) {
-        log.debug("Chatting...");
-        return chatCodingAssistant.chat(memoryId, instructions, projectBasePath, prompt);
-    }
-
-    @Override
-    public PromptType classify(String prompt) {
-        log.debug("Classifying prompt: {}...", prompt);
-        return promptClassifier.classify(prompt);
-    }
-
-    @Override
-    public String createFileName(String fileContent, String language) {
-        log.debug("Defining file path");
-        return fileManagerAssistant.createFileName(fileContent, language).trim();
+    public TokenStream chat(int memoryId, String systemInstructions, String prompt) {
+        return chatCodingAssistant.chat(memoryId, systemInstructions, prompt);
     }
 
     @Override
@@ -131,10 +61,5 @@ public class LanguageModelClientImpl implements LanguageModelClient {
         } catch (Exception e) {
             throw new LanguageModelException(e);
         }
-    }
-
-    @Override
-    public String document(String instructions, String code) {
-        return documentationAssistant.document(instructions, code);
     }
 }

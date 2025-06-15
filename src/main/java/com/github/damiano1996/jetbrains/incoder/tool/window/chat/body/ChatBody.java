@@ -14,73 +14,71 @@ public class ChatBody {
     private JPanel mainPanel;
     private JPanel messagesPanel;
     private JScrollPane scrollPane;
+    private boolean autoScroll = true;
 
     public void addMessage(@NotNull MessageComponent messageComponent) {
-        var messageMainPanel = messageComponent.getMainPanel();
-        messagesPanel.add(messageMainPanel);
-        messageMainPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-
-        repaint();
-        scrollToBottom();
+        SwingUtilities.invokeLater(() -> {
+            var messageMainPanel = messageComponent.getMainPanel();
+            
+            // Check if we should auto-scroll before adding
+            JScrollBar vertical = scrollPane.getVerticalScrollBar();
+            boolean wasAtBottom = vertical.getValue() + vertical.getVisibleAmount() >= vertical.getMaximum() - 10;
+            
+            messagesPanel.add(messageMainPanel);
+            
+            // Revalidate and repaint in proper order
+            messagesPanel.revalidate();
+            
+            // Only scroll if user was at bottom
+            if (wasAtBottom) {
+                SwingUtilities.invokeLater(this::scrollToBottom);
+            }
+        });
     }
 
     public void updateUI() {
-        repaint();
-        scrollToBottomSmoothly();
-    }
-
-    private void repaint() {
-        messagesPanel.revalidate();
-        messagesPanel.repaint();
+        SwingUtilities.invokeLater(() -> {
+            // Store scroll position
+            JScrollBar vertical = scrollPane.getVerticalScrollBar();
+            boolean wasAtBottom = vertical.getValue() + vertical.getVisibleAmount() >= vertical.getMaximum() - 10;
+            
+            messagesPanel.revalidate();
+            messagesPanel.repaint();
+            
+            // Restore scroll position or scroll to bottom if user was there
+            if (wasAtBottom) {
+                SwingUtilities.invokeLater(this::scrollToBottom);
+            }
+        });
     }
 
     private void scrollToBottom() {
-        ApplicationManager.getApplication()
-                .invokeLater(
-                        () -> {
-                            JScrollBar vertical = scrollPane.getVerticalScrollBar();
-                            vertical.setValue(vertical.getMaximum());
-                        });
-    }
-
-    private void scrollToBottomSmoothly() {
         JScrollBar vertical = scrollPane.getVerticalScrollBar();
-        if (vertical.getValue() + vertical.getVisibleAmount() >= vertical.getMaximum() - 20) {
-            Timer timer = new Timer(10, null);
-            timer.addActionListener(
-                    e -> {
-                        int currentValue = vertical.getValue();
-                        int targetValue = vertical.getMaximum() - vertical.getVisibleAmount();
-                        if (currentValue < targetValue) {
-                            vertical.setValue(Math.min(currentValue + 10, targetValue));
-                        } else {
-                            timer.stop();
-                        }
-                    });
-            timer.start();
-        }
+        vertical.setValue(vertical.getMaximum());
     }
 
     private void createUIComponents() {
         mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
 
-        // Create messages panel with proper constraints
+        // Create messages panel with proper layout
         messagesPanel = new JPanel();
         messagesPanel.setLayout(new BoxLayout(messagesPanel, BoxLayout.Y_AXIS));
         messagesPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
-        messagesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        messagesPanel.setAlignmentY(Component.TOP_ALIGNMENT);
 
-        // Create a wrapper panel to hold messagesPanel
+        // Create a wrapper panel to push messages to top and allow proper wrapping
         JPanel wrapperPanel = new JPanel(new BorderLayout());
         wrapperPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
         wrapperPanel.add(messagesPanel, BorderLayout.NORTH);
 
-        // Create scroll pane
+        // Create scroll pane with optimized settings
         scrollPane = new JBScrollPane(wrapperPanel);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        
+        // Optimize scrolling performance
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
     }

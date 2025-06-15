@@ -1,7 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelService;
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
 import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
@@ -69,7 +69,7 @@ public abstract class BaseServerConfigurable implements Configurable {
                                 () -> {
                                     try {
                                         log.debug("Restarting Language Model Service");
-                                        LanguageModelService.getInstance(
+                                        LanguageModelServiceImpl.getInstance(
                                                         Objects.requireNonNull(
                                                                 ProjectUtil.getActiveProject()))
                                                 .init(getServerFactory().createServer());

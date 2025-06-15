@@ -43,10 +43,6 @@ public final class ChatSettingsConfigurable implements Configurable {
 
         return !chatSettingsComponent.getMaxMessages().getValue().equals(state.maxMessages)
                 || !chatSettingsComponent
-                        .getSystemMessageInstructionsWithCodeField()
-                        .getText()
-                        .equals(state.systemMessageInstructionsWithCode)
-                || !chatSettingsComponent
                         .getSystemMessageInstructionsField()
                         .getText()
                         .equals(state.systemMessageInstructions);
@@ -57,8 +53,6 @@ public final class ChatSettingsConfigurable implements Configurable {
         var state = getState();
 
         state.maxMessages = (int) chatSettingsComponent.getMaxMessages().getValue();
-        state.systemMessageInstructionsWithCode =
-                chatSettingsComponent.getSystemMessageInstructionsWithCodeField().getText();
         state.systemMessageInstructions =
                 chatSettingsComponent.getSystemMessageInstructionsField().getText();
     }
@@ -68,9 +62,6 @@ public final class ChatSettingsConfigurable implements Configurable {
         var state = getState();
 
         chatSettingsComponent.getMaxMessages().setValue(state.maxMessages);
-        chatSettingsComponent
-                .getSystemMessageInstructionsWithCodeField()
-                .setText(state.systemMessageInstructionsWithCode);
         chatSettingsComponent
                 .getSystemMessageInstructionsField()
                 .setText(state.systemMessageInstructions);
