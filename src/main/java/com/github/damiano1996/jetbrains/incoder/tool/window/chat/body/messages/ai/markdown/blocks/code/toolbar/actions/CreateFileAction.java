@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.toolbar.actions;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.CodeMarkdownBlock;
 import com.intellij.icons.AllIcons;
@@ -48,10 +47,11 @@ public class CreateFileAction extends AnAction {
             Path filePath;
 
             if (Files.isDirectory(selectedFolderPath)) {
-//                var fileName =
-//                        LanguageModelServiceImpl.getInstance(project)
-//                                .createFileName(
-//                                        codeBlock.getText(), codeBlock.getLanguage().getID());
+                //                var fileName =
+                //                        LanguageModelServiceImpl.getInstance(project)
+                //                                .createFileName(
+                //                                        codeBlock.getText(),
+                // codeBlock.getLanguage().getID());
                 filePath = selectedFolderPath.resolve("fileName");
             } else {
                 filePath = selectedFolderPath;

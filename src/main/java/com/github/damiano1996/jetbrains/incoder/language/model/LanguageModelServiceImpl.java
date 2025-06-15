@@ -1,9 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model;
 
-import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageModelClient;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactoryUtils;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerSettings;
@@ -11,7 +8,6 @@ import com.github.damiano1996.jetbrains.incoder.settings.PluginSettings;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
-import dev.langchain4j.service.TokenStream;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,10 +18,8 @@ public final class LanguageModelServiceImpl implements LanguageModelService, Dis
 
     private final Project project;
 
-    @Nullable
-    private LanguageModelServer server;
-    @Nullable
-    private LanguageModelClient client;
+    @Nullable private LanguageModelServer server;
+    @Nullable private LanguageModelClient client;
 
     public LanguageModelServiceImpl(Project project) {
         this.project = project;
@@ -72,23 +66,11 @@ public final class LanguageModelServiceImpl implements LanguageModelService, Dis
     }
 
     @Override
-    public TokenStream chat(int memoryId, String prompt) {
+    public @NotNull LanguageModelClient getClient() {
         if (client == null) throw new IllegalStateException("Client must be initialized.");
-        return client.chat(memoryId,
-                ChatSettings.getInstance().getState().systemMessageInstructions,
-                prompt);
+        return client;
     }
 
     @Override
-    public String complete(@NotNull CodeCompletionContext codeCompletionContext) {
-        if (client == null) throw new IllegalStateException("Client must be initialized.");
-        return client.complete(
-                InlineSettings.getInstance().getState().systemMessageInstructions,
-                codeCompletionContext.leftContext(),
-                codeCompletionContext.rightContext());
-    }
-
-    @Override
-    public void dispose() {
-    }
+    public void dispose() {}
 }

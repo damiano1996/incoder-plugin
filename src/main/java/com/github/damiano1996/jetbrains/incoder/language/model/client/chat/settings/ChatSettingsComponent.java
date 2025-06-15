@@ -36,7 +36,9 @@ public class ChatSettingsComponent {
                                 true)
                         .addComponent(
                                 new DescriptionLabel(
-                                        "Custom system prompt that defines the AI assistant's behavior, role, and response style for all chat interactions."))
+                                        "Custom system prompt that defines the AI assistant's"
+                                                + " behavior, role, and response style for all chat"
+                                                + " interactions."))
                         .setFormLeftIndent(0)
                         .addComponentFillVertically(new JPanel(), 0)
                         .getPanel();

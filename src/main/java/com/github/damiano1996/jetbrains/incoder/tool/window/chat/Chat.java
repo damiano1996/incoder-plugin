@@ -3,14 +3,12 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ErrorMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.human.HumanMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.ui.components.PlaceholderTextField;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
-
 import java.util.function.Consumer;
 import javax.swing.*;
 import lombok.Getter;
@@ -63,32 +61,27 @@ public class Chat {
 
         var aiMessage = new AiMessageComponent(project);
         aiMessage.setModelName(
-                LanguageModelServiceImpl.getInstance(project)
-                        .getSelectedModelName()
-                        .toLowerCase());
+                LanguageModelServiceImpl.getInstance(project).getSelectedModelName().toLowerCase());
         chatBody.addMessage(aiMessage);
 
         LanguageModelServiceImpl.getInstance(project)
+                .getClient()
                 .chat(chatId, prompt)
                 .onPartialResponse(
                         token -> {
                             aiMessage.write(token);
                             chatBody.updateUI();
                         })
-                .onCompleteResponse(
-                        chatResponse -> onTokenStreamComplete(aiMessage))
-                .onError(onTokenStreamError())
+                .onCompleteResponse(chatResponse -> onTokenStreamComplete(aiMessage))
+                .onError(onTokenStreamError(project))
                 .start();
     }
 
-    private @NotNull Consumer<Throwable> onTokenStreamError() {
+    private @NotNull Consumer<Throwable> onTokenStreamError(Project project) {
         return throwable -> {
             log.warn("Error during stream", throwable);
 
-            var errorMessage = new ErrorMessageComponent();
-            errorMessage.write(throwable.getMessage());
-
-            chatBody.addMessage(errorMessage);
+            NotificationService.getInstance(project).notifyError(throwable.getMessage());
 
             updateProgressStatus(false);
         };

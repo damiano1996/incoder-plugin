@@ -20,7 +20,6 @@ public final class InCoderToolWindowFactory implements ToolWindowFactory, DumbAw
         ChatContainer chatContainer = new ChatContainer();
         chatContainer.setProject(project);
         addContent(chatContainer.getMainPanel(), "Chat", toolWindow);
-
     }
 
     private static void addContent(JPanel jPanel, String title, @NotNull ToolWindow toolWindow) {

@@ -47,6 +47,7 @@ public class CodeCompletionQueue implements Runnable {
                 try {
                     String completion =
                             LanguageModelServiceImpl.getInstance(project)
+                                    .getClient()
                                     .complete(codeCompletionContext)
                                     .split("\n")[0]
                                     .trim();

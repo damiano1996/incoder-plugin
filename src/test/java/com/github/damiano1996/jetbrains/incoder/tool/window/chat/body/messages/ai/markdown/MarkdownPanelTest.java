@@ -214,7 +214,8 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
     public void testWrite_StreamIncompleteCodeBlock() {
         MarkdownPanel markdownPanel = new MarkdownPanel(null);
 
-        var streamedMarkdown = """
+        var streamedMarkdown =
+                """
         Some text
         ```java
         // incomplete code block - no closing backticks
@@ -263,8 +264,8 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
 
         var streamedMarkdown = """
         ```java
-        
-        
+
+
         ```
         """;
 
@@ -289,7 +290,8 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
     public void testWrite_StreamInvalidLanguage() {
         MarkdownPanel markdownPanel = new MarkdownPanel(null);
 
-        var streamedMarkdown = """
+        var streamedMarkdown =
+                """
         ```nonexistentlanguage
         some code
         ```
@@ -316,7 +318,8 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
     public void testWrite_StreamConsecutiveCodeBlocks() {
         MarkdownPanel markdownPanel = new MarkdownPanel(null);
 
-        var streamedMarkdown = """
+        var streamedMarkdown =
+                """
         ```java
         // first block
         ```
@@ -334,18 +337,22 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
 
         assertInstanceOf(markdownBlocks.get(1), CodeMarkdownBlock.class);
         assertFalse(markdownBlocks.get(1).getText().isEmpty());
-        assertEquals("""
+        assertEquals(
+                """
                 // first block
-                """, markdownBlocks.get(1).getText());
+                """,
+                markdownBlocks.get(1).getText());
 
         assertInstanceOf(markdownBlocks.get(2), TextMarkdownBlock.class);
         assertTrue(markdownBlocks.get(2).getText().isEmpty());
 
         assertInstanceOf(markdownBlocks.get(3), CodeMarkdownBlock.class);
         assertFalse(markdownBlocks.get(3).getText().isEmpty());
-        assertEquals("""
+        assertEquals(
+                """
                 # second block immediately after
-                """, markdownBlocks.get(3).getText());
+                """,
+                markdownBlocks.get(3).getText());
 
         assertInstanceOf(markdownBlocks.get(4), TextMarkdownBlock.class);
         assertTrue(markdownBlocks.get(4).getText().isEmpty());
@@ -354,7 +361,6 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
 
         dispose(markdownPanel);
     }
-
 
     private static void dispose(@NotNull MarkdownPanel markdownPanel) {
         markdownPanel.getMarkdownBlocks().stream()

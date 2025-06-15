@@ -19,7 +19,8 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
 
     @Contract("_ -> new")
     @Override
-    public @NotNull LanguageModelClient createClient(Project project) throws LanguageModelException {
+    public @NotNull LanguageModelClient createClient(Project project)
+            throws LanguageModelException {
         try {
             return new LanguageModelClientImpl(
                     project, createChatLanguageModel(), createStreamingChatLanguageModel());

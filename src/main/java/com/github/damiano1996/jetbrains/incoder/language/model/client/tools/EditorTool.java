@@ -16,8 +16,7 @@ public class EditorTool {
     @Tool("Get the content of the file the user is watching")
     public String getFileContent() {
         log.debug("Getting current code from active editor");
-        Editor editor =
-                FileEditorManager.getInstance(project).getSelectedTextEditor();
+        Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
         if (editor != null) {
             String code = editor.getDocument().getText();
             log.debug("Successfully retrieved current code, length: {} characters", code.length());
@@ -32,8 +31,7 @@ public class EditorTool {
     public String getFilePath() {
         try {
             log.debug("Getting current file path from active editor");
-            Editor editor =
-                    FileEditorManager.getInstance(project).getSelectedTextEditor();
+            Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
             if (editor != null) {
                 String filePath = editor.getVirtualFile().getPath();
                 log.debug("Successfully retrieved current file path: {}", filePath);

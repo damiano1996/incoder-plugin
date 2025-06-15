@@ -1,19 +1,15 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.project.Project;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor
@@ -65,5 +61,4 @@ public class FileTool {
             return "Error reading file: " + e.getMessage();
         }
     }
-
 }

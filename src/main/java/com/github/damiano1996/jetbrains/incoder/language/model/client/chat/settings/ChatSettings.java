@@ -5,14 +5,13 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Getter
@@ -40,8 +39,8 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
         public String systemMessageInstructions = loadSystemPrompt();
 
         private static @NotNull String loadSystemPrompt() {
-            try (InputStream inputStream = State.class.getClassLoader()
-                    .getResourceAsStream("prompts/system_prompt.txt")) {
+            try (InputStream inputStream =
+                    State.class.getClassLoader().getResourceAsStream("prompts/system_prompt.txt")) {
                 if (inputStream != null) {
                     return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                 }
