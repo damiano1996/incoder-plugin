@@ -36,9 +36,9 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
     public static class State {
         public int maxMessages = 10;
 
-        public String systemMessageInstructions = loadSystemPrompt();
+        public String systemMessageInstructions = loadDefaultSystemPrompt();
 
-        private static @NotNull String loadSystemPrompt() {
+        public static @NotNull String loadDefaultSystemPrompt() {
             try (InputStream inputStream =
                     State.class.getClassLoader().getResourceAsStream("prompts/system_prompt.txt")) {
                 if (inputStream != null) {

@@ -37,6 +37,8 @@ public class FileTool {
         } else {
             filePaths.add("Invalid directory: " + folderPath);
         }
+        
+        log.info("Returning {} file/folder paths for directory: {}", filePaths.size(), folderPath);
         return filePaths;
     }
 
@@ -47,18 +49,25 @@ public class FileTool {
         try {
             File file = new File(filePath);
             if (!file.exists()) {
-                return "File does not exist: " + filePath;
+                String errorMsg = "File does not exist: " + filePath;
+                log.warn("Returning error: {}", errorMsg);
+                return errorMsg;
             }
             if (file.isDirectory()) {
-                return "Path is a directory, not a file: " + filePath;
+                String errorMsg = "Path is a directory, not a file: " + filePath;
+                log.warn("Returning error: {}", errorMsg);
+                return errorMsg;
             }
 
             String content = Files.readString(Paths.get(filePath));
             log.debug("Successfully read file content, length: {} characters", content.length());
+            log.info("Returning file content for: {}, length: {} characters", filePath, content.length());
             return content;
         } catch (IOException e) {
             log.error("Error reading file: {}", filePath, e);
-            return "Error reading file: " + e.getMessage();
+            String errorMsg = "Error reading file: " + e.getMessage();
+            log.warn("Returning error: {}", errorMsg);
+            return errorMsg;
         }
     }
 }

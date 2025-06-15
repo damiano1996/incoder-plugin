@@ -57,7 +57,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
                                 memoryId ->
                                         MessageWindowChatMemory.withMaxMessages(
                                                 ChatSettings.getInstance().getState().maxMessages))
-                        .tools(new FileTool(), new EditorTool(this.project))
+                        .tools(new FileTool())//, new EditorTool(this.project))
                         .build();
 
         inlineCodingAssistant =
@@ -118,7 +118,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
 
     private @NotNull String getCurrentFile() {
         VirtualFile[] selectedFiles = FileEditorManager.getInstance(project).getSelectedFiles();
-        return selectedFiles.length > 0 ? selectedFiles[0].getName() : "No file selected";
+        return selectedFiles.length > 0 ? selectedFiles[0].getPath() : "No file selected";
     }
 
     private @NotNull String getProgrammingLanguage() {
