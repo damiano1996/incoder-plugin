@@ -57,7 +57,7 @@ public class LanguageModelClientImpl implements LanguageModelClient {
                                 memoryId ->
                                         MessageWindowChatMemory.withMaxMessages(
                                                 ChatSettings.getInstance().getState().maxMessages))
-                        .tools(new FileTool())//, new EditorTool(this.project))
+                        .tools(new FileTool(), new EditorTool(this.project))
                         .build();
 
         inlineCodingAssistant =

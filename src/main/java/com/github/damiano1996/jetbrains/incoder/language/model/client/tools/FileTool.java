@@ -1,15 +1,18 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 
+import com.intellij.openapi.project.Project;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor
@@ -37,7 +40,7 @@ public class FileTool {
         } else {
             filePaths.add("Invalid directory: " + folderPath);
         }
-        
+
         log.info("Returning {} file/folder paths for directory: {}", filePaths.size(), folderPath);
         return filePaths;
     }
@@ -66,6 +69,42 @@ public class FileTool {
         } catch (IOException e) {
             log.error("Error reading file: {}", filePath, e);
             String errorMsg = "Error reading file: " + e.getMessage();
+            log.warn("Returning error: {}", errorMsg);
+            return errorMsg;
+        }
+    }
+
+    @Tool("Create a file at the given path with the specified content. Only if the file does not exist yet.")
+    public String createFile(@P("File path") String filePath, @P("File content") String content) {
+        log.info("Tool called, creating file at: {}", filePath);
+
+        try {
+            File file = new File(filePath);
+
+            // Create parent directories if they don't exist
+            File parentDir = file.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                boolean dirsCreated = parentDir.mkdirs();
+                if (dirsCreated) {
+                    log.debug("Created parent directories for: {}", filePath);
+                }
+            }
+
+            // Check if file already exists
+            if (file.exists()) {
+                String errorMsg = "File already exists: " + filePath;
+                log.warn("Returning error: {}", errorMsg);
+                return errorMsg;
+            }
+
+            Files.writeString(Paths.get(filePath), content);
+
+            String successMsg = "File created successfully: " + filePath;
+            log.info("Successfully created file: {}", filePath);
+            return successMsg;
+        } catch (IOException e) {
+            log.error("Error creating file: {}", filePath, e);
+            String errorMsg = "Error creating file: " + e.getMessage();
             log.warn("Returning error: {}", errorMsg);
             return errorMsg;
         }

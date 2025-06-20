@@ -11,6 +11,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import java.util.function.Consumer;
 import javax.swing.*;
+
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.service.tool.ToolExecution;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -61,34 +64,46 @@ public class Chat {
 
         var aiMessage = new AiMessageComponent(project);
         aiMessage.setModelName(
-                LanguageModelServiceImpl.getInstance(project).getSelectedModelName().toLowerCase());
+                LanguageModelServiceImpl.getInstance(project)
+                        .getSelectedModelName()
+                        .toLowerCase()
+        );
         chatBody.addMessage(aiMessage);
 
-        LanguageModelServiceImpl.getInstance(project)
-                .getClient()
-                .chat(chatId, prompt)
-                .onPartialResponse(
-                        token -> {
-                            aiMessage.write(token);
-                            chatBody.updateUI();
-                        })
-                .onCompleteResponse(chatResponse -> onTokenStreamComplete(aiMessage))
-                .onError(onTokenStreamError(project))
-                .start();
+        try {
+            LanguageModelServiceImpl.getInstance(project)
+                    .getClient()
+                    .chat(chatId, prompt)
+                    .onPartialResponse(
+                            token -> {
+                                aiMessage.write(token);
+                                chatBody.updateUI();
+                            })
+                    .onToolExecuted(toolExecution -> {
+                        aiMessage.write("\n\n");
+                        chatBody.updateUI();
+                    })
+                    .onCompleteResponse(chatResponse -> onTokenStreamComplete(aiMessage, chatResponse))
+                    .onError(onTokenStreamError(project))
+                    .start();
+        } catch (Exception e) {
+            log.warn("Error while starting token stream", e);
+            NotificationService.getInstance(project).notifyError(e.getMessage());
+            updateProgressStatus(false);
+        }
     }
 
     private @NotNull Consumer<Throwable> onTokenStreamError(Project project) {
         return throwable -> {
-            log.warn("Error during stream", throwable);
-
+            log.warn("Error during stream.", throwable);
             NotificationService.getInstance(project).notifyError(throwable.getMessage());
-
             updateProgressStatus(false);
         };
     }
 
-    private void onTokenStreamComplete(@NotNull AiMessageComponent aiMessage) {
+    private void onTokenStreamComplete(@NotNull AiMessageComponent aiMessage, @NotNull ChatResponse chatResponse) {
         log.debug("Stream completed.");
+        log.debug("Full response message:\n{}", chatResponse.aiMessage().text());
         aiMessage.streamClosed();
         updateProgressStatus(false);
     }

@@ -7,7 +7,11 @@ public interface ChatCodingAssistant {
     @SystemMessage(
             """
                     {{systemInstructions}}
-
+                    """)
+    @UserMessage(
+            """
+                    {{prompt}}
+                    
                     Context Information:
                     - Current Date: {{currentDate}}
                     - Project Name: {{projectName}}
@@ -27,5 +31,5 @@ public interface ChatCodingAssistant {
             @V("programmingLanguage") String programmingLanguage,
             @V("ideInfo") String ideInfo,
             @V("userTimezone") String userTimezone,
-            @UserMessage String prompt);
+            @V("prompt") String prompt);
 }
