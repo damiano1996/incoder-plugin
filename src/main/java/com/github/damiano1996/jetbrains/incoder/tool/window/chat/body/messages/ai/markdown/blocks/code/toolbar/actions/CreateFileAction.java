@@ -47,6 +47,7 @@ public class CreateFileAction extends AnAction {
             Path filePath;
 
             if (Files.isDirectory(selectedFolderPath)) {
+                // todo
                 //                var fileName =
                 //                        LanguageModelServiceImpl.getInstance(project)
                 //                                .createFileName(

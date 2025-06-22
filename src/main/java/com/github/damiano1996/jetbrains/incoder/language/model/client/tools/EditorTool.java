@@ -3,25 +3,26 @@ package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 import com.intellij.diff.DiffManager;
 import com.intellij.diff.DiffRequestFactory;
 import com.intellij.diff.InvalidDiffRequestException;
+import com.intellij.diff.merge.MergeResult;
 import com.intellij.diff.merge.TextMergeRequest;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.Consumer;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 @AllArgsConstructor
@@ -29,42 +30,11 @@ public class EditorTool {
 
     private Project project;
 
-    @Tool("Get the content of the file the user is watching")
-    public String getFileContent() {
-        log.debug("Getting current code from active editor");
-        Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
-        if (editor != null) {
-            String code = editor.getDocument().getText();
-            log.debug("Successfully retrieved current code, length: {} characters", code.length());
-            return code;
-        } else {
-            log.warn("No active editor found, unable to retrieve current code");
-            return "Error: unable to read the content of the document that the user is reading.";
-        }
-    }
-
-    @Tool("Get the path of the file the user is watching")
-    public String getFilePath() {
-        try {
-            log.debug("Getting current file path from active editor");
-            Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
-            if (editor != null) {
-                String filePath = editor.getVirtualFile().getPath();
-                log.debug("Successfully retrieved current file path: {}", filePath);
-                return filePath;
-            } else {
-                log.warn("No active editor found, unable to retrieve current file path");
-                return "Error: unable to get the path of the file the user is reading.";
-            }
-        } catch (Exception e) {
-            return "Error: %s".formatted(e.getMessage());
-        }
-    }
-
     @Tool("Show a diff/merge view between the original file and proposed changes")
     public String showDiff(
             @P("Absolute file path of the file to compare") String filePath,
-            @P("The new/modified content to compare against the original file") String proposedContent) {
+            @P("The new/modified content to compare against the original file")
+                    String proposedContent) {
         try {
             log.debug("Showing diff for file: {}", filePath);
 
@@ -73,32 +43,51 @@ public class EditorTool {
                 return "Error: File not found at path: " + filePath;
             }
 
-            Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
-            if (document == null) {
-                return "Error: Unable to get document for file: " + filePath;
-            }
+            String originalContent = getOriginalContent(filePath, virtualFile);
 
-            String originalContent = document.getText();
-            CompletableFuture<String> resultFuture = new CompletableFuture<>();
+            final CompletableFuture<String> resultMessage = new CompletableFuture<>();
 
-            var textMergeRequest = showDiffWithProposedChange(
-                    project,
-                    virtualFile,
-                    originalContent,
-                    proposedContent,
-                    resultFuture);
+            Consumer<MergeResult> mergeResultConsumer =
+                    mergeResult -> {
+                        log.debug("Merge request result: {}", mergeResult);
+                        resultMessage.complete(getMergeResultMessage(mergeResult));
+                    };
 
-            ApplicationManager.getApplication().runReadAction(() -> DiffManager.getInstance().showMerge(project, textMergeRequest));
+            TextMergeRequest textMergeRequest =
+                    showDiffWithProposedChange(
+                            project,
+                            virtualFile,
+                            originalContent,
+                            proposedContent,
+                            mergeResultConsumer);
 
-            // Block until user makes a decision
-            String result = resultFuture.get();
-            log.debug("User action completed: {}", result);
-            return result;
+            ApplicationManager.getApplication()
+                    .invokeLater(
+                            () -> DiffManager.getInstance().showMerge(project, textMergeRequest));
 
-        } catch (Exception e) {
+            return resultMessage.get();
+
+        } catch (Throwable e) {
             log.error("Error showing diff for file: {}", filePath, e);
             return "Error showing diff: " + e.getMessage();
         }
+    }
+
+    private static String getOriginalContent(String filePath, VirtualFile virtualFile)
+            throws Throwable {
+        return ApplicationManager.getApplication()
+                .runReadAction(
+                        (ThrowableComputable<String, Throwable>)
+                                () -> {
+                                    Document document =
+                                            FileDocumentManager.getInstance()
+                                                    .getDocument(virtualFile);
+                                    if (document == null) {
+                                        throw new IllegalArgumentException(
+                                                "Unable to get document for file: " + filePath);
+                                    }
+                                    return document.getText();
+                                });
     }
 
     private @NotNull TextMergeRequest showDiffWithProposedChange(
@@ -106,7 +95,7 @@ public class EditorTool {
             VirtualFile originalFile,
             @NotNull String originalContent,
             @NotNull String proposedContent,
-            CompletableFuture<String> resultFuture)
+            @Nullable Consumer<? super MergeResult> mergeResultConsumer)
             throws InvalidDiffRequestException {
 
         var contents = new ArrayList<byte[]>();
@@ -123,16 +112,16 @@ public class EditorTool {
                         contents,
                         "InCoder Proposal",
                         List.of("Original", "Result", "InCoder proposal"),
-                        mergeResult -> {
-                            log.debug("Merge request result: {}", mergeResult);
-                            String resultMessage = switch (mergeResult) {
-                                case RESOLVED -> "User accepted and resolved the merge successfully";
-                                case CANCEL -> "User cancelled the merge operation";
-                                case LEFT -> "User chose to keep the original content";
-                                case RIGHT -> "User chose to accept the proposed changes";
-                            };
-                            resultFuture.complete(resultMessage);
-                        });
+                        mergeResultConsumer);
     }
 
+    @Contract(pure = true)
+    private @NotNull String getMergeResultMessage(@NotNull MergeResult mergeResult) {
+        return switch (mergeResult) {
+            case RESOLVED -> "Changes successfully merged and applied to the file";
+            case CANCEL -> "Merge operation was cancelled - no changes were made";
+            case LEFT -> "Original content preserved - proposed changes were rejected";
+            case RIGHT -> "Proposed changes fully accepted and applied to the file";
+        };
+    }
 }

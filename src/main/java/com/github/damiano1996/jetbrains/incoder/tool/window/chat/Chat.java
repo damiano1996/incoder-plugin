@@ -9,11 +9,9 @@ import com.github.damiano1996.jetbrains.incoder.ui.components.PlaceholderTextFie
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
+import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.function.Consumer;
 import javax.swing.*;
-
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.service.tool.ToolExecution;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -64,10 +62,7 @@ public class Chat {
 
         var aiMessage = new AiMessageComponent(project);
         aiMessage.setModelName(
-                LanguageModelServiceImpl.getInstance(project)
-                        .getSelectedModelName()
-                        .toLowerCase()
-        );
+                LanguageModelServiceImpl.getInstance(project).getSelectedModelName().toLowerCase());
         chatBody.addMessage(aiMessage);
 
         try {
@@ -79,16 +74,19 @@ public class Chat {
                                 aiMessage.write(token);
                                 chatBody.updateUI();
                             })
-                    .onToolExecuted(toolExecution -> {
-                        aiMessage.write("\n\n");
-                        chatBody.updateUI();
-                    })
-                    .onCompleteResponse(chatResponse -> onTokenStreamComplete(aiMessage, chatResponse))
+                    .onToolExecuted(
+                            toolExecution -> {
+                                aiMessage.write("\n\n");
+                                chatBody.updateUI();
+                            })
+                    .onCompleteResponse(
+                            chatResponse -> onTokenStreamComplete(aiMessage, chatResponse))
                     .onError(onTokenStreamError(project))
                     .start();
         } catch (Exception e) {
             log.warn("Error while starting token stream", e);
-            NotificationService.getInstance(project).notifyError(e.getMessage());
+            NotificationService.getInstance(project)
+                    .notifyError("Unexpected error: unable to generate response.");
             updateProgressStatus(false);
         }
     }
@@ -96,12 +94,14 @@ public class Chat {
     private @NotNull Consumer<Throwable> onTokenStreamError(Project project) {
         return throwable -> {
             log.warn("Error during stream.", throwable);
-            NotificationService.getInstance(project).notifyError(throwable.getMessage());
+            NotificationService.getInstance(project)
+                    .notifyError("Unexpected error while generating response.");
             updateProgressStatus(false);
         };
     }
 
-    private void onTokenStreamComplete(@NotNull AiMessageComponent aiMessage, @NotNull ChatResponse chatResponse) {
+    private void onTokenStreamComplete(
+            @NotNull AiMessageComponent aiMessage, @NotNull ChatResponse chatResponse) {
         log.debug("Stream completed.");
         log.debug("Full response message:\n{}", chatResponse.aiMessage().text());
         aiMessage.streamClosed();

@@ -1,18 +1,15 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 
-import com.intellij.openapi.project.Project;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor
@@ -64,7 +61,10 @@ public class FileTool {
 
             String content = Files.readString(Paths.get(filePath));
             log.debug("Successfully read file content, length: {} characters", content.length());
-            log.info("Returning file content for: {}, length: {} characters", filePath, content.length());
+            log.info(
+                    "Returning file content for: {}, length: {} characters",
+                    filePath,
+                    content.length());
             return content;
         } catch (IOException e) {
             log.error("Error reading file: {}", filePath, e);
@@ -74,7 +74,9 @@ public class FileTool {
         }
     }
 
-    @Tool("Create a file at the given path with the specified content. Only if the file does not exist yet.")
+    @Tool(
+            "Create a file at the given path with the specified content. Only if the file does not"
+                    + " exist yet.")
     public String createFile(@P("File path") String filePath, @P("File content") String content) {
         log.info("Tool called, creating file at: {}", filePath);
 

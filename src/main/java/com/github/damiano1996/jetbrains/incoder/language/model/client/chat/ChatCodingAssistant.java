@@ -4,14 +4,13 @@ import dev.langchain4j.service.*;
 
 public interface ChatCodingAssistant {
 
-    @SystemMessage(
-            """
+    @SystemMessage("""
                     {{systemInstructions}}
                     """)
     @UserMessage(
             """
                     {{prompt}}
-                    
+
                     Context Information:
                     - Current Date: {{currentDate}}
                     - Project Name: {{projectName}}

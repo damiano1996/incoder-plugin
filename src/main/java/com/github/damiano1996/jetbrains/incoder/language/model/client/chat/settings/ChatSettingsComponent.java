@@ -6,10 +6,9 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
+import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
-
-import java.awt.*;
 
 @Getter
 public class ChatSettingsComponent {
@@ -32,7 +31,10 @@ public class ChatSettingsComponent {
         reloadDefaultButton.setBorderPainted(false);
         reloadDefaultButton.setContentAreaFilled(false);
         reloadDefaultButton.setFocusPainted(false);
-        reloadDefaultButton.addActionListener(e -> systemMessageInstructionsField.setText(ChatSettings.State.loadDefaultSystemPrompt()));
+        reloadDefaultButton.addActionListener(
+                e ->
+                        systemMessageInstructionsField.setText(
+                                ChatSettings.State.loadDefaultSystemPrompt()));
 
         JPanel labelPanel = new JPanel();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));
@@ -48,7 +50,8 @@ public class ChatSettingsComponent {
                         .addVerticalGap(20)
                         .setFormLeftIndent(0)
                         .addComponent(labelPanel)
-                        .addComponent(ScrollPaneFactory.createScrollPane(systemMessageInstructionsField))
+                        .addComponent(
+                                ScrollPaneFactory.createScrollPane(systemMessageInstructionsField))
                         .addComponent(
                                 new DescriptionLabel(
                                         "Custom system prompt that defines the AI assistant's"
