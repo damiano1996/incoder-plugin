@@ -1,5 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import java.io.File;
@@ -14,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class FileTool {
+
+    private final Project project;
 
     @Tool("List all file and folder paths in the given folder")
     public List<String> listFileAndFolderPaths(@P("Folder path") String folderPath) {
@@ -101,12 +105,15 @@ public class FileTool {
 
             Files.writeString(Paths.get(filePath), content);
 
-            String successMsg = "File created successfully: " + filePath;
+            VirtualFile projectRoot = project.getBaseDir();
+            projectRoot.refresh(true, true);
+
+            String successMsg = "File created successfully: %s".formatted(filePath);
             log.info("Successfully created file: {}", filePath);
             return successMsg;
         } catch (IOException e) {
             log.error("Error creating file: {}", filePath, e);
-            String errorMsg = "Error creating file: " + e.getMessage();
+            String errorMsg = "Error creating file: %s".formatted(e.getMessage());
             log.warn("Returning error: {}", errorMsg);
             return errorMsg;
         }
