@@ -95,7 +95,7 @@ public class Chat {
         return throwable -> {
             log.warn("Error during stream.", throwable);
             NotificationService.getInstance(project)
-                    .notifyError("Unexpected error while generating response.");
+                    .notifyError("Unexpected error while generating response.", throwable);
             updateProgressStatus(false);
         };
     }

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 @AllArgsConstructor
@@ -72,9 +73,7 @@ public class FileTool {
             return content;
         } catch (IOException e) {
             log.error("Error reading file: {}", filePath, e);
-            String errorMsg = "Error reading file: " + e.getMessage();
-            log.warn("Returning error: {}", errorMsg);
-            return errorMsg;
+            return "Error reading file: %s".formatted(e.getMessage());
         }
     }
 
@@ -87,18 +86,11 @@ public class FileTool {
         try {
             File file = new File(filePath);
 
-            // Create parent directories if they don't exist
-            File parentDir = file.getParentFile();
-            if (parentDir != null && !parentDir.exists()) {
-                boolean dirsCreated = parentDir.mkdirs();
-                if (dirsCreated) {
-                    log.debug("Created parent directories for: {}", filePath);
-                }
-            }
+            createPath(filePath, file);
 
             // Check if file already exists
             if (file.exists()) {
-                String errorMsg = "File already exists: " + filePath;
+                String errorMsg = "File already exists: %s".formatted(filePath);
                 log.warn("Returning error: {}", errorMsg);
                 return errorMsg;
             }
@@ -113,9 +105,17 @@ public class FileTool {
             return successMsg;
         } catch (IOException e) {
             log.error("Error creating file: {}", filePath, e);
-            String errorMsg = "Error creating file: %s".formatted(e.getMessage());
-            log.warn("Returning error: {}", errorMsg);
-            return errorMsg;
+            return "Error creating file: %s".formatted(e.getMessage());
+        }
+    }
+
+    private static void createPath(String filePath, @NotNull File file) {
+        File parentDir = file.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            boolean dirsCreated = parentDir.mkdirs();
+            if (dirsCreated) {
+                log.debug("Created parent directories for: {}", filePath);
+            }
         }
     }
 }
