@@ -64,12 +64,16 @@ public class FileTool {
                 return errorMsg;
             }
 
-            String content = Files.readString(Paths.get(filePath));
-            log.debug("Successfully read file content, length: {} characters", content.length());
-            log.info(
-                    "Returning file content for: {}, length: {} characters",
-                    filePath,
-                    content.length());
+            List<String> lines = Files.readAllLines(Paths.get(filePath));
+            StringBuilder contentWithLineNumbers = new StringBuilder();
+
+            for (int i = 0; i < lines.size(); i++) {
+                contentWithLineNumbers.append(String.format("%d: %s%n", i + 1, lines.get(i)));
+            }
+
+            String content = contentWithLineNumbers.toString();
+            log.debug("Successfully read file content, {} lines", lines.size());
+            log.info("Returning file content for: {}, {} lines", filePath, lines.size());
             return content;
         } catch (IOException e) {
             log.error("Error reading file: {}", filePath, e);
@@ -77,15 +81,12 @@ public class FileTool {
         }
     }
 
-    @Tool(
-            "Create a file at the given path with the specified content. Only if the file does not"
-                    + " exist yet.")
-    public String createFile(@P("File path") String filePath, @P("File content") String content) {
+    @Tool("Create an empty file at the given path. Only if the file does not exist yet.")
+    public String createEmptyFile(@P("File path") String filePath) {
         log.info("Tool called, creating file at: {}", filePath);
 
         try {
             File file = new File(filePath);
-
             createPath(filePath, file);
 
             // Check if file already exists
@@ -95,7 +96,7 @@ public class FileTool {
                 return errorMsg;
             }
 
-            Files.writeString(Paths.get(filePath), content);
+            Files.createFile(Paths.get(filePath));
 
             VirtualFile projectRoot = project.getBaseDir();
             projectRoot.refresh(true, true);
