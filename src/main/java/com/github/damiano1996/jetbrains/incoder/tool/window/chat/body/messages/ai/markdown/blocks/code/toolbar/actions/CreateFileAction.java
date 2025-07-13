@@ -12,6 +12,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import java.io.IOException;
@@ -42,21 +43,11 @@ public class CreateFileAction extends AnAction {
             var selectedFolder = chooseFolder(project);
             if (selectedFolder == null) return;
 
+            var fileName = askForFileName(project);
+            if (fileName == null || fileName.trim().isEmpty()) return;
+
             var selectedFolderPath = Path.of(selectedFolder.getPath());
-
-            Path filePath;
-
-            if (Files.isDirectory(selectedFolderPath)) {
-                // todo
-                //                var fileName =
-                //                        LanguageModelServiceImpl.getInstance(project)
-                //                                .createFileName(
-                //                                        codeBlock.getText(),
-                // codeBlock.getLanguage().getID());
-                filePath = selectedFolderPath.resolve("fileName");
-            } else {
-                filePath = selectedFolderPath;
-            }
+            Path filePath = selectedFolderPath.resolve(fileName.trim());
 
             log.debug("Generated file path: {}", filePath);
 
@@ -83,6 +74,16 @@ public class CreateFileAction extends AnAction {
         VirtualFile projectBaseDir = ProjectUtil.guessProjectDir(project);
         descriptor.setRoots(projectBaseDir);
         return FileChooser.chooseFile(descriptor, project, projectBaseDir);
+    }
+
+    private String askForFileName(@NotNull Project project) {
+        return Messages.showInputDialog(
+                project,
+                "Enter the file name:",
+                "Create New File",
+                Messages.getQuestionIcon(),
+                "",
+                null);
     }
 
     private void createNewFile(Project project, Path filePath, String fileContent) {

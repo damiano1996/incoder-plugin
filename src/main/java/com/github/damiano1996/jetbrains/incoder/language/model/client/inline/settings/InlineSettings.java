@@ -34,10 +34,12 @@ public final class InlineSettings implements PersistentStateComponent<InlineSett
 
         public String systemMessageInstructions =
                 """
-                - Respond only with the necessary code to complete the line.
-                - Do not include any markdown, comments, or unnecessary tokens.
-                - If the line is partially written, complete it up to the first newline.
-                - If the line is already complete, return an empty response.
+                You are an inline code completion assistant.
+                Follow these rules strictly:
+                1. Output only the minimal code needed to finish the current line.
+                2. Do not include markdown, comments, or extra tokens.
+                3. If the line is partially written, complete it up to the next newline.
+                4. If the line is already complete, output nothing.
                 """;
     }
 }

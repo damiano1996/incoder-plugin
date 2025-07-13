@@ -1,8 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 
+import com.github.damiano1996.jetbrains.incoder.diff.DiffUtils;
 import com.intellij.diff.DiffManager;
-import com.intellij.diff.DiffRequestFactory;
-import com.intellij.diff.InvalidDiffRequestException;
 import com.intellij.diff.merge.MergeResult;
 import com.intellij.diff.merge.TextMergeRequest;
 import com.intellij.openapi.application.ApplicationManager;
@@ -15,7 +14,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -25,7 +23,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 @AllArgsConstructor
@@ -143,7 +140,7 @@ Best practices:
                     };
 
             TextMergeRequest textMergeRequest =
-                    showDiffWithProposedChange(
+                    DiffUtils.showDiffWithProposedChange(
                             project,
                             virtualFile,
                             originalContent,
@@ -160,28 +157,6 @@ Best practices:
             log.error("Error showing diff for file: {}", filePath, e);
             return "Error showing diff: %s".formatted(e.getMessage());
         }
-    }
-
-    private @NotNull TextMergeRequest showDiffWithProposedChange(
-            Project project,
-            VirtualFile originalFile,
-            @NotNull String originalContent,
-            @NotNull String proposedContent,
-            @Nullable Consumer<? super MergeResult> mergeResultConsumer)
-            throws InvalidDiffRequestException {
-
-        var localBytes = originalContent.getBytes(StandardCharsets.UTF_8);
-        var baseBytes = originalContent.getBytes(StandardCharsets.UTF_8);
-        var rightBytes = proposedContent.getBytes(StandardCharsets.UTF_8);
-
-        return DiffRequestFactory.getInstance()
-                .createTextMergeRequest(
-                        project,
-                        originalFile,
-                        List.of(localBytes, baseBytes, rightBytes),
-                        "Merge InCoder Proposal",
-                        List.of("Local version", "Original base", "InCoder proposal"),
-                        mergeResultConsumer);
     }
 
     @Contract(pure = true)

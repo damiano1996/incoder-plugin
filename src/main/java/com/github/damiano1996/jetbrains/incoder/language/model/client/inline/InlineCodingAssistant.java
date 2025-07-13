@@ -13,11 +13,19 @@ public interface InlineCodingAssistant {
             """)
     @UserMessage(
             """
-            Complete the last line:
-            {{leftContext}}
-            """)
+Use the following code snippets to complete the current line. Present only the completed code line, nothing else.
+LEFT CONTEXT (preceding code):
+{{leftContext}}
+---
+RIGHT CONTEXT (following code):
+{{rightContext}}
+---
+CONTINUE THE LAST LINE WITHOUT REPEATING:
+{{leftContextLastLine}}
+""")
     String complete(
             @V("instructions") String instructions,
             @V("leftContext") String leftContext,
-            @V("rightContext") String rightContext);
+            @V("rightContext") String rightContext,
+            @V("leftContextLastLine") String lastLine);
 }

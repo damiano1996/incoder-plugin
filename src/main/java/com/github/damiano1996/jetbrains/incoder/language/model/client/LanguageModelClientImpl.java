@@ -72,7 +72,17 @@ public class LanguageModelClientImpl implements LanguageModelClient {
         return inlineCodingAssistant.complete(
                 InlineSettings.getInstance().getState().systemMessageInstructions,
                 codeCompletionContext.leftContext(),
-                codeCompletionContext.rightContext());
+                codeCompletionContext.rightContext(),
+                getLastLine(codeCompletionContext.leftContext()));
+    }
+
+    private String getLastLine(String s) {
+        if (s == null || s.isEmpty()) {
+            return "";
+        }
+
+        String[] lines = s.split("\n");
+        return lines[lines.length - 1];
     }
 
     @Override
