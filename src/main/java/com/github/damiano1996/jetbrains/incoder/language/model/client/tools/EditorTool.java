@@ -7,9 +7,7 @@ import com.intellij.diff.merge.MergeResult;
 import com.intellij.diff.merge.TextMergeRequest;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -17,15 +15,18 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @AllArgsConstructor
@@ -33,33 +34,43 @@ public class EditorTool {
 
     private Project project;
 
-    public record PatchHunk(
-            int startLine,
-            int endLine,
-            String oldContent,
-            String newContent
-    ) {}
+    private static String getOriginalContent(VirtualFile virtualFile)
+            throws Throwable {
+        return ApplicationManager.getApplication()
+                .runReadAction(
+                        (ThrowableComputable<String, Throwable>)
+                                () -> {
+                                    Document document =
+                                            FileDocumentManager.getInstance()
+                                                    .getDocument(virtualFile);
+                                    if (document == null) {
+                                        throw new IllegalArgumentException(
+                                                "Unable to get document for file: %s".formatted(virtualFile.getPath()));
+                                    }
+                                    return document.getText();
+                                });
+    }
 
     @Tool("""
-        Creates and applies a unified diff patch to a file, presenting changes in a merge dialog for user review and approval.
-        This tool allows precise code modifications with visual diff comparison before applying changes.""")
+            Creates and applies a unified diff patch to a file, presenting changes in a merge dialog for user review and approval.
+            This tool allows precise code modifications with visual diff comparison before applying changes.""")
     public String createPatch(
             @P("""
-                Absolute file path to the target file that needs to be modified.
-                Must be a valid file path within the project (e.g., /path/to/project/src/main/java/MyClass.java).
-                Use forward slashes for path separators regardless of operating system.""")
+                    Absolute file path to the target file that needs to be modified.
+                    Must be a valid file path within the project (e.g., /path/to/project/src/main/java/MyClass.java).
+                    Use forward slashes for path separators regardless of operating system.""")
             String filePath,
             @P("""
-                A list of PatchHunk objects containing the code changes to apply:
-                - startLine: 1-based line number where the change begins (inclusive)
-                - endLine: 1-based line number where the change ends (inclusive)
-                - oldContent: Exact original content that will be replaced (used for verification)
-                - newContent: New content to replace the old content
-                
-                Best practices:
-                - Keep hunks small and focused (5-20 lines) for clarity
-                - Ensure oldContent exactly matches the current file content
-                - Line numbers should be accurate to avoid conflicts""")
+                    A list of PatchHunk objects containing the code changes to apply:
+                    - startLine: 1-based line number where the change begins (inclusive)
+                    - endLine: 1-based line number where the change ends (inclusive)
+                    - oldContent: Exact original content that will be replaced (used for verification)
+                    - newContent: New content to replace the old content
+                    
+                    Best practices:
+                    - Keep hunks small and focused (5-20 lines) for clarity
+                    - Ensure oldContent exactly matches the current file content
+                    - Line numbers should be accurate to avoid conflicts""")
             List<PatchHunk> patchHunks
     ) {
         try {
@@ -93,7 +104,7 @@ public class EditorTool {
 
         for (PatchHunk h : patchHunks) {
             int startIdx = h.startLine() - 1;
-            int endIdx   = h.endLine()   - 1;
+            int endIdx = h.endLine() - 1;
 
             if (startIdx < 0 || endIdx >= lines.size() || startIdx > endIdx) {
                 throw new IllegalArgumentException(
@@ -156,23 +167,6 @@ public class EditorTool {
         }
     }
 
-    private static String getOriginalContent(VirtualFile virtualFile)
-            throws Throwable {
-        return ApplicationManager.getApplication()
-                .runReadAction(
-                        (ThrowableComputable<String, Throwable>)
-                                () -> {
-                                    Document document =
-                                            FileDocumentManager.getInstance()
-                                                    .getDocument(virtualFile);
-                                    if (document == null) {
-                                        throw new IllegalArgumentException(
-                                                "Unable to get document for file: %s".formatted(virtualFile.getPath()));
-                                    }
-                                    return document.getText();
-                                });
-    }
-
     private @NotNull TextMergeRequest showDiffWithProposedChange(
             Project project,
             VirtualFile originalFile,
@@ -181,9 +175,9 @@ public class EditorTool {
             @Nullable Consumer<? super MergeResult> mergeResultConsumer)
             throws InvalidDiffRequestException {
 
-        var localBytes = originalContent   .getBytes(StandardCharsets.UTF_8);
-        var baseBytes  = originalContent   .getBytes(StandardCharsets.UTF_8);
-        var rightBytes = proposedContent   .getBytes(StandardCharsets.UTF_8);
+        var localBytes = originalContent.getBytes(StandardCharsets.UTF_8);
+        var baseBytes = originalContent.getBytes(StandardCharsets.UTF_8);
+        var rightBytes = proposedContent.getBytes(StandardCharsets.UTF_8);
 
         return DiffRequestFactory.getInstance()
                 .createTextMergeRequest(
@@ -205,5 +199,13 @@ public class EditorTool {
             case LEFT -> "Original content preserved - proposed changes were rejected";
             case RIGHT -> "Proposed changes fully accepted and applied to the file";
         };
+    }
+
+    public record PatchHunk(
+            int startLine,
+            int endLine,
+            String oldContent,
+            String newContent
+    ) {
     }
 }
