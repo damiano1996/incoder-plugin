@@ -1,6 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
@@ -32,7 +33,7 @@ public class FileTool {
 
     @Tool("List all file and folder paths in the given folder")
     public List<String> listFileAndFolderPaths(@P("Folder path") String folderPath) {
-        log.info("Tool called, looking for files and folders in folder: %s".formatted(folderPath));
+        log.info("Tool called, looking for files and folders in folder: {}", folderPath);
 
         List<String> filePaths = new ArrayList<>();
         File folder = new File(folderPath);
@@ -59,19 +60,15 @@ public class FileTool {
 
     @Tool("Read the content of a file given its path")
     public String readFile(@P("File path") String filePath) {
-        log.info("Tool called, reading file content from: %s".formatted(filePath));
+        log.info("Tool called, reading file content from: {}", filePath);
 
         try {
             File file = new File(filePath);
             if (!file.exists()) {
-                String errorMsg = "File does not exist: " + filePath;
-                log.warn("Returning error: {}", errorMsg);
-                return errorMsg;
+                return "File does not exist: %s".formatted(filePath);
             }
             if (file.isDirectory()) {
-                String errorMsg = "Path is a directory, not a file: " + filePath;
-                log.warn("Returning error: {}", errorMsg);
-                return errorMsg;
+                return "Path is a directory, not a file: %s".formatted(filePath);
             }
 
             List<String> lines = Files.readAllLines(Paths.get(filePath));
@@ -81,10 +78,8 @@ public class FileTool {
                 contentWithLineNumbers.append(String.format("%d: %s%n", i + 1, lines.get(i)));
             }
 
-            String content = contentWithLineNumbers.toString();
-            log.debug("Successfully read file content, {} lines", lines.size());
-            log.info("Returning file content for: {}, {} lines", filePath, lines.size());
-            return content;
+            return contentWithLineNumbers.toString();
+
         } catch (IOException e) {
             log.error("Error reading file: {}", filePath, e);
             return "Error reading file: %s".formatted(e.getMessage());
@@ -101,15 +96,15 @@ public class FileTool {
 
             // Check if file already exists
             if (file.exists()) {
-                String errorMsg = "File already exists: %s".formatted(filePath);
-                log.warn("Returning error: {}", errorMsg);
-                return errorMsg;
+                return "File already exists: %s".formatted(filePath);
             }
 
             Files.createFile(Paths.get(filePath));
 
-            VirtualFile projectRoot = project.getBaseDir();
-            projectRoot.refresh(true, true);
+            VirtualFile projectBaseDir = ProjectUtil.guessProjectDir(project);
+            if (projectBaseDir != null) {
+                projectBaseDir.refresh(true, true);
+            }
 
             String successMsg = "File created successfully: %s".formatted(filePath);
             log.info("Successfully created file: {}", filePath);

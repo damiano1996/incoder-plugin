@@ -6,7 +6,6 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
-import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
 
