@@ -8,14 +8,14 @@ public interface InlineCodingAssistant {
 
     @SystemMessage(
             """
-                    Instructions:
-                    {{instructions}}
-                    """)
+            Instructions:
+            {{instructions}}
+            """)
     @UserMessage(
             """
-                    Complete the last line:
-                    {{leftContext}}
-                    """)
+            Complete the last line:
+            {{leftContext}}
+            """)
     String complete(
             @V("instructions") String instructions,
             @V("leftContext") String leftContext,

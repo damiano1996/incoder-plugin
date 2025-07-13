@@ -4,22 +4,23 @@ import dev.langchain4j.service.*;
 
 public interface ChatCodingAssistant {
 
-    @SystemMessage("""
-                    {{systemInstructions}}
-                    """)
+    @SystemMessage(
+            """
+            {{systemInstructions}}
+            """)
     @UserMessage(
             """
-                    {{prompt}}
+            {{prompt}}
 
-                    Context Information:
-                    - Current Date: {{currentDate}}
-                    - Project Name: {{projectName}}
-                    - Project Path: {{projectPath}}
-                    - Current File: {{currentFile}}
-                    - Programming Language: {{programmingLanguage}}
-                    - IDE: {{ideInfo}}
-                    - User Timezone: {{userTimezone}}
-                    """)
+            Context Information:
+            - Current Date: {{currentDate}}
+            - Project Name: {{projectName}}
+            - Project Path: {{projectPath}}
+            - Current File: {{currentFile}}
+            - Programming Language: {{programmingLanguage}}
+            - IDE: {{ideInfo}}
+            - User Timezone: {{userTimezone}}
+            """)
     TokenStream chat(
             @MemoryId int memoryId,
             @V("systemInstructions") String systemInstructions,
