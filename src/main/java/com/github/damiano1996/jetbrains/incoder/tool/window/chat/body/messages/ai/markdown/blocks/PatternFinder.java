@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 public class PatternFinder {
 
-    public int getFistMatchIndex(String pattern, String match) throws PatternNotFound {
+    public int getFirstMatchIndex(String pattern, String match) throws PatternNotFound {
         var matcher = Pattern.compile(pattern).matcher(match);
 
         if (matcher.find()) {

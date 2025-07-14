@@ -43,7 +43,7 @@ public class TextMarkdownBlock implements MarkdownBlock {
         String markdown = markdownEditorPane.getText();
 
         int delimiterIndex =
-                new PatternFinder().getFistMatchIndex(MARKDOWN_CODE_BLOCK_START_REGEX, markdown);
+                new PatternFinder().getFirstMatchIndex(MARKDOWN_CODE_BLOCK_START_REGEX, markdown);
         log.debug("Code block found at index: {}", delimiterIndex);
 
         var textUntilCode = markdown.substring(0, delimiterIndex);
