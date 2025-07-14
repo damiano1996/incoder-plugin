@@ -41,8 +41,8 @@ public class InlineComponent {
                         .addComponent(
                                 new DescriptionLabel(
                                         "Activates code completion only when the caret is at the"
-                                                + " end of a line.\n"
-                                                + "If disabled, suggestions may also appear while"
+                                                + " end of a line."
+                                                + " If disabled, suggestions may also appear while"
                                                 + " typing in the middle of a line."))
                         .addVerticalGap(20)
                         .addLabeledComponent(

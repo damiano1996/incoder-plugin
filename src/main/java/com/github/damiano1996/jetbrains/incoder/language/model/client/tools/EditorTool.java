@@ -14,6 +14,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Consumer;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.model.output.structured.Description;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -50,26 +51,20 @@ public class EditorTool {
     @Tool(
             """
 Creates and applies a unified diff patch to a file, presenting changes in a merge dialog for user review and approval.
-This tool allows precise code modifications with visual diff comparison before applying changes.""")
+This tool allows precise code modifications with visual diff comparison before applying changes.
+""")
     public String createPatch(
             @P(
                             """
 Absolute file path to the target file that needs to be modified.
 Must be a valid file path within the project (e.g., /path/to/project/src/main/java/MyClass.java).
-Use forward slashes for path separators regardless of operating system.""")
+Use forward slashes for path separators regardless of operating system.
+""")
                     String filePath,
             @P(
                             """
-A list of PatchHunk objects containing the code changes to apply:
-- startLine: 1-based line number where the change begins (inclusive)
-- endLine: 1-based line number where the change ends (inclusive)
-- oldContent: Exact original content that will be replaced (used for verification)
-- newContent: New content to replace the old content
-
-Best practices:
-- Keep hunks small and focused (5-20 lines) for clarity
-- Ensure oldContent exactly matches the current file content
-- Line numbers should be accurate to avoid conflicts""")
+A list of PatchHunk objects containing the code changes to apply.
+""")
                     List<PatchHunk> patchHunks) {
         try {
             VirtualFile virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath);
@@ -104,7 +99,7 @@ Best practices:
 
             if (startIdx < 0 || endIdx >= lines.size() || startIdx > endIdx) {
                 throw new IllegalArgumentException(
-                        "PatchHunk out of bounds: " + h.startLine() + "-" + h.endLine());
+                        "PatchHunk out of bounds: %d-%d".formatted(h.startLine(), h.endLine()));
             }
 
             for (int i = 0; i <= endIdx - startIdx; i++) {
@@ -169,5 +164,39 @@ Best practices:
         };
     }
 
-    public record PatchHunk(int startLine, int endLine, String oldContent, String newContent) {}
+    public record PatchHunk(
+            @Description(
+                            """
+The starting line number for the patch hunk in the file.
+Must be a 1-based line number indicating where the changes begin.
+Line numbers are inclusive and should accurately reflect the file's current state.
+Example: For the first line of a file, use 1; for the fifth line, use 5.
+""")
+                    int startLine,
+            @Description(
+                            """
+The ending line number for the patch hunk in the file.
+Must be a 1-based line number indicating where the changes end.
+Line numbers are inclusive and should match the exact range of content to be replaced.
+Must be greater than or equal to the startLine.
+Example: If replacing lines 5-7, set startLine to 5 and endLine to 7.
+""")
+                    int endLine,
+            @Description(
+                            """
+The exact original content to be replaced in the specified line range.
+This serves as a verification mechanism to ensure the patch is applied to the correct content.
+Must exactly match the current content in the file between startLine and endLine.
+Used to prevent unintended modifications if the file content has changed.
+Example: If replacing a method body, provide the exact current method body text.
+""")
+                    String oldContent,
+            @Description(
+                            """
+The new content that will replace the oldContent in the specified line range.
+Should be a complete and valid code snippet that will seamlessly replace the original content.
+Ensure proper formatting, indentation, and syntax to maintain code readability.
+Example: A new method implementation, refactored code block, or updated logic.
+""")
+                    String newContent) {}
 }
