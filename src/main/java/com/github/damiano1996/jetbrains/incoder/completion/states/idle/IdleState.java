@@ -12,7 +12,6 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.project.Project;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,8 +53,8 @@ public class IdleState extends BaseState {
                 WriteCommandAction.runWriteCommandAction(
                         project,
                         () -> {
-                            Objects.requireNonNull(editor)
-                                    .getDocument()
+                            if (editor == null) return;
+                            editor.getDocument()
                                     .insertString(editor.getCaretModel().getOffset(), "\t");
                         });
             }

@@ -13,10 +13,10 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
 
         var streamedMarkdown =
                 """
-                        ```java
-                        // a java code
-                        ```
-                        """;
+                ```java
+                // a java code
+                ```
+                """;
 
         simulateStream(streamedMarkdown, markdownPanel);
 
@@ -47,12 +47,12 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
 
         var streamedMarkdown =
                 """
-                        ```java
-                        // a java code
-                        ```
+                ```java
+                // a java code
+                ```
 
-                        A comment
-                        """;
+                A comment
+                """;
 
         simulateStream(streamedMarkdown, markdownPanel);
 
@@ -72,8 +72,8 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
         assertEquals(
                 """
 
-                A comment
-                """,
+A comment
+""",
                 markdownBlocks.get(2).getText());
         assertInstanceOf(markdownBlocks.get(2), TextMarkdownBlock.class);
 
@@ -88,12 +88,12 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
 
         var streamedMarkdown =
                 """
-                        A comment
+                A comment
 
-                        ```java
-                        // a java code
-                        ```
-                        """;
+                ```java
+                // a java code
+                ```
+                """;
 
         simulateStream(streamedMarkdown, markdownPanel);
 
@@ -129,29 +129,29 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
 
         var streamedMarkdown =
                 """
-                        A comment
+                A comment
 
-                        ```java
-                        // a java code
-                        ```
+                ```java
+                // a java code
+                ```
 
-                        Another comment
+                Another comment
 
-                        ```Markdown
-                        # Title
+                ```Markdown
+                # Title
 
-                        ## Section
+                ## Section
 
-                        ```python
-                        # a python code
-                        ```
+                ```python
+                # a python code
+                ```
 
-                        A comment
+                A comment
 
-                        ```
+                ```
 
-                        Another comment
-                        """;
+                Another comment
+                """;
 
         simulateStream(streamedMarkdown, markdownPanel);
 
@@ -176,35 +176,188 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
         assertEquals(
                 """
 
-                Another comment
+Another comment
 
-                """,
+""",
                 markdownBlocks.get(2).getText());
         assertInstanceOf(markdownBlocks.get(2), TextMarkdownBlock.class);
 
         assertEquals(
                 """
-				# Title
+                # Title
 
-				## Section
+                ## Section
 
-				```python
-				# a python code
-				```
+                ```python
+                # a python code
+                ```
 
-				A comment
+                A comment
 
-				""",
+                """,
                 markdownBlocks.get(3).getText());
         assertInstanceOf(markdownBlocks.get(3), CodeMarkdownBlock.class);
 
         assertEquals(
                 """
 
-                Another comment
-                """,
+Another comment
+""",
                 markdownBlocks.get(4).getText());
         assertInstanceOf(markdownBlocks.get(4), TextMarkdownBlock.class);
+
+        assertEquals(5, markdownBlocks.size());
+
+        dispose(markdownPanel);
+    }
+
+    public void testWrite_StreamIncompleteCodeBlock() {
+        MarkdownPanel markdownPanel = new MarkdownPanel(null);
+
+        var streamedMarkdown =
+                """
+                Some text
+                ```java
+                // incomplete code block - no closing backticks
+                """;
+
+        simulateStream(streamedMarkdown, markdownPanel);
+
+        var markdownBlocks = markdownPanel.getMarkdownBlocks();
+
+        assertInstanceOf(markdownBlocks.get(0), TextMarkdownBlock.class);
+        assertInstanceOf(markdownBlocks.get(1), CodeMarkdownBlock.class);
+
+        assertEquals(2, markdownBlocks.size());
+
+        dispose(markdownPanel);
+    }
+
+    public void testWrite_StreamEmptyCodeBlock() {
+        MarkdownPanel markdownPanel = new MarkdownPanel(null);
+
+        var streamedMarkdown =
+                """
+                ```java
+                ```
+                """;
+
+        simulateStream(streamedMarkdown, markdownPanel);
+
+        var markdownBlocks = markdownPanel.getMarkdownBlocks();
+
+        assertInstanceOf(markdownBlocks.get(0), TextMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(0).getText().isEmpty());
+
+        assertInstanceOf(markdownBlocks.get(1), CodeMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(1).getText().isEmpty());
+
+        assertInstanceOf(markdownBlocks.get(2), TextMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(2).getText().isEmpty());
+
+        assertEquals(3, markdownBlocks.size());
+
+        dispose(markdownPanel);
+    }
+
+    public void testWrite_StreamWhitespaceOnlyCodeBlock() {
+        MarkdownPanel markdownPanel = new MarkdownPanel(null);
+
+        var streamedMarkdown =
+                """
+                ```java
+
+
+                ```
+                """;
+
+        simulateStream(streamedMarkdown, markdownPanel);
+
+        var markdownBlocks = markdownPanel.getMarkdownBlocks();
+
+        assertInstanceOf(markdownBlocks.get(0), TextMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(0).getText().isEmpty());
+
+        assertInstanceOf(markdownBlocks.get(1), CodeMarkdownBlock.class);
+        assertFalse(markdownBlocks.get(1).getText().isEmpty());
+
+        assertInstanceOf(markdownBlocks.get(2), TextMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(2).getText().isEmpty());
+
+        assertEquals(3, markdownBlocks.size());
+
+        dispose(markdownPanel);
+    }
+
+    public void testWrite_StreamInvalidLanguage() {
+        MarkdownPanel markdownPanel = new MarkdownPanel(null);
+
+        var streamedMarkdown =
+                """
+                ```nonexistentlanguage
+                some code
+                ```
+                """;
+
+        simulateStream(streamedMarkdown, markdownPanel);
+
+        var markdownBlocks = markdownPanel.getMarkdownBlocks();
+
+        assertInstanceOf(markdownBlocks.get(0), TextMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(0).getText().isEmpty());
+
+        assertInstanceOf(markdownBlocks.get(1), CodeMarkdownBlock.class);
+        assertFalse(markdownBlocks.get(1).getText().isEmpty());
+
+        assertInstanceOf(markdownBlocks.get(2), TextMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(2).getText().isEmpty());
+
+        assertEquals(3, markdownBlocks.size());
+
+        dispose(markdownPanel);
+    }
+
+    public void testWrite_StreamConsecutiveCodeBlocks() {
+        MarkdownPanel markdownPanel = new MarkdownPanel(null);
+
+        var streamedMarkdown =
+                """
+                ```java
+                // first block
+                ```
+                ```python
+                # second block immediately after
+                ```
+                """;
+
+        simulateStream(streamedMarkdown, markdownPanel);
+
+        var markdownBlocks = markdownPanel.getMarkdownBlocks();
+
+        assertInstanceOf(markdownBlocks.get(0), TextMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(0).getText().isEmpty());
+
+        assertInstanceOf(markdownBlocks.get(1), CodeMarkdownBlock.class);
+        assertFalse(markdownBlocks.get(1).getText().isEmpty());
+        assertEquals(
+                """
+                // first block
+                """,
+                markdownBlocks.get(1).getText());
+
+        assertInstanceOf(markdownBlocks.get(2), TextMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(2).getText().isEmpty());
+
+        assertInstanceOf(markdownBlocks.get(3), CodeMarkdownBlock.class);
+        assertFalse(markdownBlocks.get(3).getText().isEmpty());
+        assertEquals(
+                """
+                # second block immediately after
+                """,
+                markdownBlocks.get(3).getText());
+
+        assertInstanceOf(markdownBlocks.get(4), TextMarkdownBlock.class);
+        assertTrue(markdownBlocks.get(4).getText().isEmpty());
 
         assertEquals(5, markdownBlocks.size());
 

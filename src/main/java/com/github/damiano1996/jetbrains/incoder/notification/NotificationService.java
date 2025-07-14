@@ -80,4 +80,8 @@ public final class NotificationService {
                                 }))
                 .notify(project);
     }
+
+    public void notifyError(String message, @NotNull Throwable throwable) {
+        notifyError("%s\n%s".formatted(message, throwable.getMessage()));
+    }
 }

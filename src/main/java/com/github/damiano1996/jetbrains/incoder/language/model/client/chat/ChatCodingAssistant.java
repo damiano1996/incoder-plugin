@@ -6,35 +6,30 @@ public interface ChatCodingAssistant {
 
     @SystemMessage(
             """
-                    Context:
-                    - Current code being viewed by the user:
-                      {{code}}
-
-                    - File path: {{filePath}}
-                    - Project base path: {{projectBasePath}}
-
-                    Instructions:
-                    {{instructions}}
-                    """)
-    TokenStream chat(
-            @MemoryId int memoryId,
-            @V("instructions") String instructions,
-            @V("code") String code,
-            @V("filePath") String filePath,
-            @V("projectBasePath") String projectBasePath,
-            @UserMessage String prompt);
-
-    @SystemMessage(
+            {{systemInstructions}}
+            """)
+    @UserMessage(
             """
-                    Context:
-                    - Project base path: {{projectBasePath}}
+            {{prompt}}
 
-                    Instructions:
-                    {{instructions}}
-                    """)
+            Context Information:
+            - Current Date: {{currentDate}}
+            - Project Name: {{projectName}}
+            - Project Path: {{projectPath}}
+            - Current File: {{currentFile}}
+            - Programming Language: {{programmingLanguage}}
+            - IDE: {{ideInfo}}
+            - User Timezone: {{userTimezone}}
+            """)
     TokenStream chat(
             @MemoryId int memoryId,
-            @V("instructions") String instructions,
-            @V("projectBasePath") String projectBasePath,
-            @UserMessage String prompt);
+            @V("systemInstructions") String systemInstructions,
+            @V("currentDate") String currentDate,
+            @V("projectName") String projectName,
+            @V("projectPath") String projectPath,
+            @V("currentFile") String currentFile,
+            @V("programmingLanguage") String programmingLanguage,
+            @V("ideInfo") String ideInfo,
+            @V("userTimezone") String userTimezone,
+            @V("prompt") String prompt);
 }

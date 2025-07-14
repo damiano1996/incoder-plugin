@@ -2,6 +2,7 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageModelClient;
+import com.intellij.openapi.project.Project;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,5 +15,5 @@ public interface LanguageModelServer {
     String getSelectedModelName();
 
     @NotNull
-    LanguageModelClient createClient() throws LanguageModelException;
+    LanguageModelClient createClient(Project project) throws LanguageModelException;
 }

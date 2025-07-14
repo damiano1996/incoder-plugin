@@ -1,115 +1,160 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client;
 
+import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionContext;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatCodingAssistant;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.doc.DocumentationAssistant;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.file.FileManagerAssistant;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptClassifier;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.prompt.PromptType;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.EditorTool;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.FileTool;
+import com.intellij.openapi.application.ApplicationInfo;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class LanguageModelClientImpl implements LanguageModelClient {
 
-    private final ChatModel chatModel;
+    private final Project project;
+    private final ChatLanguageModel chatLanguageModel;
 
     private final ChatCodingAssistant chatCodingAssistant;
-    private final DocumentationAssistant documentationAssistant;
     private final InlineCodingAssistant inlineCodingAssistant;
-    private final FileManagerAssistant fileManagerAssistant;
-    private final PromptClassifier promptClassifier;
 
-    public LanguageModelClientImpl(ChatModel chatModel, StreamingChatModel streamingChatModel) {
+    private final String projectName;
+    private final String projectPath;
+    private final String ideInfo;
+    private final String userTimezone;
 
-        this.chatModel = chatModel;
+    public LanguageModelClientImpl(
+            @NotNull Project project,
+            ChatLanguageModel chatLanguageModel,
+            StreamingChatLanguageModel streamingChatLanguageModel) {
+        this.project = project;
+        this.chatLanguageModel = chatLanguageModel;
+
+        this.projectName = project.getName();
+        this.projectPath = getProjectPath();
+        this.ideInfo = getIdeInfo();
+        this.userTimezone = getUserTimezone();
 
         chatCodingAssistant =
                 AiServices.builder(ChatCodingAssistant.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
-                        .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10))
-                        .build();
-
-        documentationAssistant =
-                AiServices.builder(DocumentationAssistant.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
+                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
+                        .chatMemoryProvider(
+                                memoryId ->
+                                        MessageWindowChatMemory.withMaxMessages(
+                                                ChatSettings.getInstance().getState().maxMessages))
+                        .tools(new FileTool(this.project), new EditorTool(this.project))
                         .build();
 
         inlineCodingAssistant =
                 AiServices.builder(InlineCodingAssistant.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
-                        .build();
-
-        fileManagerAssistant =
-                AiServices.builder(FileManagerAssistant.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
-                        .build();
-
-        promptClassifier =
-                AiServices.builder(PromptClassifier.class)
-                        .streamingChatModel(streamingChatModel)
-                        .chatModel(chatModel)
+                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .chatLanguageModel(chatLanguageModel)
                         .build();
     }
 
     @Override
-    public String complete(String instructions, String leftContext, String rightContext) {
-        log.debug("Completing code...");
-        return inlineCodingAssistant.complete(instructions, leftContext, rightContext);
+    public String complete(@NotNull CodeCompletionContext codeCompletionContext) {
+        return inlineCodingAssistant.complete(
+                InlineSettings.getInstance().getState().systemMessageInstructions,
+                codeCompletionContext.leftContext(),
+                codeCompletionContext.rightContext(),
+                getLastLine(codeCompletionContext.leftContext()));
+    }
+
+    private String getLastLine(String s) {
+        if (s == null || s.isEmpty()) {
+            return "";
+        }
+
+        String[] lines = s.split("\n");
+        return lines[lines.length - 1];
     }
 
     @Override
-    public TokenStream chat(
-            int memoryId,
-            String instructions,
-            String code,
-            String filePath,
-            String projectBasePath,
-            String prompt) {
-        log.debug("Chatting about codes...");
+    public TokenStream chat(int memoryId, String prompt) {
+        String currentDate = getCurrentDate();
+        String currentFile = getCurrentFile();
+        String programmingLanguage = getProgrammingLanguage();
+        String systemMessageInstructions =
+                ChatSettings.getInstance().getState().systemMessageInstructions;
+
+        log.info("Chat method called with parameters:");
+        log.info("memoryId: {}", memoryId);
+        log.info("prompt: {}", prompt);
+        log.info("systemMessageInstructions: {}", systemMessageInstructions);
+        log.info("currentDate: {}", currentDate);
+        log.info("projectName: {}", projectName);
+        log.info("projectPath: {}", projectPath);
+        log.info("currentFile: {}", currentFile);
+        log.info("programmingLanguage: {}", programmingLanguage);
+        log.info("ideInfo: {}", ideInfo);
+        log.info("userTimezone: {}", userTimezone);
+
         return chatCodingAssistant.chat(
-                memoryId, instructions, code, filePath, projectBasePath, prompt);
+                memoryId,
+                systemMessageInstructions,
+                currentDate,
+                projectName,
+                projectPath,
+                currentFile,
+                programmingLanguage,
+                ideInfo,
+                userTimezone,
+                prompt);
     }
 
-    @Override
-    public TokenStream chat(
-            int memoryId, String instructions, String projectBasePath, String prompt) {
-        log.debug("Chatting...");
-        return chatCodingAssistant.chat(memoryId, instructions, projectBasePath, prompt);
+    private @NotNull String getCurrentDate() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
-    @Override
-    public PromptType classify(String prompt) {
-        log.debug("Classifying prompt: {}...", prompt);
-        return promptClassifier.classify(prompt);
+    private String getProjectPath() {
+        return project.getBasePath() != null ? project.getBasePath() : "Unknown";
     }
 
-    @Override
-    public String createFileName(String fileContent, String language) {
-        log.debug("Defining file path");
-        return fileManagerAssistant.createFileName(fileContent, language).trim();
+    private @NotNull String getCurrentFile() {
+        VirtualFile[] selectedFiles = FileEditorManager.getInstance(project).getSelectedFiles();
+        return selectedFiles.length > 0 ? selectedFiles[0].getPath() : "No file selected";
+    }
+
+    private @NotNull String getProgrammingLanguage() {
+        VirtualFile[] selectedFiles = FileEditorManager.getInstance(project).getSelectedFiles();
+        if (selectedFiles.length > 0) {
+            String extension = selectedFiles[0].getExtension();
+            return extension != null ? extension : "Unknown";
+        }
+        return "Unknown";
+    }
+
+    private @NotNull String getIdeInfo() {
+        ApplicationInfo appInfo = ApplicationInfo.getInstance();
+        return appInfo.getFullApplicationName() + " " + appInfo.getFullVersion();
+    }
+
+    private String getUserTimezone() {
+        return ZoneId.systemDefault().toString();
     }
 
     @Override
     public void checkServerConnection() throws LanguageModelException {
         try {
-            chatModel.chat("Hello!");
+            chatLanguageModel.chat("Hello!");
         } catch (Exception e) {
             throw new LanguageModelException(e);
         }
-    }
-
-    @Override
-    public String document(String instructions, String code) {
-        return documentationAssistant.document(instructions, code);
     }
 }

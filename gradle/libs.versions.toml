@@ -10,7 +10,7 @@ kover = "0.8.3"
 qodana = "2024.2.3"
 lombokKotlin = "2.0.0"
 lombok = "8.1.0"
-spotless = "6.21.0"
+spotless = "7.1.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }

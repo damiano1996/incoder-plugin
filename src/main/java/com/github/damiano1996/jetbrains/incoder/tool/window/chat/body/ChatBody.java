@@ -1,7 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body;
 
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.MessageComponent;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.*;
@@ -16,72 +15,71 @@ public class ChatBody {
     private JScrollPane scrollPane;
 
     public void addMessage(@NotNull MessageComponent messageComponent) {
-        var messageMainPanel = messageComponent.getMainPanel();
-        messagesPanel.add(messageMainPanel);
-        messageMainPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-
-        repaint();
-        scrollToBottom();
+        SwingUtilities.invokeLater(
+                () -> {
+                    messagesPanel.add(messageComponent.getMainPanel());
+                    updateUIAndScroll();
+                });
     }
 
     public void updateUI() {
-        repaint();
-        scrollToBottomSmoothly();
+        SwingUtilities.invokeLater(this::updateUIAndScroll);
     }
 
-    private void repaint() {
+    private void updateUIAndScroll() {
+        JScrollBar vertical = scrollPane.getVerticalScrollBar();
+        boolean wasAtBottom = isScrollAtBottom(vertical);
+
         messagesPanel.revalidate();
         messagesPanel.repaint();
+
+        if (wasAtBottom) {
+            SwingUtilities.invokeLater(this::scrollToBottom);
+        }
+    }
+
+    private boolean isScrollAtBottom(@NotNull JScrollBar vertical) {
+        return vertical.getValue() + vertical.getVisibleAmount() >= vertical.getMaximum() - 10;
     }
 
     private void scrollToBottom() {
-        ApplicationManager.getApplication()
-                .invokeLater(
-                        () -> {
-                            JScrollBar vertical = scrollPane.getVerticalScrollBar();
-                            vertical.setValue(vertical.getMaximum());
-                        });
-    }
-
-    private void scrollToBottomSmoothly() {
         JScrollBar vertical = scrollPane.getVerticalScrollBar();
-        if (vertical.getValue() + vertical.getVisibleAmount() >= vertical.getMaximum() - 20) {
-            Timer timer = new Timer(10, null);
-            timer.addActionListener(
-                    e -> {
-                        int currentValue = vertical.getValue();
-                        int targetValue = vertical.getMaximum() - vertical.getVisibleAmount();
-                        if (currentValue < targetValue) {
-                            vertical.setValue(Math.min(currentValue + 10, targetValue));
-                        } else {
-                            timer.stop();
-                        }
-                    });
-            timer.start();
-        }
+        vertical.setValue(vertical.getMaximum());
     }
 
     private void createUIComponents() {
         mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
 
-        // Create messages panel with proper constraints
-        messagesPanel = new JPanel();
-        messagesPanel.setLayout(new BoxLayout(messagesPanel, BoxLayout.Y_AXIS));
-        messagesPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
-        messagesPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        messagesPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-
-        // Create a wrapper panel to hold messagesPanel
-        JPanel wrapperPanel = new JPanel(new BorderLayout());
-        wrapperPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
-        wrapperPanel.add(messagesPanel, BorderLayout.NORTH);
-
-        // Create scroll pane
-        scrollPane = new JBScrollPane(wrapperPanel);
-        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        messagesPanel = createMessagesPanel();
+        JPanel wrapperPanel = createWrapperPanel();
+        scrollPane = createScrollPane(wrapperPanel);
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private @NotNull JPanel createMessagesPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(JBColor.namedColor("ToolWindow.background"));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setAlignmentY(Component.TOP_ALIGNMENT);
+        return panel;
+    }
+
+    private @NotNull JPanel createWrapperPanel() {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setBackground(JBColor.namedColor("ToolWindow.background"));
+        wrapper.add(messagesPanel, BorderLayout.NORTH);
+        return wrapper;
+    }
+
+    private @NotNull JBScrollPane createScrollPane(JPanel wrapperPanel) {
+        JBScrollPane scroll = new JBScrollPane(wrapperPanel);
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+        return scroll;
     }
 }

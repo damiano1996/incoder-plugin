@@ -54,12 +54,12 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
 
         var streamedCode =
                 """
-                        public class HelloWorld {
-                            public static void main(String[] args) {
-                                System.out.println("Hello, World!");
-                            }
-                        }
-                        """;
+                public class HelloWorld {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+                    }
+                }
+                """;
 
         streamAndAssertResult(streamedCode, codeBlock, streamedCode);
     }
@@ -91,24 +91,24 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
 
         var streamedCode =
                 """
-                        public class HelloWorld {
-                            public static void main(String[] args) {
-                                System.out.println("Hello, World!");
-                            }
-                        }
-                        ```
+                public class HelloWorld {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+                    }
+                }
+                ```
 
-                        Another comment
-                        """;
+                Another comment
+                """;
 
         var expectedCode =
                 """
-                        public class HelloWorld {
-                            public static void main(String[] args) {
-                                System.out.println("Hello, World!");
-                            }
-                        }
-                        """;
+                public class HelloWorld {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+                    }
+                }
+                """;
 
         streamAndAssertResult(streamedCode, codeBlock, expectedCode);
     }
@@ -118,34 +118,34 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
 
         var streamedCode =
                 """
-                        public class HelloWorld {
-                            public static void main(String[] args) {
-                                System.out.println("Hello, World!");
-                            }
-                        }
-                        ```
+                public class HelloWorld {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+                    }
+                }
+                ```
 
-                        Another comment
+                Another comment
 
-                        ```java
-                        public class HelloWorld {
-                            public static void main(String[] args) {
-                                System.out.println("Hello, World!");
-                            }
-                        }
-                        ```
+                ```java
+                public class HelloWorld {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+                    }
+                }
+                ```
 
-                        Another comment
-                        """;
+                Another comment
+                """;
 
         var expectedCode =
                 """
-                        public class HelloWorld {
-                            public static void main(String[] args) {
-                                System.out.println("Hello, World!");
-                            }
-                        }
-                        """;
+                public class HelloWorld {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+                    }
+                }
+                """;
 
         streamAndAssertResult(streamedCode, codeBlock, expectedCode);
     }
@@ -155,23 +155,23 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
 
         var streamedCode =
                 """
-                        public class HelloWorld {
-                            public static void main(String[] args) {
-                                System.out.println("Hello, World!");
-                            }
-                        }
-                        ```
+                public class HelloWorld {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+                    }
+                }
+                ```
 
-                        """;
+                """;
 
         var expectedCode =
                 """
-                        public class HelloWorld {
-                            public static void main(String[] args) {
-                                System.out.println("Hello, World!");
-                            }
-                        }
-                        """;
+                public class HelloWorld {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+                    }
+                }
+                """;
 
         streamAndAssertResult(streamedCode, codeBlock, expectedCode);
     }
@@ -181,28 +181,28 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
 
         var streamedCode =
                 """
-                        # Title
+                # Title
 
-                        ## Section
+                ## Section
 
-                        ```java
-                        // sample code
-                        ```
+                ```java
+                // sample code
+                ```
 
-                        ```
-                        """;
+                ```
+                """;
 
         var expectedCode =
                 """
-                        # Title
+                # Title
 
-                        ## Section
+                ## Section
 
-                        ```java
-                        // sample code
-                        ```
+                ```java
+                // sample code
+                ```
 
-                        """;
+                """;
 
         streamAndAssertResult(streamedCode, codeBlock, expectedCode);
     }
@@ -212,34 +212,34 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
 
         var streamedCode =
                 """
-                        # Title
+                # Title
 
-                        ## Section 1
+                ## Section 1
 
-                        ```java
-                        // sample code
-                        ```
+                ```java
+                // sample code
+                ```
 
-                        ## Section 2
+                ## Section 2
 
-                        ```
+                ```
 
-                        Another comment
-                        """;
+                Another comment
+                """;
 
         var expectedCode =
                 """
-                        # Title
+                # Title
 
-                        ## Section 1
+                ## Section 1
 
-                        ```java
-                        // sample code
-                        ```
+                ```java
+                // sample code
+                ```
 
-                        ## Section 2
+                ## Section 2
 
-                        """;
+                """;
 
         streamAndAssertResult(streamedCode, codeBlock, expectedCode);
     }
@@ -249,55 +249,55 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
 
         var streamedCode =
                 """
-                        # Title
+                # Title
 
-                        ## Section 1
+                ## Section 1
 
-                        ```java
-                        // sample code
-                        ```
+                ```java
+                // sample code
+                ```
 
-                        ## Section 2
+                ## Section 2
 
-                        ```python
-                        # sample code
-                        ```
+                ```python
+                # sample code
+                ```
 
-                        ```
+                ```
 
-                        Another comment
+                Another comment
 
-                        ```Markdown
-                        # Title
+                ```Markdown
+                # Title
 
-                        ## Section 1
+                ## Section 1
 
-                        ```java
-                        // sample code
-                        ```
+                ```java
+                // sample code
+                ```
 
-                        ## Section 2
+                ## Section 2
 
-                        ```
-                        """;
+                ```
+                """;
 
         var expectedCode =
                 """
-                        # Title
+                # Title
 
-                        ## Section 1
+                ## Section 1
 
-                        ```java
-                        // sample code
-                        ```
+                ```java
+                // sample code
+                ```
 
-                        ## Section 2
+                ## Section 2
 
-                        ```python
-                        # sample code
-                        ```
+                ```python
+                # sample code
+                ```
 
-                        """;
+                """;
 
         streamAndAssertResult(streamedCode, codeBlock, expectedCode);
     }

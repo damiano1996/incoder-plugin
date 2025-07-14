@@ -2,8 +2,8 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server.ollama;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings.OllamaSettings;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.ollama.*;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +18,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public ChatModel createChatModel() {
+    public ChatLanguageModel createChatLanguageModel() {
         return OllamaChatModel.builder()
                 .baseUrl(getState().baseUrl)
                 .modelName(getState().modelName)
@@ -27,7 +27,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public StreamingChatModel createStreamingChatModel() {
+    public StreamingChatLanguageModel createStreamingChatLanguageModel() {
         return OllamaStreamingChatModel.builder()
                 .baseUrl(getState().baseUrl)
                 .modelName(getState().modelName)

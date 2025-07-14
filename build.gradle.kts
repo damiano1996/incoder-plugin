@@ -4,12 +4,10 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
     id("java")
-    alias(libs.plugins.kotlin) // Kotlin support
     alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
-    alias(libs.plugins.lombokKotlin) // Kotlin Lombok Plugin
     alias(libs.plugins.lombok) // Lombok Plugin
     alias(libs.plugins.spotless) // Spotless Plugin
 }
@@ -18,8 +16,10 @@ group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
 // Set the JVM language level used to build the project.
-kotlin {
-    jvmToolchain(17)
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 // Configure project's dependencies
@@ -40,10 +40,10 @@ dependencies {
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
     implementation("org.reflections:reflections:0.10.2")
 
-    implementation("dev.langchain4j:langchain4j:1.0.0-rc1")
-    implementation("dev.langchain4j:langchain4j-ollama:1.0.0-beta4")
-    implementation("dev.langchain4j:langchain4j-open-ai:1.0.0-rc1")
-    implementation("dev.langchain4j:langchain4j-anthropic:1.0.0-beta4")
+    implementation("dev.langchain4j:langchain4j:1.0.0-beta2")
+    implementation("dev.langchain4j:langchain4j-ollama:1.0.0-beta2")
+    implementation("dev.langchain4j:langchain4j-open-ai:1.0.0-beta2")
+    implementation("dev.langchain4j:langchain4j-anthropic:1.0.0-beta2")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
@@ -62,12 +62,6 @@ dependencies {
 }
 
 spotless {
-    kotlin {
-        ktlint()
-    }
-    kotlinGradle {
-        ktlint()
-    }
     java {
         googleJavaFormat().aosp().reflowLongStrings()
     }
