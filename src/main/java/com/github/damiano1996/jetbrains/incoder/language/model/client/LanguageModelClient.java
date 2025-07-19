@@ -36,6 +36,4 @@ public interface LanguageModelClient {
      * @throws LanguageModelException if the connection or settings are unhealthy
      */
     void checkServerConnection() throws LanguageModelException;
-
-    void removeLastMessage(int chatId);
 }

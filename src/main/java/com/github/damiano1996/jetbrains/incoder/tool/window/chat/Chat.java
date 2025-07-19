@@ -103,8 +103,10 @@ public class Chat {
                     <html>Response parsing failed. This could be due to:<br>
                     &nbsp;&nbsp;- Insufficient max tokens<br>
                     &nbsp;&nbsp;- Incomplete model response<br>
+                    Additional details: %s<br>
                     Please adjust model settings and start a new chat.</html>
-                    """;
+                    """
+                            .formatted(throwable.getMessage());
         } else if (throwable instanceof MismatchedInputException
                 || throwable.getCause() instanceof MismatchedInputException) {
             errorMessage =
@@ -112,14 +114,18 @@ public class Chat {
                     <html>Tool invocation error occurred.<br>
                     &nbsp;&nbsp;- Model failed to call tool correctly<br>
                     &nbsp;&nbsp;- Incorrect tool function or parameter format<br>
+                    Additional details: %s<br>
                     Please try again or start a new chat.</html>
-                    """;
+                    """
+                            .formatted(throwable.getMessage());
         } else {
             errorMessage =
                     """
                     <html>An unexpected error occurred during response generation.<br>
+                    Additional details: %s<br>
                     Please check your network connection and model settings.</html>
-                    """;
+                    """
+                            .formatted(throwable.getMessage());
         }
 
         NotificationService.getInstance(project).notifyError(errorMessage);

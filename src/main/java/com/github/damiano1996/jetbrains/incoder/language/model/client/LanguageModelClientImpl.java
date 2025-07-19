@@ -20,8 +20,6 @@ import dev.langchain4j.service.TokenStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,8 +31,6 @@ public class LanguageModelClientImpl implements LanguageModelClient {
 
     private final ChatCodingAssistant chatCodingAssistant;
     private final InlineCodingAssistant inlineCodingAssistant;
-
-    private final Map<Integer, MessageWindowChatMemory> chatMemories = new ConcurrentHashMap<>();
 
     private final String projectName;
     private final String projectPath;
@@ -59,13 +55,8 @@ public class LanguageModelClientImpl implements LanguageModelClient {
                         .chatLanguageModel(chatLanguageModel)
                         .chatMemoryProvider(
                                 memoryId ->
-                                        chatMemories.computeIfAbsent(
-                                                (Integer) memoryId,
-                                                id ->
-                                                        MessageWindowChatMemory.withMaxMessages(
-                                                                ChatSettings.getInstance()
-                                                                        .getState()
-                                                                        .maxMessages)))
+                                        MessageWindowChatMemory.withMaxMessages(
+                                                ChatSettings.getInstance().getState().maxMessages))
                         .tools(new FileTool(this.project), new EditorTool(this.project))
                         .build();
 
@@ -164,22 +155,6 @@ public class LanguageModelClientImpl implements LanguageModelClient {
             chatLanguageModel.chat("Hello!");
         } catch (Exception e) {
             throw new LanguageModelException(e);
-        }
-    }
-
-    @Override
-    public void removeLastMessage(int chatId) {
-        try {
-            MessageWindowChatMemory chatMemory = chatMemories.get(chatId);
-
-            if (chatMemory != null && !chatMemory.messages().isEmpty()) {
-                chatMemory.messages().remove(chatMemory.messages().size() - 1);
-                log.info("Last message removed from chat memory with ID: {}", chatId);
-            } else {
-                log.warn("No messages found for chat memory ID: {}", chatId);
-            }
-        } catch (Exception e) {
-            log.error("Error removing last message from chat memory with ID: " + chatId, e);
         }
     }
 }
