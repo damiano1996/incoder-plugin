@@ -7,7 +7,7 @@ import com.github.damiano1996.jetbrains.incoder.notification.NotificationService
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.human.HumanMessageComponent;
-import com.github.damiano1996.jetbrains.incoder.ui.components.PlaceholderTextField;
+import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
@@ -24,7 +24,7 @@ public class Chat {
     @Setter @Getter private int chatId;
 
     @Getter private JPanel mainPanel;
-    private JTextField prompt;
+    private ExpandableTextArea prompt;
     private JProgressBar generating;
 
     private ChatBody chatBody;
@@ -34,7 +34,7 @@ public class Chat {
     }
 
     private void handleAction(Project project) {
-        String prompt = this.prompt.getText();
+        String prompt = this.prompt.getText().trim();
         handlePrompt(project, prompt);
     }
 
@@ -152,7 +152,7 @@ public class Chat {
         mainPanel = new JPanel();
         mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
 
-        prompt = new PlaceholderTextField("Enter a prompt...", 12, 8);
+        prompt = new ExpandableTextArea("Enter a prompt...", 12, 12, 1);
         generating = new JProgressBar();
         updateProgressStatus(false);
     }
