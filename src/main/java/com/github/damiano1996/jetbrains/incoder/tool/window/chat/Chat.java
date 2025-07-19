@@ -12,6 +12,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +27,7 @@ public class Chat {
     @Getter private JPanel mainPanel;
     private ExpandableTextArea prompt;
     private JProgressBar generating;
+    private JScrollPane promptScrollPane;
 
     private ChatBody chatBody;
 
@@ -154,6 +156,34 @@ public class Chat {
 
         prompt = new ExpandableTextArea("Enter a prompt...", 12, 12, 1);
         generating = new JProgressBar();
+
+        promptScrollPane =
+                new JScrollPane() {
+                    @Override
+                    public boolean isWheelScrollingEnabled() {
+                        return false;
+                    }
+
+                    @Override
+                    public Dimension getMinimumSize() {
+                        return getPreferredSize();
+                    }
+
+                    @Override
+                    public Dimension getPreferredSize() {
+                        Dimension size = super.getPreferredSize();
+                        if (getViewport() != null && getViewport().getView() != null) {
+                            size.height = getViewport().getView().getPreferredSize().height;
+                        }
+                        return size;
+                    }
+                };
+        promptScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        promptScrollPane.setOpaque(false);
+        promptScrollPane.getViewport().setOpaque(false);
+        promptScrollPane.setHorizontalScrollBarPolicy(
+                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        promptScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         updateProgressStatus(false);
     }
 }

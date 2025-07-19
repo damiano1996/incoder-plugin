@@ -23,24 +23,43 @@
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <forms defaultalign-horz="false" defaultalign-vert="false"/>
         </constraints>
+        <properties>
+          <name value="chatBody"/>
+        </properties>
       </nested-form>
-      <component id="75a7d" class="com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea" binding="prompt" custom-create="true">
+      <scrollpane id="scrollPrompt" binding="promptScrollPane" custom-create="true">
         <constraints>
-          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
           </grid>
-          <forms defaultalign-horz="false"/>
+          <forms defaultalign-horz="false" defaultalign-vert="false"/>
         </constraints>
         <properties>
-          <margin top="2" left="9" bottom="2" right="6"/>
+          <horizontalScrollBarPolicy value="31"/>
+          <verticalScrollBarPolicy value="21"/>
+          <opaque value="false"/>
+          <visible value="true"/>
+          <name value="promptScrollPane"/>
         </properties>
-      </component>
+        <border type="empty"/>
+        <children>
+          <component id="75a7d" class="com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea" binding="prompt" custom-create="true">
+            <constraints/>
+            <properties>
+              <margin top="2" left="9" bottom="2" right="6"/>
+              <name value="promptTextArea"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
       <component id="528" class="javax.swing.JProgressBar" binding="generating" custom-create="true">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <forms top="0" left="5" bottom="0" right="5" defaultalign-horz="false"/>
         </constraints>
-        <properties/>
+        <properties>
+          <name value="generatingProgressBar"/>
+        </properties>
       </component>
     </children>
   </grid>

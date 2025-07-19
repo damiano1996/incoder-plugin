@@ -62,10 +62,11 @@ public class TextAreaSizeManager {
                 parent.invalidate();
                 parent.validate();
 
-                Container grandparent = parent.getParent();
-                if (grandparent != null) {
-                    grandparent.invalidate();
-                    grandparent.validate();
+                Container currentParent = parent;
+                while (currentParent != null) {
+                    currentParent.invalidate();
+                    currentParent.validate();
+                    currentParent = currentParent.getParent();
                 }
             }
         } catch (Exception e) {
