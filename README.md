@@ -37,10 +37,18 @@ It seamlessly integrates advanced Large Language Models (LLMs) into your develop
 
 
 - A dedicated **tool window** appears on the right panel of the IDE after installing the plugin.
-- Interact with an LLM to:
+- Interact with an LLM that now offers powerful autonomous capabilities:
   - **Generate code snippets** or solve coding challenges.
   - **Understand code** by analyzing the file or specific lines you're viewing.
+  - **Autonomous Project Interaction**:
+  	- Create new files and directories directly within your project structure
+    - Navigate through project files and folders
+    - Propose and apply code changes with intelligent context-aware suggestions
   - Get contextual suggestions and explanations based on the active file you're working on, as the LLM has access to the current code.
+- **Advanced Tools**:
+    - File creation: instantly generate new source files, test cases, or configuration files
+    - Project navigation: quickly locate and open relevant files
+    - Refactoring assistant: suggest and implement code improvements, extract methods, and optimize existing code
 
 ### 2. **Inline Code Completion**
 
@@ -52,25 +60,14 @@ It seamlessly integrates advanced Large Language Models (LLMs) into your develop
 - Press **Tab** to accept the suggested code and insert it directly into your file.
 - Accelerate your coding workflow with intelligent autocompletion that understands the context of your project.
 
-### 3. **Agents**
-
-Automate repetitive and time-consuming tasks with intelligent agents powered by LLMs.
-
-<p align="center">
-  <img src=".github/readme/demo-intelligent-actions.png" alt="Demo Intelligent Actions" style="width: 70%;">
-</p>
-
-- Available agents:
-  - **Documentation**: Generate documentation automatically for all files in a target folder, review changes, and merge the new documentation seamlessly.
-
-### 4. **Support for Multiple LLM Providers**
+### 3. **Support for Multiple LLM Providers**
 - InCoder supports **multiple LLM providers**, giving you flexibility and choice:
   - **Ollama**: Utilize models running locally on your machine to preserve privacy.
   - **OpenAI**: Access advanced cloud-based LLMs for high-quality suggestions and assistance.
   - **Anthropic**: Integrate with this leading LLM provider for ethical and powerful AI capabilities.
 - All providers can be easily **configured** through the plugin's settings, allowing you to choose the one that best fits your needs.
 
-### 5. **Privacy-Focused Local LLM Support**
+### 4. **Privacy-Focused Local LLM Support**
 - By using **Ollama**, InCoder enables local LLM inference directly on your computer.
 - Keeps sensitive project data private and ensures compliance with internal security policies.
 - Ideal for developers who value privacy and want to avoid sending data to external servers.
@@ -80,7 +77,6 @@ The plugin is highly customizable through the **InCoder Settings** panel in your
 Configuration is divided into three main subsections:
 
 - **Chat**: Configure settings for the interactive chat window, such as history retention and UI preferences.
-- **Documentation**: Edit the system prompts to generate documentation.
 - **Inline**: Enable or disable inline code completion and customize the behavior (e.g., auto-suggestions, Tab behavior).
 - **Server**: Set up your preferred LLM provider.
 
