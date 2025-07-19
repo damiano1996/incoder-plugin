@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2025-07-19
+
+### Added
+
+- LLM with tools: list files and directories, create empty files, create patches.
+- Max tokens is now configurable.
+
+### Changed
+
+- System prompts
+- Default configurations
+
+### Removed
+
+- Agents: removed the tab with agents. Now integrated in the chat with tools.
+
 ## [0.2.0] - 2025-05-24
 
 ### Added
@@ -55,7 +71,8 @@
 
 - Qodana recommendations.
 
-[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/damiano1996/incoder-plugin/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/damiano1996/incoder-plugin/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/damiano1996/incoder-plugin/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/damiano1996/incoder-plugin/compare/v0.0.2...v0.1.0
