@@ -20,10 +20,6 @@ public class NewChatAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-        ApplicationManager.getApplication()
-                .invokeLater(
-                        () -> {
-                            chatContainer.createNewChat();
-                        });
+        ApplicationManager.getApplication().invokeLater(chatContainer::createNewChat);
     }
 }
