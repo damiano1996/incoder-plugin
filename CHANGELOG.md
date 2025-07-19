@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-07-19
+
+### Changed
+
+- Prompt text field replaced with expandable text area
+
 ## [1.0.0] - 2025-07-19
 
 ### Added
@@ -71,7 +77,8 @@
 
 - Qodana recommendations.
 
-[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/damiano1996/incoder-plugin/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/damiano1996/incoder-plugin/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/damiano1996/incoder-plugin/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/damiano1996/incoder-plugin/compare/v0.1.0...v0.1.1
