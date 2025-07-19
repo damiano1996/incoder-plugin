@@ -51,7 +51,8 @@ public final class AnthropicConfigurable extends BaseServerConfigurable {
                         .getEditor()
                         .getItem()
                         .equals(state.modelName)
-                || !settingsComponent.getTemperatureField().getValue().equals(state.temperature);
+                || !settingsComponent.getTemperatureField().getValue().equals(state.temperature)
+                || !settingsComponent.getMaxTokensField().getValue().equals(state.maxTokens);
     }
 
     @Override
@@ -61,6 +62,7 @@ public final class AnthropicConfigurable extends BaseServerConfigurable {
         state.apiKey = new String(settingsComponent.getApiKeyField().getPassword());
         state.modelName = settingsComponent.getModelNameField().getItem();
         state.temperature = (Double) settingsComponent.getTemperatureField().getValue();
+        state.maxTokens = (Integer) settingsComponent.getMaxTokensField().getValue();
     }
 
     @Override
@@ -70,6 +72,7 @@ public final class AnthropicConfigurable extends BaseServerConfigurable {
         settingsComponent.getApiKeyField().setText(state.apiKey);
         settingsComponent.getModelNameField().setItem(state.modelName);
         settingsComponent.getTemperatureField().setValue(state.temperature);
+        settingsComponent.getMaxTokensField().setValue(state.maxTokens);
     }
 
     @Override

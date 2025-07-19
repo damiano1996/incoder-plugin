@@ -9,5 +9,5 @@
         <appender-ref ref="STDOUT" />
     </root>
 
-    <logger name="com.github.damiano1996.jetbrains.incoder" level="DEBUG" />
+    <logger name="com.github.damiano1996.jetbrains.incoder" level="INFO" />
 </configuration>

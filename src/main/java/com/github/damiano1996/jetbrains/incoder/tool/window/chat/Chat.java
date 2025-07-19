@@ -1,5 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat;
 
+import com.fasterxml.jackson.core.io.JsonEOFException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
@@ -10,7 +12,6 @@ import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import java.util.function.Consumer;
 import javax.swing.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -81,23 +82,48 @@ public class Chat {
                             })
                     .onCompleteResponse(
                             chatResponse -> onTokenStreamComplete(aiMessage, chatResponse))
-                    .onError(onTokenStreamError(project))
+                    .onError(
+                            throwable -> {
+                                log.error("Error during chat streaming.", throwable);
+                                handleError(project, throwable);
+                            })
                     .start();
         } catch (Exception e) {
-            log.warn("Error while starting token stream", e);
-            NotificationService.getInstance(project)
-                    .notifyError("Unexpected error: unable to generate response.");
-            updateProgressStatus(false);
+            log.error("Error during chat stream start.", e);
+            handleError(project, e);
         }
     }
 
-    private @NotNull Consumer<Throwable> onTokenStreamError(Project project) {
-        return throwable -> {
-            log.warn("Error during stream.", throwable);
-            NotificationService.getInstance(project)
-                    .notifyError("Unexpected error while generating response.", throwable);
-            updateProgressStatus(false);
-        };
+    private void handleError(Project project, Throwable throwable) {
+        String errorMessage;
+        if (throwable instanceof JsonEOFException
+                || throwable.getCause() instanceof JsonEOFException) {
+            errorMessage =
+                    """
+                    <html>Response parsing failed. This could be due to:<br>
+                    &nbsp;&nbsp;- Insufficient max tokens<br>
+                    &nbsp;&nbsp;- Incomplete model response<br>
+                    Please adjust model settings and start a new chat.</html>
+                    """;
+        } else if (throwable instanceof MismatchedInputException
+                || throwable.getCause() instanceof MismatchedInputException) {
+            errorMessage =
+                    """
+                    <html>Tool invocation error occurred.<br>
+                    &nbsp;&nbsp;- Model failed to call tool correctly<br>
+                    &nbsp;&nbsp;- Incorrect tool function or parameter format<br>
+                    Please try again or start a new chat.</html>
+                    """;
+        } else {
+            errorMessage =
+                    """
+                    <html>An unexpected error occurred during response generation.<br>
+                    Please check your network connection and model settings.</html>
+                    """;
+        }
+
+        NotificationService.getInstance(project).notifyError(errorMessage);
+        updateProgressStatus(false);
     }
 
     private void onTokenStreamComplete(

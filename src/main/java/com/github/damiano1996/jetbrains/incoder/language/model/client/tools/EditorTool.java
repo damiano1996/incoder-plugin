@@ -49,7 +49,9 @@ public class EditorTool {
     }
 
     @Tool(
-            """
+            name = "CREATE_PATCH",
+            value =
+                    """
 Creates and applies a unified diff patch to a file, presenting changes in a merge dialog for user review and approval.
 This tool allows precise code modifications with visual diff comparison before applying changes.
 """)
@@ -63,7 +65,22 @@ Use forward slashes for path separators regardless of operating system.
                     String filePath,
             @P(
                             """
-A list of PatchHunk objects containing the code changes to apply.
+A list of PatchHunk objects representing targeted code modifications. Each PatchHunk defines:
+- Precise line range for modifications (startLine and endLine)
+- Original content to be replaced (oldContent)
+- New content to replace the original (newContent)
+
+Key characteristics:
+- Line numbers are 1-based and inclusive
+- Hunks are applied in reverse order to prevent line number shifting
+- Allows granular, controlled code changes with explicit content verification
+- Supports multiple, non-overlapping modifications in a single patch operation
+
+Example structure:
+[
+  PatchHunk(5, 7, "original method body", "updated method implementation"),
+  PatchHunk(12, 12, "single line to replace", "new line of code")
+]
 """)
                     List<PatchHunk> patchHunks) {
         try {
