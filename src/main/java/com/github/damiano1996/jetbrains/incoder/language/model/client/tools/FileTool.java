@@ -31,8 +31,8 @@ public class FileTool {
         }
     }
 
-    @Tool("List all file and folder paths in the given folder")
-    public List<String> listFileAndFolderPaths(@P("Folder path") String folderPath) {
+    @Tool(name = "SCAN_DIRECTORY", value = "List all file and folder paths in the given folder")
+    public List<String> scanDirectory(@P("Folder path") String folderPath) {
         log.info("Tool called, looking for files and folders in folder: {}", folderPath);
 
         List<String> filePaths = new ArrayList<>();
@@ -58,7 +58,7 @@ public class FileTool {
         return filePaths;
     }
 
-    @Tool("Read the content of a file given its path")
+    @Tool(name = "READ_FILE", value = "Read the content of a file given its path")
     public String readFile(@P("File path") String filePath) {
         log.info("Tool called, reading file content from: {}", filePath);
 
@@ -78,7 +78,7 @@ public class FileTool {
                 contentWithLineNumbers.append(String.format("%d: %s%n", i + 1, lines.get(i)));
             }
 
-            return contentWithLineNumbers.toString();
+            return "File content:\n%s".formatted(contentWithLineNumbers.toString());
 
         } catch (IOException e) {
             log.error("Error reading file: {}", filePath, e);
@@ -86,7 +86,9 @@ public class FileTool {
         }
     }
 
-    @Tool("Create an empty file at the given path. Only if the file does not exist yet.")
+    @Tool(
+            name = "CREATE_EMPTY_FILE",
+            value = "Create an empty file at the given path. Only if the file does not exist yet.")
     public String createEmptyFile(@P("File path") String filePath) {
         log.info("Tool called, creating file at: {}", filePath);
 
@@ -106,9 +108,7 @@ public class FileTool {
                 projectBaseDir.refresh(true, true);
             }
 
-            String successMsg = "File created successfully: %s".formatted(filePath);
-            log.info("Successfully created file: {}", filePath);
-            return successMsg;
+            return "File created successfully: %s".formatted(filePath);
         } catch (IOException e) {
             log.error("Error creating file: {}", filePath, e);
             return "Error creating file: %s".formatted(e.getMessage());

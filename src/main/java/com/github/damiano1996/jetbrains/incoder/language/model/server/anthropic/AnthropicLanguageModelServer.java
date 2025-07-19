@@ -31,6 +31,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
                 .apiKey(getState().apiKey)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
+                .maxTokens(getState().maxTokens)
                 .build();
     }
 

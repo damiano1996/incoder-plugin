@@ -15,6 +15,7 @@ public class AnthropicComponent {
     private final JPasswordField apiKeyField;
     private final ComboBox<String> modelNameField;
     private final JSpinner temperatureField;
+    private final JSpinner maxTokensField;
 
     public AnthropicComponent() {
         apiKeyField = new JPasswordField();
@@ -22,6 +23,9 @@ public class AnthropicComponent {
 
         SpinnerNumberModel temperatureModel = new SpinnerNumberModel(0.5, 0.0, 1.0, 0.1);
         temperatureField = new JSpinner(temperatureModel);
+
+        SpinnerNumberModel maxTokensModel = new SpinnerNumberModel(2048, 100, 100000, 1);
+        maxTokensField = new JSpinner(maxTokensModel);
 
         modelNameField =
                 new ComboBox<>(
@@ -38,6 +42,7 @@ public class AnthropicComponent {
                         .addLabeledComponent(new JBLabel("Model name:"), modelNameField, 1, false)
                         .addLabeledComponent(
                                 new JBLabel("Temperature:"), temperatureField, 1, false)
+                        .addLabeledComponent(new JBLabel("Max tokens:"), maxTokensField, 1, false)
                         .setFormLeftIndent(0)
                         .addComponentFillVertically(new JPanel(), 0)
                         .getPanel();

@@ -34,5 +34,6 @@ public final class OpenAiSettings implements PersistentStateComponent<OpenAiSett
         public String apiKey = "";
         public String modelName = "";
         public Double temperature = 0.2;
+        public Integer maxTokens = 2048;
     }
 }
