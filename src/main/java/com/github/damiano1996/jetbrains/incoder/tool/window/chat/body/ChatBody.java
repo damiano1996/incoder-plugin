@@ -5,18 +5,17 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.Timer;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
 public class ChatBody {
+    private static final int UPDATE_DELAY_MS = 50; // Batch updates every 50ms
     private JPanel mainPanel;
     private JPanel messagesPanel;
     private JScrollPane scrollPane;
     private Timer updateTimer;
     private volatile boolean pendingUpdate = false;
-    private static final int UPDATE_DELAY_MS = 50; // Batch updates every 50ms
 
     public ChatBody() {
         initializeUpdateTimer();
