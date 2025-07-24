@@ -62,27 +62,35 @@ public class FileTool {
     public String readFile(@P("File path") String filePath) {
         log.info("Tool called, reading file content from: {}", filePath);
 
-        try {
-            File file = new File(filePath);
-            if (!file.exists()) {
-                return "File does not exist: %s".formatted(filePath);
-            }
-            if (file.isDirectory()) {
-                return "Path is a directory, not a file: %s".formatted(filePath);
-            }
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new IllegalArgumentException("File does not exist: %s".formatted(filePath));
+        }
 
+        if (file.isDirectory()) {
+            throw new IllegalArgumentException(
+                    "Path is a directory, not a file: %s".formatted(filePath));
+        }
+
+        String contentWithLineNumbers = getContentWithLineNumbers(filePath);
+
+        return "File content:\n%s".formatted(contentWithLineNumbers);
+    }
+
+    public static @NotNull String getContentWithLineNumbers(String filePath) {
+        try {
             List<String> lines = Files.readAllLines(Paths.get(filePath));
-            StringBuilder contentWithLineNumbers = new StringBuilder();
+            StringBuilder contentWithLineNumbersBuilder = new StringBuilder();
 
             for (int i = 0; i < lines.size(); i++) {
-                contentWithLineNumbers.append(String.format("%d: %s%n", i + 1, lines.get(i)));
+                contentWithLineNumbersBuilder.append(
+                        String.format("%d: %s%n", i + 1, lines.get(i)));
             }
 
-            return "File content:\n%s".formatted(contentWithLineNumbers.toString());
-
+            return contentWithLineNumbersBuilder.toString();
         } catch (IOException e) {
-            log.error("Error reading file: {}", filePath, e);
-            return "Error reading file: %s".formatted(e.getMessage());
+            throw new RuntimeException(
+                    "Unable to read file: %s. Error: %s".formatted(filePath, e.getMessage()), e);
         }
     }
 
@@ -92,26 +100,27 @@ public class FileTool {
     public String createEmptyFile(@P("File path") String filePath) {
         log.info("Tool called, creating file at: {}", filePath);
 
-        try {
-            File file = new File(filePath);
-            createPath(filePath, file);
+        File file = new File(filePath);
+        createPath(filePath, file);
 
-            // Check if file already exists
-            if (file.exists()) {
-                return "File already exists: %s".formatted(filePath);
-            }
-
-            Files.createFile(Paths.get(filePath));
-
-            VirtualFile projectBaseDir = ProjectUtil.guessProjectDir(project);
-            if (projectBaseDir != null) {
-                projectBaseDir.refresh(true, true);
-            }
-
-            return "File created successfully: %s".formatted(filePath);
-        } catch (IOException e) {
-            log.error("Error creating file: {}", filePath, e);
-            return "Error creating file: %s".formatted(e.getMessage());
+        if (file.exists()) {
+            throw new IllegalArgumentException("File already exists: %s".formatted(filePath));
         }
+
+        try {
+            Files.createFile(Paths.get(filePath));
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Unable to create file at path: %s. Error: %s"
+                            .formatted(filePath, e.getMessage()),
+                    e);
+        }
+
+        VirtualFile projectBaseDir = ProjectUtil.guessProjectDir(project);
+        if (projectBaseDir != null) {
+            projectBaseDir.refresh(true, true);
+        }
+
+        return "File created successfully: %s".formatted(filePath);
     }
 }

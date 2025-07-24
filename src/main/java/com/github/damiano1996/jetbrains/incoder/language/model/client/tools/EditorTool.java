@@ -2,6 +2,7 @@ package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 
 import com.github.damiano1996.jetbrains.incoder.diff.DiffUtils;
 import com.intellij.diff.DiffManager;
+import com.intellij.diff.InvalidDiffRequestException;
 import com.intellij.diff.merge.MergeResult;
 import com.intellij.diff.merge.TextMergeRequest;
 import com.intellij.openapi.application.ApplicationManager;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
@@ -31,21 +33,25 @@ public class EditorTool {
 
     private Project project;
 
-    private static String getOriginalContent(VirtualFile virtualFile) throws Throwable {
-        return ApplicationManager.getApplication()
-                .runReadAction(
-                        (ThrowableComputable<String, Throwable>)
-                                () -> {
-                                    Document document =
-                                            FileDocumentManager.getInstance()
-                                                    .getDocument(virtualFile);
-                                    if (document == null) {
-                                        throw new IllegalArgumentException(
-                                                "Unable to get document for file: %s"
-                                                        .formatted(virtualFile.getPath()));
-                                    }
-                                    return document.getText();
-                                });
+    private static String getOriginalContent(VirtualFile virtualFile) {
+        try {
+            return ApplicationManager.getApplication()
+                    .runReadAction(
+                            (ThrowableComputable<String, Throwable>)
+                                    () -> {
+                                        Document document =
+                                                FileDocumentManager.getInstance()
+                                                        .getDocument(virtualFile);
+                                        if (document == null) {
+                                            throw new IllegalArgumentException(
+                                                    "Unable to get document for file: %s"
+                                                            .formatted(virtualFile.getPath()));
+                                        }
+                                        return document.getText();
+                                    });
+        } catch (Throwable e) {
+            throw new RuntimeException("Unable to read virtual file. Error: " + e.getMessage(), e);
+        }
     }
 
     @Tool(
@@ -83,25 +89,18 @@ Example structure:
 ]
 """)
                     List<PatchHunk> patchHunks) {
-        try {
-            VirtualFile virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath);
-            if (virtualFile == null) {
-                return "Error: File not found at path: %s".formatted(filePath);
-            }
+        VirtualFile virtualFile = getVirtualFile(filePath);
 
-            String originalContent = getOriginalContent(virtualFile);
+        String originalContent = getOriginalContent(virtualFile);
 
-            String proposedContent = applyPatches(originalContent, patchHunks);
+        String proposedContent = applyPatches(originalContent, patchHunks);
 
-            return showDiff(filePath, proposedContent);
+        if (originalContent.equals(proposedContent))
+            throw new IllegalArgumentException(
+                    "No changes provided. The original content is equal to the proposed one. "
+                            + "Review patch hunks.");
 
-        } catch (Throwable e) {
-            String errorMessage =
-                    "Unexpected error while applying patches to file %s: %s"
-                            .formatted(filePath, e.getMessage());
-            log.error(errorMessage, e);
-            return errorMessage;
-        }
+        return mergeRequest(filePath, proposedContent);
     }
 
     private @NotNull String applyPatches(
@@ -132,25 +131,46 @@ Example structure:
         return String.join("\n", lines);
     }
 
-    public String showDiff(String filePath, String proposedContent) {
+    private String mergeRequest(String filePath, String proposedContent) {
+        log.debug("Creating merge request for file: {}", filePath);
+
+        VirtualFile virtualFile = getVirtualFile(filePath);
+
+        String originalContent = getOriginalContent(virtualFile);
+
+        final CompletableFuture<String> resultMessage = new CompletableFuture<>();
+
+        Consumer<MergeResult> mergeResultConsumer =
+                mergeResult -> {
+                    log.debug("Merge request result: {}", mergeResult);
+                    resultMessage.complete(getMergeResultMessage(mergeResult));
+                };
+
+        String mergeResultMessage =
+                getMergeResultMessage(
+                        proposedContent,
+                        virtualFile,
+                        originalContent,
+                        mergeResultConsumer,
+                        resultMessage);
+
+        String contentWithLineNumbers = FileTool.getContentWithLineNumbers(filePath);
+
+        return """
+               Merge result: %s
+
+               File content:
+               %s"""
+                .formatted(mergeResultMessage, contentWithLineNumbers);
+    }
+
+    private String getMergeResultMessage(
+            String proposedContent,
+            VirtualFile virtualFile,
+            String originalContent,
+            Consumer<MergeResult> mergeResultConsumer,
+            CompletableFuture<String> resultMessage) {
         try {
-            log.debug("Showing diff for file: {}", filePath);
-
-            VirtualFile virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath);
-            if (virtualFile == null) {
-                return "Error: File not found at path: %s".formatted(filePath);
-            }
-
-            String originalContent = getOriginalContent(virtualFile);
-
-            final CompletableFuture<String> resultMessage = new CompletableFuture<>();
-
-            Consumer<MergeResult> mergeResultConsumer =
-                    mergeResult -> {
-                        log.debug("Merge request result: {}", mergeResult);
-                        resultMessage.complete(getMergeResultMessage(mergeResult));
-                    };
-
             TextMergeRequest textMergeRequest =
                     DiffUtils.showDiffWithProposedChange(
                             project,
@@ -164,11 +184,18 @@ Example structure:
                             () -> DiffManager.getInstance().showMerge(project, textMergeRequest));
 
             return resultMessage.get();
-
-        } catch (Throwable e) {
-            log.error("Error showing diff for file: {}", filePath, e);
-            return "Error showing diff: %s".formatted(e.getMessage());
+        } catch (ExecutionException | InterruptedException | InvalidDiffRequestException e) {
+            throw new RuntimeException(
+                    "Unable to get merge result message. Error: " + e.getMessage(), e);
         }
+    }
+
+    private static @NotNull VirtualFile getVirtualFile(String filePath) {
+        VirtualFile virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath);
+        if (virtualFile == null) {
+            throw new IllegalArgumentException("File not found at path: %s".formatted(filePath));
+        }
+        return virtualFile;
     }
 
     @Contract(pure = true)
