@@ -50,7 +50,7 @@ public class EditorTool {
                                         return document.getText();
                                     });
         } catch (Throwable e) {
-            throw new RuntimeException("Unable to read virtual file. Error: " + e.getMessage(), e);
+            throw new ToolException("Unable to read virtual file. Error: " + e.getMessage(), e);
         }
     }
 
@@ -81,12 +81,6 @@ Key characteristics:
 - Hunks are applied in reverse order to prevent line number shifting
 - Allows granular, controlled code changes with explicit content verification
 - Supports multiple, non-overlapping modifications in a single patch operation
-
-Example structure:
-[
-  PatchHunk(5, 7, "original method body", "updated method implementation"),
-  PatchHunk(12, 12, "single line to replace", "new line of code")
-]
 """)
                     List<PatchHunk> patchHunks) {
         VirtualFile virtualFile = getVirtualFile(filePath);
@@ -103,26 +97,27 @@ Example structure:
         return mergeRequest(filePath, proposedContent);
     }
 
-    private @NotNull String applyPatches(
+    protected @NotNull String applyPatches(
             @NotNull String originalContent, @NotNull List<PatchHunk> patchHunks) {
         List<String> lines = new ArrayList<>(Arrays.asList(originalContent.split("\\R", -1)));
 
         patchHunks.sort(Comparator.comparingInt(PatchHunk::startLine).reversed());
 
-        for (PatchHunk h : patchHunks) {
-            int startIdx = h.startLine() - 1;
-            int endIdx = h.endLine() - 1;
+        for (PatchHunk patchHunk : patchHunks) {
+            int startIdx = patchHunk.startLine() - 1;
+            int endIdx = patchHunk.endLine() - 1;
 
             if (startIdx < 0 || endIdx >= lines.size() || startIdx > endIdx) {
                 throw new IllegalArgumentException(
-                        "PatchHunk out of bounds: %d-%d".formatted(h.startLine(), h.endLine()));
+                        "PatchHunk out of bounds: %d-%d"
+                                .formatted(patchHunk.startLine(), patchHunk.endLine()));
             }
 
             for (int i = 0; i <= endIdx - startIdx; i++) {
                 lines.remove(startIdx);
             }
 
-            String[] newLines = h.newContent().split("\\R", -1);
+            String[] newLines = patchHunk.newContent().split("\\R", -1);
             for (int i = 0; i < newLines.length; i++) {
                 lines.add(startIdx + i, newLines[i]);
             }
@@ -156,12 +151,17 @@ Example structure:
 
         String contentWithLineNumbers = FileTool.getContentWithLineNumbers(filePath);
 
-        return """
-               Merge result: %s
+        String result =
+                """
+                Merge result: %s
 
-               File content:
-               %s"""
-                .formatted(mergeResultMessage, contentWithLineNumbers);
+                New file content:
+                %s"""
+                        .formatted(mergeResultMessage, contentWithLineNumbers);
+
+        log.debug("Result of the merge action:\n{}", result);
+
+        return result;
     }
 
     private String getMergeResultMessage(
@@ -185,7 +185,7 @@ Example structure:
 
             return resultMessage.get();
         } catch (ExecutionException | InterruptedException | InvalidDiffRequestException e) {
-            throw new RuntimeException(
+            throw new ToolException(
                     "Unable to get merge result message. Error: " + e.getMessage(), e);
         }
     }
@@ -214,7 +214,6 @@ Example structure:
 The starting line number for the patch hunk in the file.
 Must be a 1-based line number indicating where the changes begin.
 Line numbers are inclusive and should accurately reflect the file's current state.
-Example: For the first line of a file, use 1; for the fifth line, use 5.
 """)
                     int startLine,
             @Description(
@@ -223,7 +222,6 @@ The ending line number for the patch hunk in the file.
 Must be a 1-based line number indicating where the changes end.
 Line numbers are inclusive and should match the exact range of content to be replaced.
 Must be greater than or equal to the startLine.
-Example: If replacing lines 5-7, set startLine to 5 and endLine to 7.
 """)
                     int endLine,
             @Description(
@@ -232,7 +230,6 @@ The exact original content to be replaced in the specified line range.
 This serves as a verification mechanism to ensure the patch is applied to the correct content.
 Must exactly match the current content in the file between startLine and endLine.
 Used to prevent unintended modifications if the file content has changed.
-Example: If replacing a method body, provide the exact current method body text.
 """)
                     String oldContent,
             @Description(
@@ -240,7 +237,6 @@ Example: If replacing a method body, provide the exact current method body text.
 The new content that will replace the oldContent in the specified line range.
 Should be a complete and valid code snippet that will seamlessly replace the original content.
 Ensure proper formatting, indentation, and syntax to maintain code readability.
-Example: A new method implementation, refactored code block, or updated logic.
 """)
                     String newContent) {}
 }

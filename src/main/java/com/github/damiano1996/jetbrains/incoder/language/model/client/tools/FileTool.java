@@ -89,7 +89,7 @@ public class FileTool {
 
             return contentWithLineNumbersBuilder.toString();
         } catch (IOException e) {
-            throw new RuntimeException(
+            throw new ToolException(
                     "Unable to read file: %s. Error: %s".formatted(filePath, e.getMessage()), e);
         }
     }
@@ -110,7 +110,7 @@ public class FileTool {
         try {
             Files.createFile(Paths.get(filePath));
         } catch (IOException e) {
-            throw new RuntimeException(
+            throw new ToolException(
                     "Unable to create file at path: %s. Error: %s"
                             .formatted(filePath, e.getMessage()),
                     e);
