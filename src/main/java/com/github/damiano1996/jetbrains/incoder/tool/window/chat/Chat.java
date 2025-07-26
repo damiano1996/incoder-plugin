@@ -1,7 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat;
 
-import com.fasterxml.jackson.core.io.JsonEOFException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatConstants.*;
+
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
@@ -18,7 +18,6 @@ import javax.swing.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class Chat {
@@ -29,12 +28,11 @@ public class Chat {
     private ExpandableTextArea prompt;
     private JScrollPane promptScrollPane;
     private JButton submitButton;
-
-    private boolean isGenerating;
-    private boolean stopRequested;
-
     private ChatBody chatBody;
     private JPanel inputPanel;
+
+    private ChatState chatState;
+    private ChatService chatService;
 
     public void setPromptActionListener(Project project) {
         prompt.addActionListener(e -> handleAction(project));
@@ -42,20 +40,19 @@ public class Chat {
     }
 
     private void handleButtonAction(Project project) {
-        if (isGenerating) {
-            stopRequested = true;
+        if (chatState.isGenerating()) {
+            chatState.requestStop();
+            updateProgressStatus();
         } else {
             handleAction(project);
         }
     }
 
     private void handleAction(Project project) {
-        if (!LanguageModelServiceImpl.getInstance(project).isReady()) {
+        if (!chatService.isLanguageModelReady(project)) {
             NotificationService.getInstance(project)
                     .notifyWithSettingsActionButton(
-                            "The Language Model Service is not ready. "
-                                    + "Please, configure the Chat and the Server from Settings.",
-                            NotificationType.WARNING);
+                            LANGUAGE_MODEL_NOT_READY, NotificationType.WARNING);
             return;
         }
 
@@ -72,129 +69,43 @@ public class Chat {
         HumanMessageComponent humanMessageComponent = new HumanMessageComponent(prompt);
         chatBody.addMessage(humanMessageComponent);
 
-        updateProgressStatus(true);
-
         var aiMessage = new AiMessageComponent(project);
         aiMessage.setModelName(
                 LanguageModelServiceImpl.getInstance(project).getSelectedModelName().toLowerCase());
         chatBody.addMessage(aiMessage);
 
-        startChatStream(project, prompt, aiMessage);
+        chatService.processPrompt(
+                project,
+                chatId,
+                prompt,
+                this::updateProgressStatus,
+                token -> {
+                    aiMessage.write(token);
+                    chatBody.updateUI();
+                },
+                () -> {
+                    aiMessage.write("\n\n");
+                    chatBody.updateUI();
+                },
+                () -> {
+                    aiMessage.streamClosed();
+                    updateProgressStatus();
+                },
+                this::updateProgressStatus);
     }
 
-    private void startChatStream(
-            Project project, @NotNull String prompt, AiMessageComponent aiMessage) {
-        try {
-            log.debug("Starting chat stream...");
-
-            LanguageModelServiceImpl.getInstance(project)
-                    .getClient()
-                    .chat(chatId, prompt)
-                    .onPartialResponse(
-                            token -> {
-                                aiMessage.write(token);
-                                chatBody.updateUI();
-
-                                checkStreamStopRequest();
-                            })
-                    .onToolExecuted(
-                            toolExecution -> {
-                                aiMessage.write("\n\n");
-                                chatBody.updateUI();
-
-                                checkStreamStopRequest();
-                            })
-                    .onCompleteResponse(chatResponse -> onTokenStreamComplete(aiMessage))
-                    .onError(
-                            throwable -> {
-                                if (throwable instanceof StopStreamException) {
-                                    log.info("Unable to stop stream...");
-                                } else {
-                                    handleError(project, throwable);
-                                }
-                            })
-                    .start();
-
-        } catch (Exception e) {
-            log.error("Error during chat stream execution.", e);
-            handleError(project, e);
-        }
-    }
-
-    private void checkStreamStopRequest() {
-        if (stopRequested) {
-            throw new StopStreamException();
-        }
-    }
-
-    private void handleError(Project project, Throwable throwable) {
-        String errorMessage;
-
-        if (throwable instanceof JsonEOFException
-                || throwable.getCause() instanceof JsonEOFException) {
-            errorMessage =
-                    """
-                    <html>Response parsing failed. This could be due to:<br>
-                    &nbsp;&nbsp;- Insufficient max tokens<br>
-                    &nbsp;&nbsp;- Incomplete model response<br>
-                    <br>
-                    Additional details:<br>
-                    %s
-                    </html>
-                    """
-                            .formatted(throwable.getMessage());
-        } else if (throwable instanceof MismatchedInputException
-                || throwable.getCause() instanceof MismatchedInputException) {
-            errorMessage =
-                    """
-                    <html>Tool invocation error occurred.<br>
-                    &nbsp;&nbsp;- Model failed to call tool correctly<br>
-                    &nbsp;&nbsp;- Incorrect tool function or parameter format<br>
-                    <br>
-                    Additional details:<br>
-                    %s
-                    </html>
-                    """
-                            .formatted(throwable.getMessage());
-        } else {
-            errorMessage =
-                    """
-                    <html>An unexpected error occurred during response generation.<br>
-                    <br>
-                    Additional details:<br>
-                    %s
-                    </html>
-                    """
-                            .formatted(throwable.getMessage());
-        }
-
-        NotificationService.getInstance(project).notifyError(errorMessage);
-        updateProgressStatus(false);
-    }
-
-    private void onTokenStreamComplete(@NotNull AiMessageComponent aiMessage) {
-        log.debug("Stream completed.");
-        stopRequested = false;
-        aiMessage.streamClosed();
-        updateProgressStatus(false);
-    }
-
-    private synchronized void updateProgressStatus(boolean isGenerating) {
+    private synchronized void updateProgressStatus() {
         log.debug("Is generating...");
-        this.prompt.setEnabled(!isGenerating);
-        if (!isGenerating) this.prompt.requestFocusInWindow();
+        this.prompt.setEnabled(!chatState.isGenerating());
+        if (!chatState.isGenerating()) this.prompt.requestFocusInWindow();
 
-        log.debug("Updating progress bar status");
-        this.isGenerating = isGenerating;
-        if (inputPanel != null) log.debug("Updating submit button status");
-
-        if (isGenerating) {
+        if (chatState.isGenerating()) {
             this.submitButton.setIcon(AllIcons.Actions.Suspend);
-            this.submitButton.setToolTipText("Stop feature coming soon");
+            this.submitButton.setToolTipText(STOP_TOOLTIP);
             this.submitButton.setEnabled(false);
         } else {
             this.submitButton.setIcon(AllIcons.Actions.Execute);
-            this.submitButton.setToolTipText("Send message");
+            this.submitButton.setToolTipText(SEND_MESSAGE_TOOLTIP);
             this.submitButton.setEnabled(true);
         }
     }
@@ -203,7 +114,7 @@ public class Chat {
         mainPanel = new JPanel();
         mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
 
-        prompt = new ExpandableTextArea("Enter a prompt...", 12, 12, 1);
+        prompt = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 1);
 
         promptScrollPane =
                 new JScrollPane() {
@@ -243,6 +154,9 @@ public class Chat {
         inputPanel = new FocusAwarePanel();
         ((FocusAwarePanel) inputPanel).addFocusTrackingFor(prompt);
 
-        updateProgressStatus(false);
+        chatState = new ChatState();
+        chatService = new ChatServiceImpl(chatState);
+
+        updateProgressStatus();
     }
 }
