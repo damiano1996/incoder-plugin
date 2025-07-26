@@ -20,8 +20,11 @@ It seamlessly integrates advanced Large Language Models (LLMs) into your develop
 <!-- Plugin description end -->
 
 <p align="center">
-  <img src=".github/readme/demo-chat-hello-world-01.png" alt="Demo Chat Hello World 01" style="width: 45%; margin-right: 10px;">
-  <img src=".github/readme/demo-chat-hello-world-02.png" alt="Demo Chat Hello World 02" style="width: 45%;">
+  <img src=".github/readme/demo-chat-hello-world-01.png" alt="Demo Chat Hello World 01" style="width: 70%;">
+</p>
+
+<p align="center">
+  <img src=".github/readme/demo-chat-hello-world-02.png" alt="Demo Chat Hello World 02" style="width: 70%;">
 </p>
 
 ---
@@ -31,8 +34,11 @@ It seamlessly integrates advanced Large Language Models (LLMs) into your develop
 ### 1. **Interactive Chat for Code Assistance**
 
 <p align="center">
-  <img src=".github/readme/demo-chat.png" alt="Demo Chat" style="width: 45%; margin-right: 10px;">
-  <img src=".github/readme/demo-chat-merge.png" alt="Demo Chat Merge" style="width: 45%;">
+  <img src=".github/readme/demo-chat.png" alt="Demo Chat" style="width: 70%;">
+</p>
+
+<p align="center">
+  <img src=".github/readme/demo-chat-merge.png" alt="Demo Chat Merge" style="width: 50%;">
 </p>
 
 
