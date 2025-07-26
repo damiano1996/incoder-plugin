@@ -5,6 +5,7 @@
     <vendor email="damiano.derin@gmail.com">Damiano Derin</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.terminal</depends>
 
     <resource-bundle>messages.bundle</resource-bundle>
 
