@@ -121,7 +121,19 @@ public class FileTool {
         return "File created successfully: %s".formatted(filePath);
     }
 
-    public static void refreshProjectStructure(Project project) {
+    @Tool(
+            name = "REFRESH_PROJECT_STRUCTURE",
+            value =
+                    """
+                    Tool to refresh the project structure.
+                    Useful when new files or folders have been created.
+                    """)
+    public String refreshProjectStructure() {
+        refreshProjectStructure(project);
+        return "Project structure refreshed.";
+    }
+
+    private void refreshProjectStructure(Project project) {
         log.info("Refreshing project structure");
         VirtualFile projectBaseDir = ProjectUtil.guessProjectDir(project);
         if (projectBaseDir != null) {

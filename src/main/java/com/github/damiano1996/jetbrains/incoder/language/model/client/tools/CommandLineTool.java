@@ -49,8 +49,9 @@ This tool provides a safe way to run system commands with user oversight and vis
 The shell command to execute. Should be a valid command for the target operating system.
 Examples: ["ls", "-la", "/home/user"], ["echo", "\\"Hello", "World\\""].
 Avoid commands that require interactive input or run indefinitely.
-""") @Nullable
-            List<String> command,
+""")
+                    @Nullable
+                    List<String> command,
             @P(
                             """
 Optional working directory where the command should be executed.
@@ -109,7 +110,9 @@ Must be an absolute path to an existing directory.
                             try {
                                 CommandConfirmationDialog dialog =
                                         new CommandConfirmationDialog(
-                                                project, String.join(" ", command), workingDirectory);
+                                                project,
+                                                String.join(" ", command),
+                                                workingDirectory);
                                 dialogResult.complete(dialog.showAndGet());
                             } catch (Exception e) {
                                 log.error("Error showing confirmation dialog", e);
@@ -136,63 +139,30 @@ Must be an absolute path to an existing directory.
         ApplicationManager.getApplication()
                 .invokeLater(
                         () -> {
-                            try {
-                                ToolWindowManager toolWindowManager =
-                                        ToolWindowManager.getInstance(project);
-                                ToolWindow terminalToolWindow =
-                                        toolWindowManager.getToolWindow(TERMINAL_TOOL_WINDOW_ID);
+                            ToolWindowManager toolWindowManager =
+                                    ToolWindowManager.getInstance(project);
+                            ToolWindow terminalToolWindow =
+                                    toolWindowManager.getToolWindow(TERMINAL_TOOL_WINDOW_ID);
 
-                                if (terminalToolWindow == null) {
-                                    executionResult.complete(
-                                            "Error: Terminal tool window not found. Please ensure"
-                                                    + " the Terminal plugin is enabled.");
-                                    return;
-                                }
-
+                            if (terminalToolWindow != null) {
                                 terminalToolWindow.show();
-
-                                TerminalToolWindowManager terminalManager =
-                                        TerminalToolWindowManager.getInstance(project);
-
-                                TerminalTabState tabState = new TerminalTabState();
-                                tabState.myWorkingDirectory = workingDirectory.getAbsolutePath();
-                                tabState.myShellCommand = command;
-                                tabState.myTabName = InCoderBundle.message("name");
-
-                                // Create terminal runner and new session
-                                try {
-                                    terminalManager.createNewSession(new LocalTerminalDirectRunner(project), tabState);
-
-                                    String result =
-                                            String.format(
-                                                    """
-                                                    Command executed in IntelliJ terminal successfully.
-                                                    Command: %s
-                                                    Working directory: %s
-                                                    Terminal tab: %s
-                                                    
-                                                    The command is now running in the integrated terminal.
-                                                    You can monitor its progress and interact with it directly in the terminal tab.
-                                                    """,
-                                                    command,
-                                                    workingDirectory.getAbsolutePath(),
-                                                    tabState.myTabName);
-
-                                    log.info(
-                                            "Command successfully executed in terminal: {}",
-                                            command);
-                                    executionResult.complete(result);
-                                } catch (Exception e) {
-                                    log.error("Error creating terminal session", e);
-                                    executionResult.complete(
-                                            "Error creating terminal session: " + e.getMessage());
-                                }
-
-                            } catch (Exception e) {
-                                log.error("Error executing command in terminal", e);
-                                executionResult.complete(
-                                        "Error executing command in terminal: " + e.getMessage());
                             }
+
+                            TerminalToolWindowManager terminalManager =
+                                    TerminalToolWindowManager.getInstance(project);
+
+                            TerminalTabState tabState = new TerminalTabState();
+                            tabState.myWorkingDirectory = workingDirectory.getAbsolutePath();
+                            tabState.myShellCommand = command;
+                            tabState.myTabName = InCoderBundle.message("name");
+
+                            terminalManager.createNewSession(
+                                    new LocalTerminalDirectRunner(project), tabState);
+
+                            String result = "Command executed in terminal: %s".formatted(command);
+
+                            log.info(result);
+                            executionResult.complete(result);
                         });
 
         try {
@@ -250,10 +220,12 @@ Must be an absolute path to an existing directory.
 
             JBLabel warningText =
                     new JBLabel(
-                            "<html><b>Security Warning:</b> The AI assistant is requesting to"
-                                    + " execute a system command.<br/>Please review the command"
-                                    + " carefully before proceeding. Only execute commands you"
-                                    + " trust.</html>");
+                            """
+<html>
+<b>Security Warning:</b> The AI assistant is requesting to execute a system command.<br/>
+Please review the command carefully before proceeding. Only execute commands you trust.
+</html>
+""");
             warningText.setForeground(JBUI.CurrentTheme.NotificationWarning.foregroundColor());
 
             warningPanel.add(warningIcon, BorderLayout.WEST);
