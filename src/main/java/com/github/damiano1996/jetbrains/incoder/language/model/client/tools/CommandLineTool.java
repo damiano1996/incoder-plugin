@@ -12,32 +12,28 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
-import com.jediterm.terminal.TtyConnector;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import org.bouncycastle.util.Strings;
-import org.jetbrains.plugins.terminal.AbstractTerminalRunner;
-import org.jetbrains.plugins.terminal.TerminalTabState;
-import org.jetbrains.plugins.terminal.TerminalToolWindowFactory;
-import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.plugins.terminal.LocalTerminalDirectRunner;
+import org.jetbrains.plugins.terminal.TerminalTabState;
+import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 @Slf4j
 @AllArgsConstructor
 public class CommandLineTool {
 
-    private final Project project;
-
     private static final String TERMINAL_TOOL_WINDOW_ID = "Terminal";
+    private final Project project;
 
     @Tool(
             name = "COMMAND_LINE_TOOL",
@@ -49,19 +45,19 @@ This tool provides a safe way to run system commands with user oversight and vis
 """)
     public String executeCommand(
             @P(
-                    """
+                            """
 The shell command to execute. Should be a valid command for the target operating system.
-Examples: 'ls -la', 'git status', 'npm install', 'mvn clean compile'.
+Examples: ["ls", "-la", "/home/user"], ["echo", "\\"Hello", "World\\""].
 Avoid commands that require interactive input or run indefinitely.
-""")
-            String command,
+""") @Nullable
+            List<String> command,
             @P(
-                    """
+                            """
 Optional working directory where the command should be executed.
 If not provided, the command will be executed in the project root directory.
 Must be an absolute path to an existing directory.
 """)
-            String workingDirectory) {
+                    String workingDirectory) {
 
         log.info(
                 "Tool called to execute command: '{}' in directory: '{}'",
@@ -69,8 +65,6 @@ Must be an absolute path to an existing directory.
                 workingDirectory);
 
         File workDir = prepareWorkingDirectory(workingDirectory);
-
-        String[] osCommand = prepareOSCommand(command);
 
         if (!showConfirmationDialog(command, workDir.getAbsolutePath())) {
             return "Command execution cancelled by user.";
@@ -106,16 +100,7 @@ Must be an absolute path to an existing directory.
         return workDir;
     }
 
-    private String[] prepareOSCommand(String command) {
-        String osName = System.getProperty("os.name").toLowerCase();
-        if (osName.contains("win")) {
-            return new String[]{"cmd.exe", "/c", command};
-        } else {
-            return new String[]{"/bin/bash", "-c", command};
-        }
-    }
-
-    private boolean showConfirmationDialog(String command, String workingDirectory) {
+    private boolean showConfirmationDialog(List<String> command, String workingDirectory) {
         CompletableFuture<Boolean> dialogResult = new CompletableFuture<>();
 
         ApplicationManager.getApplication()
@@ -124,7 +109,7 @@ Must be an absolute path to an existing directory.
                             try {
                                 CommandConfirmationDialog dialog =
                                         new CommandConfirmationDialog(
-                                                project, command, workingDirectory);
+                                                project, String.join(" ", command), workingDirectory);
                                 dialogResult.complete(dialog.showAndGet());
                             } catch (Exception e) {
                                 log.error("Error showing confirmation dialog", e);
@@ -137,6 +122,84 @@ Must be an absolute path to an existing directory.
         } catch (InterruptedException | ExecutionException e) {
             log.error("Error waiting for user confirmation", e);
             return false;
+        }
+    }
+
+    private String executeCommandInTerminal(@Nullable List<String> command, File workingDirectory) {
+        log.debug(
+                "Executing command in terminal: '{}' in directory: '{}'",
+                command,
+                workingDirectory.getAbsolutePath());
+
+        CompletableFuture<String> executionResult = new CompletableFuture<>();
+
+        ApplicationManager.getApplication()
+                .invokeLater(
+                        () -> {
+                            try {
+                                ToolWindowManager toolWindowManager =
+                                        ToolWindowManager.getInstance(project);
+                                ToolWindow terminalToolWindow =
+                                        toolWindowManager.getToolWindow(TERMINAL_TOOL_WINDOW_ID);
+
+                                if (terminalToolWindow == null) {
+                                    executionResult.complete(
+                                            "Error: Terminal tool window not found. Please ensure"
+                                                    + " the Terminal plugin is enabled.");
+                                    return;
+                                }
+
+                                terminalToolWindow.show();
+
+                                TerminalToolWindowManager terminalManager =
+                                        TerminalToolWindowManager.getInstance(project);
+
+                                TerminalTabState tabState = new TerminalTabState();
+                                tabState.myWorkingDirectory = workingDirectory.getAbsolutePath();
+                                tabState.myShellCommand = command;
+                                tabState.myTabName = InCoderBundle.message("name");
+
+                                // Create terminal runner and new session
+                                try {
+                                    terminalManager.createNewSession(new LocalTerminalDirectRunner(project), tabState);
+
+                                    String result =
+                                            String.format(
+                                                    """
+                                                    Command executed in IntelliJ terminal successfully.
+                                                    Command: %s
+                                                    Working directory: %s
+                                                    Terminal tab: %s
+                                                    
+                                                    The command is now running in the integrated terminal.
+                                                    You can monitor its progress and interact with it directly in the terminal tab.
+                                                    """,
+                                                    command,
+                                                    workingDirectory.getAbsolutePath(),
+                                                    tabState.myTabName);
+
+                                    log.info(
+                                            "Command successfully executed in terminal: {}",
+                                            command);
+                                    executionResult.complete(result);
+                                } catch (Exception e) {
+                                    log.error("Error creating terminal session", e);
+                                    executionResult.complete(
+                                            "Error creating terminal session: " + e.getMessage());
+                                }
+
+                            } catch (Exception e) {
+                                log.error("Error executing command in terminal", e);
+                                executionResult.complete(
+                                        "Error executing command in terminal: " + e.getMessage());
+                            }
+                        });
+
+        try {
+            return executionResult.get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Error waiting for terminal command execution", e);
+            return "Error: Failed to execute command in terminal - " + e.getMessage();
         }
     }
 
@@ -234,97 +297,16 @@ Must be an absolute path to an existing directory.
 
             JBLabel infoText =
                     new JBLabel(
-                            "<html><b>What happens next:</b><br/>• The command will be executed"
-                                    + " in a new IntelliJ terminal tab<br/>• You can monitor progress and interact"
-                                    + " with the command in real-time<br/>• The terminal will remain open for further use</html>");
+                            "<html><b>What happens next:</b><br/>• The command will be executed in"
+                                + " a new IntelliJ terminal tab<br/>• You can monitor progress and"
+                                + " interact with the command in real-time<br/>• The terminal will"
+                                + " remain open for further use</html>");
             infoText.setForeground(JBUI.CurrentTheme.NotificationInfo.foregroundColor());
 
             infoPanel.add(infoIcon, BorderLayout.WEST);
             infoPanel.add(infoText, BorderLayout.CENTER);
 
             return infoPanel;
-        }
-    }
-
-    private String executeCommandInTerminal(String command, File workingDirectory) {
-        log.debug(
-                "Executing command in terminal: '{}' in directory: '{}'",
-                command,
-                workingDirectory.getAbsolutePath());
-
-        CompletableFuture<String> executionResult = new CompletableFuture<>();
-
-        ApplicationManager.getApplication()
-                .invokeLater(
-                        () -> {
-                            try {
-                                ToolWindowManager toolWindowManager = ToolWindowManager.getInstance(project);
-                                ToolWindow terminalToolWindow = toolWindowManager.getToolWindow(TERMINAL_TOOL_WINDOW_ID);
-
-                                if (terminalToolWindow == null) {
-                                    executionResult.complete(
-                                            "Error: Terminal tool window not found. Please ensure the Terminal plugin is enabled.");
-                                    return;
-                                }
-
-                                // Show the terminal tool window
-                                terminalToolWindow.show();
-
-                                // Use the new terminal manager API
-                                TerminalToolWindowManager terminalManager = TerminalToolWindowManager.getInstance(project);
-
-                                // Create a new terminal tab with the specified working directory and command
-                                TerminalTabState tabState = new TerminalTabState();
-                                tabState.myWorkingDirectory = workingDirectory.getAbsolutePath();
-                                tabState.myShellCommand = new ArrayList<>(Arrays.asList(command.split("\\s+")));
-                                tabState.myTabName = InCoderBundle.message("name");
-
-                                // Create terminal runner and new session
-                                try {
-                                    terminalManager.createNewSession(new AbstractTerminalRunner<Process>(project) {
-                                        @Override
-                                        public @NotNull TtyConnector createTtyConnector(@NotNull Process process) {
-
-                                            return null;
-                                        }
-                                    }, tabState);
-
-                                    // Refresh project structure after command execution
-                                    FileTool.refreshProjectStructure(project);
-
-                                    String result = String.format(
-                                            """
-                                            Command executed in IntelliJ terminal successfully.
-                                            Command: %s
-                                            Working directory: %s
-                                            Terminal tab: %s
-                                            
-                                            The command is now running in the integrated terminal. 
-                                            You can monitor its progress and interact with it directly in the terminal tab.
-                                            """,
-                                            command,
-                                            workingDirectory.getAbsolutePath(),
-                                            tabState.myTabName);
-
-                                    log.info("Command successfully executed in terminal: {}", command);
-                                    executionResult.complete(result);
-                                } catch (Exception e) {
-                                    log.error("Error creating terminal session", e);
-                                    executionResult.complete("Error creating terminal session: " + e.getMessage());
-                                }
-
-                            } catch (Exception e) {
-                                log.error("Error executing command in terminal", e);
-                                executionResult.complete(
-                                        "Error executing command in terminal: " + e.getMessage());
-                            }
-                        });
-
-        try {
-            return executionResult.get();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Error waiting for terminal command execution", e);
-            return "Error: Failed to execute command in terminal - " + e.getMessage();
         }
     }
 }
