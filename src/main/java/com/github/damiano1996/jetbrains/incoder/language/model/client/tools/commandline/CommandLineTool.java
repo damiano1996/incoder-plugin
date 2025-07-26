@@ -1,24 +1,23 @@
-package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
+package com.github.damiano1996.jetbrains.incoder.language.model.client.tools.commandline;
 
 import com.github.damiano1996.jetbrains.incoder.InCoderBundle;
-import com.intellij.icons.AllIcons;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.ToolException;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.components.JBTextArea;
-import com.intellij.util.ui.FormBuilder;
-import com.intellij.util.ui.JBUI;
+import com.jediterm.terminal.TtyConnector;
+import com.pty4j.PtyProcess;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import java.awt.*;
-import java.io.File;
+import java.io.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.swing.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,13 @@ import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 @AllArgsConstructor
 public class CommandLineTool {
 
+    private static final int COMMAND_TIMEOUT_SECONDS = 30;
     private static final String TERMINAL_TOOL_WINDOW_ID = "Terminal";
+
+    private static final int MAX_OUTPUT_LINES = 100;
+    private static final int HEAD_LINES = 50;
+    private static final int TAIL_LINES = 50;
+
     private final Project project;
 
     @Tool(
@@ -134,7 +139,8 @@ Must be an absolute path to an existing directory.
                 command,
                 workingDirectory.getAbsolutePath());
 
-        CompletableFuture<String> executionResult = new CompletableFuture<>();
+        CompletableFuture<Boolean> terminalSessionCreationResult = new CompletableFuture<>();
+        CompletableFuture<StringBuilder> commandExecutionOutputResult = new CompletableFuture<>();
 
         ApplicationManager.getApplication()
                 .invokeLater(
@@ -153,140 +159,106 @@ Must be an absolute path to an existing directory.
 
                             TerminalTabState tabState = new TerminalTabState();
                             tabState.myWorkingDirectory = workingDirectory.getAbsolutePath();
-                            tabState.myShellCommand = command;
+                            tabState.myShellCommand = buildShellCommand(command);
                             tabState.myTabName = InCoderBundle.message("name");
+                            tabState.myIsUserDefinedTabTitle = false;
 
-                            String result;
                             try {
-                                terminalManager.createNewSession(
-                                        new LocalTerminalDirectRunner(project), tabState);
-                                result = "Command executed in terminal: %s".formatted(command);
+
+                                var runner =
+                                        new LocalTerminalDirectRunner(project) {
+                                            @Override
+                                            public @NotNull TtyConnector createTtyConnector(
+                                                    @NotNull PtyProcess process) {
+                                                TtyConnector originalConnector =
+                                                        super.createTtyConnector(process);
+                                                return new OutputCapturingTtyConnector(
+                                                        originalConnector,
+                                                        commandExecutionOutputResult);
+                                            }
+                                        };
+
+                                terminalManager.createNewSession(runner, tabState);
+                                log.info("Terminal session created");
+                                terminalSessionCreationResult.complete(true);
 
                             } catch (Exception e) {
-                                result =
-                                        "Unable to execute the command: %s. Error: %s"
-                                                .formatted(command, e.getMessage());
+                                log.warn("Unable to run new terminal session.", e);
+                                terminalSessionCreationResult.complete(false);
                             }
-
-                            log.info(result);
-                            executionResult.complete(result);
                         });
 
         try {
-            return executionResult.get();
-        } catch (InterruptedException | ExecutionException e) {
+
+            boolean isTerminalSessionCreated = terminalSessionCreationResult.get();
+
+            if (!isTerminalSessionCreated)
+                throw new ToolException("Unable to run the command: %s".formatted(command));
+
+            StringBuilder commandExecutionOutputStringBuilder =
+                    commandExecutionOutputResult.get(COMMAND_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+            String result =
+                    """
+                    Command executed successfully.
+                    Output:
+                    %s
+                    """
+                            .formatted(commandExecutionOutputStringBuilder.toString());
+
+            result = truncateOutput(result);
+            log.info(result);
+
+            return result;
+
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new ToolException(
                     "Unable to get the result of the command execution. Error: " + e.getMessage(),
                     e);
         }
     }
 
-    private static class CommandConfirmationDialog extends DialogWrapper {
-        private final String command;
-        private final String workingDirectory;
+    /**
+     * Wraps the user command so the terminal stays open after execution. Returns null if command is
+     * empty -> means "just open a shell".
+     */
+    private static @Nullable List<String> buildShellCommand(@Nullable List<String> cmd) {
+        if (cmd == null || cmd.isEmpty()) return null;
 
-        protected CommandConfirmationDialog(
-                Project project, String command, String workingDirectory) {
-            super(project);
-            this.command = command;
-            this.workingDirectory = workingDirectory;
-            setTitle("AI Assistant - Command Execution Request");
-            setOKButtonText("Execute Command");
-            setCancelButtonText("Cancel");
-            init();
+        String joined = String.join(" ", cmd);
+
+        if (SystemInfoRt.isWindows) {
+            return List.of("cmd", "/k", joined);
+        } else {
+            String shell = System.getenv().getOrDefault("SHELL", "/bin/bash");
+            return List.of(shell, "-lc", joined + "; exec " + shell + " -l");
+        }
+    }
+
+    private String truncateOutput(String output) {
+        String[] lines = output.split("\n");
+
+        if (lines.length <= MAX_OUTPUT_LINES) {
+            return output;
         }
 
-        @Override
-        protected JComponent createCenterPanel() {
-            String osName = System.getProperty("os.name");
-            String osVersion = System.getProperty("os.version");
-            String osArch = System.getProperty("os.arch");
-            String osInfo = String.format("%s %s (%s)", osName, osVersion, osArch);
+        StringBuilder result = new StringBuilder();
 
-            JBTextArea commandArea = new JBTextArea(command);
-            commandArea.setEditable(false);
-            commandArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-            commandArea.setBorder(JBUI.Borders.empty(8));
-            commandArea.setLineWrap(true);
-            commandArea.setWrapStyleWord(true);
-
-            JBScrollPane commandScrollPane = new JBScrollPane(commandArea);
-            commandScrollPane.setPreferredSize(new Dimension(500, 80));
-            commandScrollPane.setBorder(
-                    JBUI.Borders.customLine(JBUI.CurrentTheme.Editor.BORDER_COLOR));
-
-            JPanel warningPanel = new JPanel(new BorderLayout());
-            warningPanel.setBackground(JBUI.CurrentTheme.NotificationWarning.backgroundColor());
-            warningPanel.setBorder(
-                    JBUI.Borders.compound(
-                            JBUI.Borders.customLine(
-                                    JBUI.CurrentTheme.NotificationWarning.borderColor()),
-                            JBUI.Borders.empty(8)));
-
-            JBLabel warningIcon = new JBLabel(AllIcons.General.Warning);
-            warningIcon.setBorder(JBUI.Borders.emptyRight(12));
-
-            JBLabel warningText =
-                    new JBLabel(
-                            """
-<html>
-<b>Security Warning:</b> The AI assistant is requesting to execute a system command.<br/>
-Please review the command carefully before proceeding. Only execute commands you trust.
-</html>
-""");
-            warningText.setForeground(JBUI.CurrentTheme.NotificationWarning.foregroundColor());
-
-            warningPanel.add(warningIcon, BorderLayout.WEST);
-            warningPanel.add(warningText, BorderLayout.CENTER);
-
-            // Build the form
-            return FormBuilder.createFormBuilder()
-                    .addComponent(warningPanel)
-                    .addVerticalGap(12)
-                    .addLabeledComponent("AI Assistant wants to execute:", commandScrollPane)
-                    .addVerticalGap(8)
-                    .addLabeledComponent("Working directory:", new JBLabel(workingDirectory))
-                    .addVerticalGap(4)
-                    .addLabeledComponent("Operating system:", new JBLabel(osInfo))
-                    .addVerticalGap(4)
-                    .addLabeledComponent("Shell:", new JBLabel(getShellInfo(osName)))
-                    .addVerticalGap(12)
-                    .addComponent(createInfoPanel())
-                    .getPanel();
+        // Add first N lines
+        for (int i = 0; i < HEAD_LINES; i++) {
+            result.append(lines[i]).append("\n");
         }
 
-        private String getShellInfo(String osName) {
-            if (osName.toLowerCase().contains("win")) {
-                return "Windows Command Prompt (cmd.exe)";
-            } else {
-                return "Bash Shell (/bin/bash)";
-            }
+        // Add truncation indicator
+        result.append("\n... [OUTPUT TRUNCATED - ")
+                .append(lines.length - HEAD_LINES - TAIL_LINES)
+                .append(" lines omitted] ...\n\n");
+
+        // Add last N lines
+        for (int i = lines.length - TAIL_LINES; i < lines.length; i++) {
+            result.append(lines[i]).append("\n");
         }
 
-        private JComponent createInfoPanel() {
-            JPanel infoPanel = new JPanel(new BorderLayout());
-            infoPanel.setBackground(JBUI.CurrentTheme.NotificationInfo.backgroundColor());
-            infoPanel.setBorder(
-                    JBUI.Borders.compound(
-                            JBUI.Borders.customLine(
-                                    JBUI.CurrentTheme.NotificationInfo.borderColor()),
-                            JBUI.Borders.empty(8)));
-
-            JBLabel infoIcon = new JBLabel(AllIcons.General.Information);
-            infoIcon.setBorder(JBUI.Borders.emptyRight(12));
-
-            JBLabel infoText =
-                    new JBLabel(
-                            "<html><b>What happens next:</b><br/>• The command will be executed in"
-                                + " a new IntelliJ terminal tab<br/>• You can monitor progress and"
-                                + " interact with the command in real-time<br/>• The terminal will"
-                                + " remain open for further use</html>");
-            infoText.setForeground(JBUI.CurrentTheme.NotificationInfo.foregroundColor());
-
-            infoPanel.add(infoIcon, BorderLayout.WEST);
-            infoPanel.add(infoText, BorderLayout.CENTER);
-
-            return infoPanel;
-        }
+        return result.toString();
     }
 }

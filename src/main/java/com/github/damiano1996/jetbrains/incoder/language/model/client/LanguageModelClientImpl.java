@@ -6,9 +6,9 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatC
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.CommandLineTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.EditorTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.FileTool;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.commandline.CommandLineTool;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
