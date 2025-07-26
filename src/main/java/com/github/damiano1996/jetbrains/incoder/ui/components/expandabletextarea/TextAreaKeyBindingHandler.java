@@ -10,6 +10,8 @@ import javax.swing.*;
  */
 public class TextAreaKeyBindingHandler {
 
+    public static final String SUBMIT = "submit";
+    public static final String NEWLINE = "newline";
     private final ExpandableTextArea textArea;
 
     /**
@@ -32,11 +34,11 @@ public class TextAreaKeyBindingHandler {
         KeyStroke shiftEnter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.SHIFT_DOWN_MASK);
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
 
-        inputMap.put(enter, "submit");
-        inputMap.put(shiftEnter, "newline");
+        inputMap.put(enter, SUBMIT);
+        inputMap.put(shiftEnter, NEWLINE);
 
         actionMap.put(
-                "submit",
+                SUBMIT,
                 new AbstractAction() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -47,7 +49,7 @@ public class TextAreaKeyBindingHandler {
                 });
 
         actionMap.put(
-                "newline",
+                NEWLINE,
                 new AbstractAction() {
                     @Override
                     public void actionPerformed(ActionEvent e) {

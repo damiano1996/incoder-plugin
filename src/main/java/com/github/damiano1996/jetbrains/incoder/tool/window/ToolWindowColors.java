@@ -21,7 +21,4 @@ public class ToolWindowColors {
     public static JBColor AI_MESSAGE_BACKGROUND = TRANSPARENT;
     public static JBColor AI_MESSAGE_FOREGROUND =
             new JBColor(new Color(40, 40, 40, 255), new Color(210, 210, 210, 255));
-
-    public static JBColor INTELLIGENT_ACTION_BACKGROUND = BADGE_FOREGROUND;
-    public static JBColor INTELLIGENT_ACTION_FOREGROUND = BADGE_BACKGROUND;
 }

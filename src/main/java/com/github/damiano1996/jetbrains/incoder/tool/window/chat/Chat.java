@@ -7,11 +7,12 @@ import com.github.damiano1996.jetbrains.incoder.notification.NotificationService
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.human.HumanMessageComponent;
+import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
 import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
+import com.intellij.icons.AllIcons;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.JBColor;
-import dev.langchain4j.model.chat.response.ChatResponse;
 import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
@@ -26,21 +27,29 @@ public class Chat {
 
     @Getter private JPanel mainPanel;
     private ExpandableTextArea prompt;
-    private JProgressBar generating;
     private JScrollPane promptScrollPane;
+    private JButton submitButton;
+
+    private boolean isGenerating;
+    private boolean stopRequested;
 
     private ChatBody chatBody;
+    private JPanel inputPanel;
 
     public void setPromptActionListener(Project project) {
         prompt.addActionListener(e -> handleAction(project));
+        submitButton.addActionListener(e -> handleButtonAction(project));
+    }
+
+    private void handleButtonAction(Project project) {
+        if (isGenerating) {
+            stopRequested = true;
+        } else {
+            handleAction(project);
+        }
     }
 
     private void handleAction(Project project) {
-        String prompt = this.prompt.getText().trim();
-        handlePrompt(project, prompt);
-    }
-
-    private void handlePrompt(Project project, @NotNull String prompt) {
         if (!LanguageModelServiceImpl.getInstance(project).isReady()) {
             NotificationService.getInstance(project)
                     .notifyWithSettingsActionButton(
@@ -49,6 +58,8 @@ public class Chat {
                             NotificationType.WARNING);
             return;
         }
+
+        String prompt = this.prompt.getText().trim();
 
         if (prompt.isEmpty()) {
             log.debug("Prompt is empty.");
@@ -68,7 +79,14 @@ public class Chat {
                 LanguageModelServiceImpl.getInstance(project).getSelectedModelName().toLowerCase());
         chatBody.addMessage(aiMessage);
 
+        startChatStream(project, prompt, aiMessage);
+    }
+
+    private void startChatStream(
+            Project project, @NotNull String prompt, AiMessageComponent aiMessage) {
         try {
+            log.debug("Starting chat stream...");
+
             LanguageModelServiceImpl.getInstance(project)
                     .getClient()
                     .chat(chatId, prompt)
@@ -76,28 +94,42 @@ public class Chat {
                             token -> {
                                 aiMessage.write(token);
                                 chatBody.updateUI();
+
+                                checkStreamStopRequest();
                             })
                     .onToolExecuted(
                             toolExecution -> {
                                 aiMessage.write("\n\n");
                                 chatBody.updateUI();
+
+                                checkStreamStopRequest();
                             })
-                    .onCompleteResponse(
-                            chatResponse -> onTokenStreamComplete(aiMessage, chatResponse))
+                    .onCompleteResponse(chatResponse -> onTokenStreamComplete(aiMessage))
                     .onError(
                             throwable -> {
-                                log.error("Error during chat streaming.", throwable);
-                                handleError(project, throwable);
+                                if (throwable instanceof StopStreamException) {
+                                    log.info("Unable to stop stream...");
+                                } else {
+                                    handleError(project, throwable);
+                                }
                             })
                     .start();
+
         } catch (Exception e) {
-            log.error("Error during chat stream start.", e);
+            log.error("Error during chat stream execution.", e);
             handleError(project, e);
+        }
+    }
+
+    private void checkStreamStopRequest() {
+        if (stopRequested) {
+            throw new StopStreamException();
         }
     }
 
     private void handleError(Project project, Throwable throwable) {
         String errorMessage;
+
         if (throwable instanceof JsonEOFException
                 || throwable.getCause() instanceof JsonEOFException) {
             errorMessage =
@@ -105,8 +137,10 @@ public class Chat {
                     <html>Response parsing failed. This could be due to:<br>
                     &nbsp;&nbsp;- Insufficient max tokens<br>
                     &nbsp;&nbsp;- Incomplete model response<br>
-                    Additional details: %s<br>
-                    Please adjust model settings and start a new chat.</html>
+                    <br>
+                    Additional details:<br>
+                    %s
+                    </html>
                     """
                             .formatted(throwable.getMessage());
         } else if (throwable instanceof MismatchedInputException
@@ -116,16 +150,20 @@ public class Chat {
                     <html>Tool invocation error occurred.<br>
                     &nbsp;&nbsp;- Model failed to call tool correctly<br>
                     &nbsp;&nbsp;- Incorrect tool function or parameter format<br>
-                    Additional details: %s<br>
-                    Please try again or start a new chat.</html>
+                    <br>
+                    Additional details:<br>
+                    %s
+                    </html>
                     """
                             .formatted(throwable.getMessage());
         } else {
             errorMessage =
                     """
                     <html>An unexpected error occurred during response generation.<br>
-                    Additional details: %s<br>
-                    Please check your network connection and model settings.</html>
+                    <br>
+                    Additional details:<br>
+                    %s
+                    </html>
                     """
                             .formatted(throwable.getMessage());
         }
@@ -134,20 +172,31 @@ public class Chat {
         updateProgressStatus(false);
     }
 
-    private void onTokenStreamComplete(
-            @NotNull AiMessageComponent aiMessage, @NotNull ChatResponse chatResponse) {
+    private void onTokenStreamComplete(@NotNull AiMessageComponent aiMessage) {
         log.debug("Stream completed.");
-        log.debug("Full response message:\n{}", chatResponse.aiMessage().text());
+        stopRequested = false;
         aiMessage.streamClosed();
         updateProgressStatus(false);
     }
 
-    private void updateProgressStatus(boolean isGenerating) {
+    private synchronized void updateProgressStatus(boolean isGenerating) {
         log.debug("Is generating...");
         this.prompt.setEnabled(!isGenerating);
         if (!isGenerating) this.prompt.requestFocusInWindow();
-        this.generating.setIndeterminate(isGenerating);
-        this.generating.setVisible(isGenerating);
+
+        log.debug("Updating progress bar status");
+        this.isGenerating = isGenerating;
+        if (inputPanel != null) log.debug("Updating submit button status");
+
+        if (isGenerating) {
+            this.submitButton.setIcon(AllIcons.Actions.Suspend);
+            this.submitButton.setToolTipText("Stop feature coming soon");
+            this.submitButton.setEnabled(false);
+        } else {
+            this.submitButton.setIcon(AllIcons.Actions.Execute);
+            this.submitButton.setToolTipText("Send message");
+            this.submitButton.setEnabled(true);
+        }
     }
 
     private void createUIComponents() {
@@ -155,7 +204,6 @@ public class Chat {
         mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
 
         prompt = new ExpandableTextArea("Enter a prompt...", 12, 12, 1);
-        generating = new JProgressBar();
 
         promptScrollPane =
                 new JScrollPane() {
@@ -183,7 +231,18 @@ public class Chat {
         promptScrollPane.getViewport().setOpaque(false);
         promptScrollPane.setHorizontalScrollBarPolicy(
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        promptScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        promptScrollPane.setVerticalScrollBarPolicy(
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        submitButton = new JButton();
+        submitButton.setBorderPainted(false);
+        submitButton.setContentAreaFilled(false);
+        submitButton.setFocusPainted(false);
+        submitButton.setOpaque(false);
+
+        inputPanel = new FocusAwarePanel();
+        ((FocusAwarePanel) inputPanel).addFocusTrackingFor(prompt);
+
         updateProgressStatus(false);
     }
 }
