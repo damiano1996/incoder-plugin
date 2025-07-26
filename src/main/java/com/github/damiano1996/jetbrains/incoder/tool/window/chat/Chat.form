@@ -4,8 +4,6 @@
     <rowspec value="center:d:grow"/>
     <rowspec value="top:4dlu:noGrow"/>
     <rowspec value="center:max(d;4px):noGrow"/>
-    <rowspec value="top:4dlu:noGrow"/>
-    <rowspec value="center:max(d;4px):noGrow"/>
     <colspec value="fill:d:grow"/>
     <constraints>
       <xy x="20" y="20" width="475" height="400"/>
@@ -23,44 +21,61 @@
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <forms defaultalign-horz="false" defaultalign-vert="false"/>
         </constraints>
-        <properties>
-          <name value="chatBody"/>
-        </properties>
       </nested-form>
-      <scrollpane id="scrollPrompt" binding="promptScrollPane" custom-create="true">
+      <grid id="inputPanel" binding="inputPanel" custom-create="true" layout-manager="FormLayout">
+        <rowspec value="center:d:noGrow"/>
+        <rowspec value="top:4dlu:noGrow"/>
+        <rowspec value="center:max(d;4px):noGrow"/>
+        <colspec value="fill:d:grow"/>
         <constraints>
-          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
-          </grid>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <forms defaultalign-horz="false" defaultalign-vert="false"/>
         </constraints>
-        <properties>
-          <horizontalScrollBarPolicy value="31"/>
-          <verticalScrollBarPolicy value="21"/>
-          <opaque value="false"/>
-          <visible value="true"/>
-          <name value="promptScrollPane"/>
-        </properties>
-        <border type="empty"/>
+        <properties/>
+        <border type="none"/>
         <children>
-          <component id="75a7d" class="com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea" binding="prompt" custom-create="true">
-            <constraints/>
+          <scrollpane id="scrollPrompt" binding="promptScrollPane" custom-create="true">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="-1"/>
+              </grid>
+              <forms defaultalign-horz="false" defaultalign-vert="false"/>
+            </constraints>
             <properties>
-              <margin top="2" left="9" bottom="2" right="6"/>
-              <name value="promptTextArea"/>
+              <horizontalScrollBarPolicy value="31"/>
+              <name value="promptScrollPane"/>
+              <opaque value="false"/>
+              <verticalScrollBarPolicy value="21"/>
+              <visible value="true"/>
+            </properties>
+            <border type="empty"/>
+            <children>
+              <component id="75a7d" class="com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea" binding="prompt" custom-create="true">
+                <constraints/>
+                <properties>
+                  <margin top="2" left="9" bottom="2" right="6"/>
+                  <name value="promptTextArea"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
+          <component id="submitButton" class="javax.swing.JButton" binding="submitButton" custom-create="true">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false">
+                <minimum-size width="32" height="32"/>
+                <preferred-size width="32" height="32"/>
+                <maximum-size width="32" height="32"/>
+              </grid>
+              <forms defaultalign-horz="false" defaultalign-vert="false"/>
+            </constraints>
+            <properties>
+              <horizontalAlignment value="11"/>
+              <name value="submitButton"/>
+              <toolTipText value="Send message"/>
             </properties>
           </component>
         </children>
-      </scrollpane>
-      <component id="528" class="javax.swing.JProgressBar" binding="generating" custom-create="true">
-        <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-          <forms top="0" left="5" bottom="0" right="5" defaultalign-horz="false"/>
-        </constraints>
-        <properties>
-          <name value="generatingProgressBar"/>
-        </properties>
-      </component>
+      </grid>
     </children>
   </grid>
 </form>

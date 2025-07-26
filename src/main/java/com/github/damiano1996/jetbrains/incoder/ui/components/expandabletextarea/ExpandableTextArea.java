@@ -1,5 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea;
 
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import java.awt.*;
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -55,9 +55,10 @@ public class ExpandableTextArea extends JBTextArea {
         setLineWrap(true);
         setWrapStyleWord(true);
 
-        Border textFieldBorder = UIManager.getBorder("TextField.border");
-        Border paddingBorder = JBUI.Borders.empty(8);
-        setBorder(new CompoundBorder(textFieldBorder, paddingBorder));
+        Border paddingBorder = JBUI.Borders.empty(10);
+        setBorder(paddingBorder);
+
+        setBackground(JBColor.background());
 
         setMargin(JBUI.insets(4));
         setFont(getFont().deriveFont((float) JBUI.scale(13)));
