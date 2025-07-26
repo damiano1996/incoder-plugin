@@ -48,7 +48,11 @@ It seamlessly integrates advanced Large Language Models (LLMs) into your develop
 - **Advanced Tools**:
     - File creation: instantly generate new source files, test cases, or configuration files
     - Project navigation: quickly locate and open relevant files
-    - Refactoring assistant: suggest and implement code improvements, extract methods, and optimize existing code
+    - Command line execution: give to the LLM the possibility to execute command lines after human approval.
+      <p align="center">
+        <img src=".github/readme/demo-command-line.png" alt="Demo Command Line" style="width: 50%;">
+      </p>
+    - Merge request and Patch generation: suggest and implement code improvements, extract methods, and optimize existing code
 
 ### 2. **Inline Code Completion**
 
