@@ -156,10 +156,17 @@ Must be an absolute path to an existing directory.
                             tabState.myShellCommand = command;
                             tabState.myTabName = InCoderBundle.message("name");
 
-                            terminalManager.createNewSession(
-                                    new LocalTerminalDirectRunner(project), tabState);
+                            String result;
+                            try {
+                                terminalManager.createNewSession(
+                                        new LocalTerminalDirectRunner(project), tabState);
+                                result = "Command executed in terminal: %s".formatted(command);
 
-                            String result = "Command executed in terminal: %s".formatted(command);
+                            } catch (Exception e) {
+                                result =
+                                        "Unable to execute the command: %s. Error: %s"
+                                                .formatted(command, e.getMessage());
+                            }
 
                             log.info(result);
                             executionResult.complete(result);
@@ -168,8 +175,9 @@ Must be an absolute path to an existing directory.
         try {
             return executionResult.get();
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Error waiting for terminal command execution", e);
-            return "Error: Failed to execute command in terminal - " + e.getMessage();
+            throw new ToolException(
+                    "Unable to get the result of the command execution. Error: " + e.getMessage(),
+                    e);
         }
     }
 
