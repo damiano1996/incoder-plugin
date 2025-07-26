@@ -6,6 +6,7 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatC
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.CommandLineTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.EditorTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.FileTool;
 import com.intellij.openapi.application.ApplicationInfo;
@@ -57,7 +58,10 @@ public class LanguageModelClientImpl implements LanguageModelClient {
                                 memoryId ->
                                         MessageWindowChatMemory.withMaxMessages(
                                                 ChatSettings.getInstance().getState().maxMessages))
-                        .tools(new FileTool(this.project), new EditorTool(this.project))
+                        .tools(
+                                new FileTool(this.project),
+                                new EditorTool(this.project),
+                                new CommandLineTool(project))
                         .build();
 
         inlineCodingAssistant =

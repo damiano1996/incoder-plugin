@@ -126,7 +126,29 @@ Key characteristics:
         return String.join("\n", lines);
     }
 
-    private String mergeRequest(String filePath, String proposedContent) {
+    @Tool(
+            name = "MERGE_REQUEST",
+            value =
+                    """
+Creates a merge request dialog to review and apply proposed changes to a file.
+This tool presents a visual diff comparison between the original file content and the proposed changes,
+allowing the user to review, modify, and approve changes before they are applied to the file.
+""")
+    public String mergeRequest(
+            @P(
+                            """
+Absolute file path to the target file that needs to be modified.
+Must be a valid file path within the project (e.g., /path/to/project/src/main/java/MyClass.java).
+Use forward slashes for path separators regardless of operating system.
+""")
+                    String filePath,
+            @P(
+                            """
+The complete proposed content that should replace the current file content.
+This content will be compared against the original file content in a visual diff dialog.
+Should be properly formatted and syntactically correct code.
+""")
+                    String proposedContent) {
         log.debug("Creating merge request for file: {}", filePath);
 
         VirtualFile virtualFile = getVirtualFile(filePath);
