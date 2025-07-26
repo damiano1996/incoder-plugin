@@ -5,6 +5,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBLabel;
@@ -153,7 +154,7 @@ Must be an absolute path to an existing directory.
 
                             TerminalTabState tabState = new TerminalTabState();
                             tabState.myWorkingDirectory = workingDirectory.getAbsolutePath();
-                            tabState.myShellCommand = command;
+                            tabState.myShellCommand = buildShellCommand(command);
                             tabState.myTabName = InCoderBundle.message("name");
 
                             String result;
@@ -178,6 +179,23 @@ Must be an absolute path to an existing directory.
             throw new ToolException(
                     "Unable to get the result of the command execution. Error: " + e.getMessage(),
                     e);
+        }
+    }
+
+    /**
+     * Wraps the user command so the terminal stays open after execution.
+     * Returns null if command is empty -> means "just open a shell".
+     */
+    private static @Nullable List<String> buildShellCommand(@Nullable List<String> cmd) {
+        if (cmd == null || cmd.isEmpty()) return null;
+
+        String joined = String.join(" ", cmd);
+
+        if (SystemInfoRt.isWindows) {
+            return List.of("cmd", "/k", joined);
+        } else {
+            String shell = System.getenv().getOrDefault("SHELL", "/bin/bash");
+            return List.of(shell, "-lc", joined + "; exec " + shell + " -l");
         }
     }
 
