@@ -116,11 +116,16 @@ public class FileTool {
                     e);
         }
 
+        refreshProjectStructure(project);
+
+        return "File created successfully: %s".formatted(filePath);
+    }
+
+    private void refreshProjectStructure(Project project) {
+        log.info("Refreshing project structure");
         VirtualFile projectBaseDir = ProjectUtil.guessProjectDir(project);
         if (projectBaseDir != null) {
             projectBaseDir.refresh(true, true);
         }
-
-        return "File created successfully: %s".formatted(filePath);
     }
 }

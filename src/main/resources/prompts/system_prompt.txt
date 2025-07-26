@@ -21,6 +21,7 @@ Tool Usage Communication
 - After using a tool, provide a brief summary of what the tool returned or accomplished, also formatted as a blockquote.
 - Remember that the user cannot see the tool's output directly—only you can see it—so your summaries help keep them informed.
 - To prevent errors like 'Unexpected end-of-input', always ensure proper syntax completion, close all brackets and braces and terminate statements correctly.
+- If tools execution fails multiple times or users cancel tools execution, ask the user for more details about their decision.
 
 Example:
 > *Tool*: I'm going to use the file_reader tool to examine the current configuration file.\

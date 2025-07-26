@@ -1,9 +1,12 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 
+import com.github.damiano1996.jetbrains.incoder.InCoderBundle;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
@@ -12,45 +15,43 @@ import com.intellij.util.ui.JBUI;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import java.awt.*;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.swing.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.plugins.terminal.LocalTerminalDirectRunner;
+import org.jetbrains.plugins.terminal.TerminalTabState;
+import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 @Slf4j
 @AllArgsConstructor
 public class CommandLineTool {
 
+    private static final String TERMINAL_TOOL_WINDOW_ID = "Terminal";
     private final Project project;
-
-    private static final int COMMAND_TIMEOUT_SECONDS = 30;
 
     @Tool(
             name = "COMMAND_LINE_TOOL",
             value =
                     """
-Executes a shell command on the user's system after obtaining user approval through a confirmation dialog.
-The command will be adapted to the user's operating system (Windows uses cmd.exe, Unix-like systems use bash).
-This tool provides a safe way to run system commands with user oversight and includes timeout protection.
+Executes a shell command in the IntelliJ integrated terminal after obtaining user approval through a confirmation dialog.
+The command will be executed in a new terminal tab, allowing real-time monitoring of the execution.
+This tool provides a safe way to run system commands with user oversight and visual feedback.
 """)
     public String executeCommand(
             @P(
                             """
 The shell command to execute. Should be a valid command for the target operating system.
-Examples: 'ls -la', 'git status', 'npm install', 'mvn clean compile'.
+Examples: ["ls", "-la", "/home/user"], ["echo", "\\"Hello", "World\\""].
 Avoid commands that require interactive input or run indefinitely.
 """)
-                    String command,
+                    @Nullable
+                    List<String> command,
             @P(
                             """
 Optional working directory where the command should be executed.
@@ -66,13 +67,11 @@ Must be an absolute path to an existing directory.
 
         File workDir = prepareWorkingDirectory(workingDirectory);
 
-        String[] osCommand = prepareOSCommand(command);
-
         if (!showConfirmationDialog(command, workDir.getAbsolutePath())) {
             return "Command execution cancelled by user.";
         }
 
-        return executeCommandInternal(osCommand, workDir);
+        return executeCommandInTerminal(command, workDir);
     }
 
     private @NotNull File prepareWorkingDirectory(String workingDirectory) {
@@ -102,20 +101,7 @@ Must be an absolute path to an existing directory.
         return workDir;
     }
 
-    private String[] prepareOSCommand(String command) {
-        String osName = System.getProperty("os.name").toLowerCase();
-        log.debug("Detected OS: {}", osName);
-
-        if (osName.contains("win")) {
-            // Windows
-            return new String[] {"cmd.exe", "/c", command};
-        } else {
-            // Unix-like systems (Linux, macOS, etc.)
-            return new String[] {"/bin/bash", "-c", command};
-        }
-    }
-
-    private boolean showConfirmationDialog(String command, String workingDirectory) {
+    private boolean showConfirmationDialog(List<String> command, String workingDirectory) {
         CompletableFuture<Boolean> dialogResult = new CompletableFuture<>();
 
         ApplicationManager.getApplication()
@@ -124,7 +110,9 @@ Must be an absolute path to an existing directory.
                             try {
                                 CommandConfirmationDialog dialog =
                                         new CommandConfirmationDialog(
-                                                project, command, workingDirectory);
+                                                project,
+                                                String.join(" ", command),
+                                                workingDirectory);
                                 dialogResult.complete(dialog.showAndGet());
                             } catch (Exception e) {
                                 log.error("Error showing confirmation dialog", e);
@@ -133,10 +121,63 @@ Must be an absolute path to an existing directory.
                         });
 
         try {
-            return dialogResult.get(30, TimeUnit.SECONDS); // 30 second timeout for dialog
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            return dialogResult.get();
+        } catch (InterruptedException | ExecutionException e) {
             log.error("Error waiting for user confirmation", e);
             return false;
+        }
+    }
+
+    private String executeCommandInTerminal(@Nullable List<String> command, File workingDirectory) {
+        log.debug(
+                "Executing command in terminal: '{}' in directory: '{}'",
+                command,
+                workingDirectory.getAbsolutePath());
+
+        CompletableFuture<String> executionResult = new CompletableFuture<>();
+
+        ApplicationManager.getApplication()
+                .invokeLater(
+                        () -> {
+                            ToolWindowManager toolWindowManager =
+                                    ToolWindowManager.getInstance(project);
+                            ToolWindow terminalToolWindow =
+                                    toolWindowManager.getToolWindow(TERMINAL_TOOL_WINDOW_ID);
+
+                            if (terminalToolWindow != null) {
+                                terminalToolWindow.show();
+                            }
+
+                            TerminalToolWindowManager terminalManager =
+                                    TerminalToolWindowManager.getInstance(project);
+
+                            TerminalTabState tabState = new TerminalTabState();
+                            tabState.myWorkingDirectory = workingDirectory.getAbsolutePath();
+                            tabState.myShellCommand = command;
+                            tabState.myTabName = InCoderBundle.message("name");
+
+                            String result;
+                            try {
+                                terminalManager.createNewSession(
+                                        new LocalTerminalDirectRunner(project), tabState);
+                                result = "Command executed in terminal: %s".formatted(command);
+
+                            } catch (Exception e) {
+                                result =
+                                        "Unable to execute the command: %s. Error: %s"
+                                                .formatted(command, e.getMessage());
+                            }
+
+                            log.info(result);
+                            executionResult.complete(result);
+                        });
+
+        try {
+            return executionResult.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new ToolException(
+                    "Unable to get the result of the command execution. Error: " + e.getMessage(),
+                    e);
         }
     }
 
@@ -187,10 +228,12 @@ Must be an absolute path to an existing directory.
 
             JBLabel warningText =
                     new JBLabel(
-                            "<html><b>Security Warning:</b> The AI assistant is requesting to"
-                                    + " execute a system command.<br/>Please review the command"
-                                    + " carefully before proceeding. Only execute commands you"
-                                    + " trust.</html>");
+                            """
+<html>
+<b>Security Warning:</b> The AI assistant is requesting to execute a system command.<br/>
+Please review the command carefully before proceeding. Only execute commands you trust.
+</html>
+""");
             warningText.setForeground(JBUI.CurrentTheme.NotificationWarning.foregroundColor());
 
             warningPanel.add(warningIcon, BorderLayout.WEST);
@@ -234,78 +277,16 @@ Must be an absolute path to an existing directory.
 
             JBLabel infoText =
                     new JBLabel(
-                            "<html><b>What happens next:</b><br/>• The command will be executed"
-                                + " with a 30-second timeout<br/>• Both output and errors will be"
-                                + " captured and shown to the AI Assistant</html>");
+                            "<html><b>What happens next:</b><br/>• The command will be executed in"
+                                + " a new IntelliJ terminal tab<br/>• You can monitor progress and"
+                                + " interact with the command in real-time<br/>• The terminal will"
+                                + " remain open for further use</html>");
             infoText.setForeground(JBUI.CurrentTheme.NotificationInfo.foregroundColor());
 
             infoPanel.add(infoIcon, BorderLayout.WEST);
             infoPanel.add(infoText, BorderLayout.CENTER);
 
             return infoPanel;
-        }
-    }
-
-    private String executeCommandInternal(String[] command, File workingDirectory) {
-        log.debug(
-                "Executing command: {} in directory: {}",
-                String.join(" ", command),
-                workingDirectory.getAbsolutePath());
-
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-            processBuilder.directory(workingDirectory);
-            processBuilder.redirectErrorStream(true);
-
-            Process process = processBuilder.start();
-
-            List<String> outputLines = new ArrayList<>();
-            try (BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    outputLines.add(line);
-                    log.debug("Command output: {}", line);
-                }
-            }
-
-            boolean finished = process.waitFor(COMMAND_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-
-            if (!finished) {
-                process.destroyForcibly();
-                throw new ToolException(
-                        "Command execution timed out after "
-                                + COMMAND_TIMEOUT_SECONDS
-                                + " seconds");
-            }
-
-            int exitCode = process.exitValue();
-            String output = String.join("\n", outputLines);
-
-            String result =
-                    String.format(
-                            "Command executed successfully.\n"
-                                    + "Exit code: %d\n"
-                                    + "Working directory: %s\n"
-                                    + "Output:\n%s",
-                            exitCode,
-                            workingDirectory.getAbsolutePath(),
-                            output.isEmpty() ? "(no output)" : output);
-
-            log.info("Command execution completed with exit code: {}", exitCode);
-            return result;
-
-        } catch (IOException e) {
-            throw new ToolException(
-                    "Failed to execute command: "
-                            + String.join(" ", command)
-                            + ". Error: "
-                            + e.getMessage(),
-                    e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new ToolException(
-                    "Command execution was interrupted: " + String.join(" ", command), e);
         }
     }
 }
