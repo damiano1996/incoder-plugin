@@ -5,12 +5,14 @@
 # InCoder: An LLM-Powered Plugin for JetBrains IDEs
 
 [![jetbrains marketplace badge]][jetbrains marketplace link]
+[![youtube badge]][youtube link]
+[![paypal badge]][paypal link]
+
 [![latest release badge]][latest release link]
 [![latest tag badge]][latest tag link]
 [![CI checks on main badge]][CI checks on main link]
 [![latest commit to main badge]][latest commit to main link]
 [![license badge]][license link]
-[![paypal badge]][paypal link]
 
 </div>
 
@@ -19,19 +21,15 @@
 It seamlessly integrates advanced Large Language Models (LLMs) into your development workflow, providing you with code generation, understanding, completion, and intelligent action capabilities, all directly within your favorite IDE.
 <!-- Plugin description end -->
 
-[![Watch the video](https://img.youtube.com/vi/sW1ajzRwFaQ/0.jpg)](https://www.youtube.com/watch?v=sW1ajzRwFaQ)
+<div align="center">
 
-<p align="center">
   <img src=".github/readme/demo-chat-hello-world-01.png" alt="Demo Chat Hello World 01" style="width: 70%;">
-</p>
 
-<p align="center">
   <img src=".github/readme/demo-chat-hello-world-02.png" alt="Demo Chat Hello World 02" style="width: 70%;">
-</p>
 
-<p align="center">
   <img src=".github/readme/demo-chat-editor.png" alt="Demo Chat Editor" style="width: 70%;">
-</p>
+
+</div>
 
 ---
 
@@ -149,6 +147,9 @@ Whether you're generating code, understanding complex algorithms, or seeking int
 
 [jetbrains marketplace badge]: https://badgen.net/badge/JetBrains/marketplace/orange
 [jetbrains marketplace link]: https://plugins.jetbrains.com/plugin/26037-incoder
+
+[youtube badge]: https://badgen.net/badge/YouTube/watch%20demo/ff0000?icon=youtube
+[youtube link]: https://www.youtube.com/watch?v=sW1ajzRwFaQ
 
 [latest release badge]: https://badgen.net/github/release/damiano1996/incoder-plugin?icon=github
 [latest release link]: https://github.com/damiano1996/incoder-plugin/releases/latest
