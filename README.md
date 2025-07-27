@@ -27,6 +27,10 @@ It seamlessly integrates advanced Large Language Models (LLMs) into your develop
   <img src=".github/readme/demo-chat-hello-world-02.png" alt="Demo Chat Hello World 02" style="width: 70%;">
 </p>
 
+<p align="center">
+  <img src=".github/readme/demo-chat-editor.png" alt="Demo Chat Editor" style="width: 70%;">
+</p>
+
 ---
 
 ## Key Features
