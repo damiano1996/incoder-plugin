@@ -19,6 +19,8 @@
 It seamlessly integrates advanced Large Language Models (LLMs) into your development workflow, providing you with code generation, understanding, completion, and intelligent action capabilities, all directly within your favorite IDE.
 <!-- Plugin description end -->
 
+[![Watch the video](https://img.youtube.com/vi/sW1ajzRwFaQ/0.jpg)](https://www.youtube.com/watch?v=sW1ajzRwFaQ)
+
 <p align="center">
   <img src=".github/readme/demo-chat-hello-world-01.png" alt="Demo Chat Hello World 01" style="width: 70%;">
 </p>
