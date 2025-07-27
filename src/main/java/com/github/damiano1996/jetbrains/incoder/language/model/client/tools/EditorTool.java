@@ -224,7 +224,9 @@ Should be properly formatted and syntactically correct code.
     private @NotNull String getMergeResultMessage(@NotNull MergeResult mergeResult) {
         return switch (mergeResult) {
             case RESOLVED -> "Changes successfully merged and applied to the file";
-            case CANCEL -> "Merge operation was cancelled by the user - no changes were made";
+            case CANCEL ->
+                    "Merge operation was cancelled by the user - no changes were made. "
+                            + "Ask why to understand their motivation before proceeding.";
             case LEFT -> "Original content preserved - proposed changes were rejected";
             case RIGHT -> "Proposed changes fully accepted and applied to the file";
         };

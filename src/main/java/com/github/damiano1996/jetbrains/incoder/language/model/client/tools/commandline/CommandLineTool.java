@@ -4,21 +4,16 @@ import com.github.damiano1996.jetbrains.incoder.InCoderBundle;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.ToolException;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.jediterm.terminal.TtyConnector;
 import com.pty4j.PtyProcess;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import java.awt.*;
-import java.io.*;
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import javax.swing.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +68,8 @@ Must be an absolute path to an existing directory.
         File workDir = prepareWorkingDirectory(workingDirectory);
 
         if (!showConfirmationDialog(command, workDir.getAbsolutePath())) {
-            return "Command execution cancelled by user.";
+            return "Command canceled by the user. "
+                    + "Ask why to understand their motivation before proceeding.";
         }
 
         return executeCommandInTerminal(command, workDir);
@@ -159,7 +155,7 @@ Must be an absolute path to an existing directory.
 
                             TerminalTabState tabState = new TerminalTabState();
                             tabState.myWorkingDirectory = workingDirectory.getAbsolutePath();
-                            tabState.myShellCommand = buildShellCommand(command);
+                            tabState.myShellCommand = command;
                             tabState.myTabName = InCoderBundle.message("name");
                             tabState.myIsUserDefinedTabTitle = false;
 
@@ -195,8 +191,7 @@ Must be an absolute path to an existing directory.
             if (!isTerminalSessionCreated)
                 throw new ToolException("Unable to run the command: %s".formatted(command));
 
-            StringBuilder commandExecutionOutputStringBuilder =
-                    commandExecutionOutputResult.get(COMMAND_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            StringBuilder commandExecutionOutputStringBuilder = commandExecutionOutputResult.get();
 
             String result =
                     """
@@ -211,27 +206,10 @@ Must be an absolute path to an existing directory.
 
             return result;
 
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new ToolException(
                     "Unable to get the result of the command execution. Error: " + e.getMessage(),
                     e);
-        }
-    }
-
-    /**
-     * Wraps the user command so the terminal stays open after execution. Returns null if command is
-     * empty -> means "just open a shell".
-     */
-    private static @Nullable List<String> buildShellCommand(@Nullable List<String> cmd) {
-        if (cmd == null || cmd.isEmpty()) return null;
-
-        String joined = String.join(" ", cmd);
-
-        if (SystemInfoRt.isWindows) {
-            return List.of("cmd", "/k", joined);
-        } else {
-            String shell = System.getenv().getOrDefault("SHELL", "/bin/bash");
-            return List.of(shell, "-lc", joined + "; exec " + shell + " -l");
         }
     }
 

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Getter
 public class ChatBody {
-    private static final int UPDATE_DELAY_MS = 50; // Batch updates every 50ms
+    private static final int UPDATE_DELAY_MS = 50;
     private JPanel mainPanel;
     private JPanel messagesPanel;
     private JScrollPane scrollPane;
