@@ -1,14 +1,14 @@
 package com.github.damiano1996.jetbrains.incoder.ui.components;
 
+import com.intellij.ui.components.JBTextArea;
 import java.awt.*;
-import javax.swing.*;
 
-public class RoundedTextArea extends JTextArea {
+public class RoundedJBTextArea extends JBTextArea {
 
     private final int arcWidth;
     private final int arcHeight;
 
-    public RoundedTextArea(int arcWidth, int arcHeight) {
+    public RoundedJBTextArea(int arcWidth, int arcHeight) {
         this.arcWidth = arcWidth;
         this.arcHeight = arcHeight;
     }

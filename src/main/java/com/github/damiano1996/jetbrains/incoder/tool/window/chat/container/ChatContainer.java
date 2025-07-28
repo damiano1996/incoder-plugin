@@ -2,7 +2,9 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat.container;
 
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.Chat;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.container.toolbar.ChatActionToolbar;
+import com.github.damiano1996.jetbrains.incoder.ui.components.Layout;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.ui.FormBuilder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,30 +12,35 @@ import javax.swing.*;
 import lombok.Getter;
 
 public class ChatContainer {
-    private JComponent chatToolBar;
-    private JPanel chatPanel;
+    private final JPanel chatPanel = new JPanel();
     @Getter private JPanel mainPanel;
 
-    private Project project;
+    private final Project project;
 
-    private List<Chat> chats;
+    private final List<Chat> chats = new ArrayList<>();
 
-    private void createUIComponents() {
-        chatPanel = new JPanel();
-        chatPanel = new JPanel();
-
-        chats = new ArrayList<>();
-        chatToolBar = ChatActionToolbar.createActionToolbarComponent(chatPanel, this);
+    public ChatContainer(Project project) {
+        this.project = project;
+        createUIComponents();
+        createNewChat();
     }
 
-    public void setProject(Project project) {
-        this.project = project;
-        if (chats.isEmpty()) createNewChat();
+    private void createUIComponents() {
+
+        JComponent chatToolBar = ChatActionToolbar.createActionToolbarComponent(chatPanel, this);
+
+        chatToolBar.setPreferredSize(new Dimension(-1, 20));
+
+        mainPanel =
+                FormBuilder.createFormBuilder()
+                        .addComponent(Layout.componentToRight(chatToolBar))
+                        .addVerticalGap(4)
+                        .addComponentFillVertically(chatPanel, 0)
+                        .getPanel();
     }
 
     public void createNewChat() {
-        Chat chat = new Chat();
-        chat.setPromptActionListener(project);
+        Chat chat = new Chat(project);
         chats.add(chat);
         chat.setChatId(chats.size() - 1);
 

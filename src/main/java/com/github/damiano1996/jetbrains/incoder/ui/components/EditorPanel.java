@@ -1,12 +1,10 @@
 package com.github.damiano1996.jetbrains.incoder.ui.components;
 
-import com.github.damiano1996.jetbrains.incoder.tool.window.ToolWindowColors;
 import com.intellij.lang.Language;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.EditorFactory;
-import com.intellij.openapi.editor.EditorKind;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
@@ -22,17 +20,22 @@ import org.jetbrains.annotations.NotNull;
 public class EditorPanel extends JPanel implements TextAccessor, Disposable {
 
     @Getter private final Language language;
+    private final Project project;
 
     private Editor editor;
 
-    public EditorPanel(Project project, Language language) {
+    public EditorPanel(@NotNull Project project, @NotNull Language language) {
         this.language = language;
+        this.project = project;
 
         setLayout(new BorderLayout());
-        setBackground(ToolWindowColors.AI_MESSAGE_BACKGROUND);
-        setForeground(ToolWindowColors.AI_MESSAGE_FOREGROUND);
         setFocusable(false);
+        setOpaque(false);
 
+        initializeEditor();
+    }
+
+    private void initializeEditor() {
         var fileType = FileTypeManager.getInstance().findFileTypeByLanguage(language);
         var virtualFile = new LightVirtualFile("temp", fileType, "");
         var document = EditorFactory.getInstance().createDocument("");
@@ -40,18 +43,52 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
         ApplicationManager.getApplication()
                 .invokeAndWait(
                         () -> {
-                            editor =
-                                    EditorFactory.getInstance()
-                                            .createEditor(
-                                                    document,
-                                                    project,
-                                                    virtualFile,
-                                                    false,
-                                                    EditorKind.PREVIEW);
-                            ((EditorEx) editor).setViewer(true);
+                            try {
+                                editor =
+                                        EditorFactory.getInstance()
+                                                .createEditor(
+                                                        document,
+                                                        project,
+                                                        virtualFile,
+                                                        false,
+                                                        EditorKind.PREVIEW);
 
-                            add(editor.getComponent(), BorderLayout.CENTER);
-                        });
+                                if (editor instanceof EditorEx editorEx) {
+                                    editorEx.setViewer(false);
+                                    editorEx.setCaretEnabled(false);
+                                }
+
+                                add(editor.getComponent(), BorderLayout.CENTER);
+                                revalidate();
+                                repaint();
+                            } catch (Exception e) {
+                                log.error("Unable to initialize embedded editor", e);
+                            }
+                        },
+                        ModalityState.any());
+    }
+
+    @Override
+    public String getText() {
+        return editor != null ? editor.getDocument().getText() : "";
+    }
+
+    @Override
+    public void setText(@NotNull String text) {
+        if (editor == null) return;
+        ApplicationManager.getApplication()
+                .invokeLater(
+                        () ->
+                                ApplicationManager.getApplication()
+                                        .runWriteAction(() -> editor.getDocument().setText(text)));
+    }
+
+    @Override
+    public void dispose() {
+        if (editor != null && !editor.isDisposed()) {
+            EditorFactory.getInstance().releaseEditor(editor);
+            editor = null;
+        }
     }
 
     public static @NotNull Language guessLanguage(String languageName) {
@@ -65,32 +102,5 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
 
         log.debug("Unable to infer the language from the language name");
         return Language.ANY;
-    }
-
-    @Override
-    public void setText(@NotNull String text) {
-        ApplicationManager.getApplication()
-                .invokeAndWait(
-                        () -> {
-                            ApplicationManager.getApplication()
-                                    .runWriteAction(
-                                            () -> {
-                                                if (editor == null) return;
-                                                editor.getDocument().setText(text);
-                                            });
-                        });
-    }
-
-    @Override
-    public String getText() {
-        return editor.getDocument().getText();
-    }
-
-    @Override
-    public void dispose() {
-        if (editor != null && !editor.isDisposed()) {
-            EditorFactory.getInstance().releaseEditor(editor);
-            editor = null;
-        }
     }
 }

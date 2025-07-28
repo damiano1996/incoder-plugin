@@ -1,8 +1,9 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body;
 
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.MessageComponent;
-import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.ui.FormBuilder;
+import com.intellij.util.ui.JBUI;
 import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
@@ -10,58 +11,36 @@ import org.jetbrains.annotations.NotNull;
 
 @Getter
 public class ChatBody {
-    private static final int UPDATE_DELAY_MS = 50;
     private JPanel mainPanel;
     private JPanel messagesPanel;
     private JScrollPane scrollPane;
-    private Timer updateTimer;
-    private volatile boolean pendingUpdate = false;
 
     public ChatBody() {
-        initializeUpdateTimer();
-    }
-
-    private void initializeUpdateTimer() {
-        updateTimer =
-                new Timer(
-                        UPDATE_DELAY_MS,
-                        e -> {
-                            if (pendingUpdate) {
-                                performUpdate();
-                                pendingUpdate = false;
-                            }
-                        });
-        updateTimer.setRepeats(true);
-        updateTimer.start();
+        createUIComponents();
     }
 
     public void addMessage(@NotNull MessageComponent messageComponent) {
         SwingUtilities.invokeLater(
                 () -> {
                     messagesPanel.add(messageComponent.getMainPanel());
-                    scheduleUpdate();
+                    performUpdate();
                 });
     }
 
     public void updateUI() {
-        SwingUtilities.invokeLater(this::scheduleUpdate);
-    }
-
-    private void scheduleUpdate() {
-        pendingUpdate = true;
+        SwingUtilities.invokeLater(this::performUpdate);
     }
 
     private void performUpdate() {
         JScrollBar vertical = scrollPane.getVerticalScrollBar();
         boolean wasAtBottom = isScrollAtBottom(vertical);
 
-        // Use more efficient update mechanism
         messagesPanel.invalidate();
         scrollPane.getViewport().invalidate();
         scrollPane.revalidate();
 
         if (wasAtBottom) {
-            SwingUtilities.invokeLater(this::scrollToBottom);
+            scrollToBottom();
         }
     }
 
@@ -75,32 +54,36 @@ public class ChatBody {
     }
 
     private void createUIComponents() {
-        mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
-        mainPanel.setDoubleBuffered(true); // Enable double buffering
-
         messagesPanel = createMessagesPanel();
         JPanel wrapperPanel = createWrapperPanel();
         scrollPane = createScrollPane(wrapperPanel);
 
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel =
+                FormBuilder.createFormBuilder()
+                        .addComponentFillVertically(scrollPane, 0)
+                        .getPanel();
+
+        mainPanel.setDoubleBuffered(true);
+        mainPanel.setBorder(JBUI.Borders.empty());
+        mainPanel.setMinimumSize(new Dimension(300, -1));
+        mainPanel.setPreferredSize(new Dimension(300, -1));
+        mainPanel.setOpaque(true);
     }
 
     private @NotNull JPanel createMessagesPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(JBColor.namedColor("ToolWindow.background"));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.setAlignmentY(Component.TOP_ALIGNMENT);
-        panel.setDoubleBuffered(true); // Enable double buffering
+        panel.setDoubleBuffered(true);
+        panel.setBorder(JBUI.Borders.empty());
         return panel;
     }
 
     private @NotNull JPanel createWrapperPanel() {
         JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setBackground(JBColor.namedColor("ToolWindow.background"));
         wrapper.add(messagesPanel, BorderLayout.NORTH);
-        wrapper.setDoubleBuffered(true); // Enable double buffering
+        wrapper.setDoubleBuffered(true);
         return wrapper;
     }
 
@@ -108,24 +91,14 @@ public class ChatBody {
         JBScrollPane scroll = new JBScrollPane(wrapperPanel);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        scroll.getViewport()
-                .setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE); // Better for smooth scrolling
-        scroll.setDoubleBuffered(true); // Enable double buffering
+        scroll.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
+        scroll.setDoubleBuffered(true);
+        scroll.setBorder(JBUI.Borders.empty());
 
-        // Optimize viewport for better performance
         JViewport viewport = scroll.getViewport();
         viewport.setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
         viewport.setOpaque(true);
-        viewport.setBackground(JBColor.namedColor("ToolWindow.background"));
 
         return scroll;
-    }
-
-    public void dispose() {
-        if (updateTimer != null) {
-            updateTimer.stop();
-            updateTimer = null;
-        }
     }
 }

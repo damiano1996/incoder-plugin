@@ -1,6 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat;
 
 import com.intellij.openapi.project.Project;
+import dev.langchain4j.service.tool.ToolExecution;
 import java.util.function.Consumer;
 
 /**
@@ -27,7 +28,7 @@ public interface ChatService {
             String prompt,
             Runnable onStart,
             Consumer<String> onNewToken,
-            Runnable onToolExecuted,
+            Consumer<ToolExecution> onToolExecuted,
             Runnable onComplete,
             Runnable onError);
 

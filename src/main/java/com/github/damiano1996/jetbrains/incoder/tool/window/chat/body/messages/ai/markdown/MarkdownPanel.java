@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown;
 
-import com.github.damiano1996.jetbrains.incoder.tool.window.ToolWindowColors;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.StreamWriter;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.text.TextMarkdownBlock;
@@ -31,8 +30,6 @@ public class MarkdownPanel extends JPanel implements StreamWriter {
         this.project = project;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(ToolWindowColors.AI_MESSAGE_BACKGROUND);
-        setForeground(ToolWindowColors.AI_MESSAGE_FOREGROUND);
         setFocusable(false);
 
         markdownBlocks = new LinkedList<>();
