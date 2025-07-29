@@ -4,7 +4,7 @@ import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatCons
 import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatConstants.PADDING;
 
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.MessageComponent;
-import com.github.damiano1996.jetbrains.incoder.ui.components.RoundedJBTextArea;
+import com.github.damiano1996.jetbrains.incoder.ui.components.RoundedUtils;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextArea;
@@ -41,7 +41,14 @@ public class HumanMessageComponent implements MessageComponent {
         mainPanel.setOpaque(false);
         mainPanel.setBorder(JBUI.Borders.empty(10, 200, 10, 10));
 
-        promptTextArea = new RoundedJBTextArea(ARC_DIAMETER, ARC_DIAMETER);
+        promptTextArea =
+                new JBTextArea() {
+                    @Override
+                    protected Graphics getComponentGraphics(Graphics graphics) {
+                        return RoundedUtils.getRoundedComponentGraphics(
+                                this, graphics, ARC_DIAMETER);
+                    }
+                };
         promptTextArea.setBorder(JBUI.Borders.empty(PADDING * 2));
         promptTextArea.setText(userPrompt);
         promptTextArea.setEditable(false);
