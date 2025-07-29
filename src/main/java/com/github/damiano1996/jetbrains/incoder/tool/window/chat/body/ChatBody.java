@@ -15,6 +15,8 @@ public class ChatBody {
     private JPanel messagesPanel;
     private JScrollPane scrollPane;
 
+    @Getter private MessageComponent currentMessage;
+
     public ChatBody() {
         createUIComponents();
     }
@@ -23,6 +25,7 @@ public class ChatBody {
         SwingUtilities.invokeLater(
                 () -> {
                     messagesPanel.add(messageComponent.getMainPanel());
+                    currentMessage = messageComponent;
                     performUpdate();
                 });
     }
@@ -65,8 +68,8 @@ public class ChatBody {
 
         mainPanel.setDoubleBuffered(true);
         mainPanel.setBorder(JBUI.Borders.empty());
-        mainPanel.setMinimumSize(new Dimension(300, -1));
-        mainPanel.setPreferredSize(new Dimension(300, -1));
+        mainPanel.setMinimumSize(new Dimension(400, -1));
+        mainPanel.setPreferredSize(new Dimension(400, -1));
         mainPanel.setOpaque(true);
     }
 

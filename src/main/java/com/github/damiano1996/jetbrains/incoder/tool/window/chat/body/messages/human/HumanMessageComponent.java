@@ -12,11 +12,13 @@ import com.intellij.util.ui.JBUI;
 import java.awt.*;
 import lombok.Getter;
 
+import javax.swing.*;
+
 public class HumanMessageComponent implements MessageComponent {
 
     private final String userPrompt;
     private JBTextArea promptTextArea;
-    @Getter private JBPanel mainPanel;
+    @Getter private JPanel mainPanel;
 
     public HumanMessageComponent(String userPrompt) {
         this.userPrompt = userPrompt;
@@ -39,7 +41,7 @@ public class HumanMessageComponent implements MessageComponent {
     private void createUIComponents() {
         mainPanel = new JBPanel<>(new BorderLayout());
         mainPanel.setOpaque(false);
-        mainPanel.setBorder(JBUI.Borders.empty(10, 200, 10, 10));
+        mainPanel.setBorder(JBUI.Borders.empty(10));
 
         promptTextArea =
                 new JBTextArea() {
@@ -52,7 +54,7 @@ public class HumanMessageComponent implements MessageComponent {
         promptTextArea.setBorder(JBUI.Borders.empty(PADDING * 2));
         promptTextArea.setText(userPrompt);
         promptTextArea.setEditable(false);
-        promptTextArea.setLineWrap(true);
+        promptTextArea.setLineWrap(false);
         promptTextArea.setWrapStyleWord(true);
         promptTextArea.setOpaque(false);
         promptTextArea.setBackground(JBColor.background().darker());

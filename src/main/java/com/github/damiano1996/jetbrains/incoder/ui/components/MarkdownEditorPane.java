@@ -43,10 +43,13 @@ public class MarkdownEditorPane extends JEditorPane {
                             String html = renderer.render(parser.parse(markdown));
                             String styledHtml =
                                     """
-<html><head><style>
-body { font-family: Arial, sans-serif; background: transparent; }
-</style></head><body>%s</body></html>
-"""
+                                    <html><head><style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        background: transparent;
+                                    }
+                                    </style></head><body>%s</body></html>
+                                    """
                                             .formatted(html);
                             super.setText(styledHtml);
                             revalidate();

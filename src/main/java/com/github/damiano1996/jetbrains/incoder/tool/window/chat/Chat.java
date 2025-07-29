@@ -42,8 +42,6 @@ public class Chat {
     private ChatState chatState;
     private ChatService chatService;
 
-    private AiMessageComponent currentAiMessage;
-
     public Chat(Project project) {
         this.project = project;
 
@@ -86,13 +84,12 @@ public class Chat {
         HumanMessageComponent humanMessageComponent = new HumanMessageComponent(prompt);
         chatBody.addMessage(humanMessageComponent);
 
-        currentAiMessage =
+        chatBody.addMessage(
                 new AiMessageComponent(
                         project,
                         LanguageModelServiceImpl.getInstance(project)
                                 .getSelectedModelName()
-                                .toLowerCase());
-        chatBody.addMessage(currentAiMessage);
+                                .toLowerCase()));
 
         chatService.processPrompt(
                 project,
@@ -100,21 +97,23 @@ public class Chat {
                 prompt,
                 this::updateProgressStatus,
                 token -> {
-                    currentAiMessage.write(token);
+                    chatBody.getCurrentMessage().write(token);
                     chatBody.updateUI();
                 },
                 toolExecution -> {
-                    currentAiMessage.streamClosed();
+                    log.debug("Tool executed");
+                    chatBody.getCurrentMessage().streamClosed();
 
+                    log.debug("Adding new tool message component");
                     chatBody.addMessage(new ToolMessageComponent(toolExecution));
 
-                    currentAiMessage = new AiMessageComponent(project);
-                    chatBody.addMessage(currentAiMessage);
+                    log.debug("Resuming with an ai message");
+                    chatBody.addMessage(new AiMessageComponent(project));
 
                     chatBody.updateUI();
                 },
                 () -> {
-                    currentAiMessage.streamClosed();
+                    chatBody.getCurrentMessage().streamClosed();
                     updateProgressStatus();
                 },
                 this::updateProgressStatus);
@@ -142,6 +141,7 @@ public class Chat {
 
         promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 1);
         promptTextArea.setMargin(JBUI.insets(2, 9, 2, 6));
+        promptTextArea.setLineWrap(false);
 
         JScrollPane promptScrollPane = getPromptScrollPane();
 
@@ -192,8 +192,8 @@ public class Chat {
                         .getPanel();
 
         mainPanel.setBorder(JBUI.Borders.empty(20));
-        mainPanel.setMinimumSize(new Dimension(150, 400));
-        mainPanel.setPreferredSize(new Dimension(150, 400));
+        mainPanel.setMinimumSize(new Dimension(400, 400));
+        mainPanel.setPreferredSize(new Dimension(400, 400));
 
         updateProgressStatus();
     }

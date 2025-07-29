@@ -37,6 +37,9 @@ public class ChatContainer {
                         .addVerticalGap(4)
                         .addComponentFillVertically(chatPanel, 0)
                         .getPanel();
+
+        mainPanel.setMinimumSize(new Dimension(400, 400));
+        mainPanel.setPreferredSize(new Dimension(400, 400));
     }
 
     public void createNewChat() {
