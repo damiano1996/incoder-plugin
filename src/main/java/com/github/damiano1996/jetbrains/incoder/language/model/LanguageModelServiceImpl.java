@@ -4,7 +4,9 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageMo
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactoryUtils;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerSettings;
+import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.settings.PluginSettings;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
@@ -23,6 +25,20 @@ public final class LanguageModelServiceImpl implements LanguageModelService, Dis
 
     public LanguageModelServiceImpl(Project project) {
         this.project = project;
+        try {
+            startWithDefaultServer();
+        } catch (LanguageModelException e) {
+            if (PluginSettings.getInstance().getState().isPluginConfigured) {
+                log.debug("Plugin is configured, notifying with error.");
+                NotificationService.getInstance(project)
+                        .notifyWithSettingsActionButton(e.getMessage(), NotificationType.ERROR);
+            } else {
+                log.debug(
+                        "Plugin is not configured. "
+                                + "Showing default message with settings button.");
+                NotificationService.getInstance(project).notifyWithSettingsActionButton();
+            }
+        }
     }
 
     public static LanguageModelServiceImpl getInstance(@NotNull Project project) {
@@ -30,15 +46,15 @@ public final class LanguageModelServiceImpl implements LanguageModelService, Dis
     }
 
     @Override
-    public void init() throws LanguageModelException {
-        init(
+    public void startWithDefaultServer() throws LanguageModelException {
+        startWith(
                 ServerFactoryUtils.findByName(
                                 ServerSettings.getInstance().getState().activeServerName)
                         .createServer());
     }
 
     @Override
-    public void init(LanguageModelServer server) throws LanguageModelException {
+    public void startWith(LanguageModelServer server) throws LanguageModelException {
         log.debug("Initializing {}...", LanguageModelServiceImpl.class.getSimpleName());
 
         this.server = server;

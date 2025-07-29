@@ -66,7 +66,7 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
 
     private @NotNull CodeMarkdownBlock getCodeMarkdownBlock(String language) {
         MarkdownPanel mockMarkdownPanel =
-                new MarkdownPanel(null) {
+                new MarkdownPanel(getProject()) {
                     private boolean initialized = false;
 
                     @Override

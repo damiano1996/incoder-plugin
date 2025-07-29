@@ -15,6 +15,7 @@ import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 public class EditorPanel extends JPanel implements TextAccessor, Disposable {
@@ -22,6 +23,7 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
     @Getter private final Language language;
     private final Project project;
 
+    @Nullable
     private Editor editor;
 
     public EditorPanel(@NotNull Project project, @NotNull Language language) {
@@ -80,7 +82,11 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
                 .invokeLater(
                         () ->
                                 ApplicationManager.getApplication()
-                                        .runWriteAction(() -> editor.getDocument().setText(text)));
+                                        .runWriteAction(() -> {
+                                            if (editor != null) {
+                                                editor.getDocument().setText(text);
+                                            }
+                                        }));
     }
 
     @Override

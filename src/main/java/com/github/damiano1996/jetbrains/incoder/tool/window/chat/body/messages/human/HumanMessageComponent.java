@@ -10,9 +10,8 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import java.awt.*;
-import lombok.Getter;
-
 import javax.swing.*;
+import lombok.Getter;
 
 public class HumanMessageComponent implements MessageComponent {
 

@@ -89,7 +89,8 @@ public class ToolMessageComponent implements MessageComponent {
     }
 
     private static @NotNull String getArgValue(Map.Entry<String, Object> e) {
-        return CommandLineTool.truncateOutput(e.getValue().toString(), 10, 5, 5).replace("\n", "<br>");
+        return CommandLineTool.truncateOutput(e.getValue().toString(), 10, 5, 5)
+                .replace("\n", "<br>");
     }
 
     @Override
