@@ -26,7 +26,7 @@ public class ChatServiceImpl implements ChatService {
             Consumer<String> onNewToken,
             Consumer<ToolExecution> onToolExecuted,
             Runnable onComplete,
-            Runnable onError) {
+            Consumer<Throwable> onError) {
 
         chatState.setState(ChatStateEnum.GENERATING);
         onStart.run();
@@ -58,7 +58,7 @@ public class ChatServiceImpl implements ChatService {
                                 log.error("Error in chat stream", throwable);
                                 chatState.handleError();
                                 errorHandler.handleError(project, throwable);
-                                onError.run();
+                                onError.accept(throwable);
                             })
                     .start();
 
@@ -66,7 +66,7 @@ public class ChatServiceImpl implements ChatService {
             log.error("Error starting chat stream", e);
             chatState.handleError();
             errorHandler.handleError(project, e);
-            onError.run();
+            onError.accept(e);
         }
     }
 

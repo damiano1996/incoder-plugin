@@ -6,6 +6,7 @@ import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServ
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.error.ErrorMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.human.HumanMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.tool.ToolMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
@@ -97,12 +98,14 @@ public class Chat {
                 prompt,
                 this::updateProgressStatus,
                 token -> {
-                    chatBody.getCurrentMessage().write(token);
+                    if (chatBody.getCurrentMessage() != null) {
+                        chatBody.getCurrentMessage().write(token);
+                    }
                     chatBody.updateUI();
                 },
                 toolExecution -> {
                     log.debug("Tool executed");
-                    chatBody.getCurrentMessage().streamClosed();
+                    closeCurrentMessageStream();
 
                     log.debug("Adding new tool message component");
                     chatBody.addMessage(new ToolMessageComponent(toolExecution));
@@ -113,10 +116,23 @@ public class Chat {
                     chatBody.updateUI();
                 },
                 () -> {
-                    chatBody.getCurrentMessage().streamClosed();
+                    closeCurrentMessageStream();
                     updateProgressStatus();
                 },
-                this::updateProgressStatus);
+                throwable -> {
+                    closeCurrentMessageStream();
+
+                    chatBody.addMessage(new ErrorMessageComponent(throwable));
+                    chatBody.updateUI();
+
+                    updateProgressStatus();
+                });
+    }
+
+    private void closeCurrentMessageStream() {
+        if (chatBody.getCurrentMessage() != null) {
+            chatBody.getCurrentMessage().streamClosed();
+        }
     }
 
     private synchronized void updateProgressStatus() {

@@ -30,7 +30,7 @@ public interface ChatService {
             Consumer<String> onNewToken,
             Consumer<ToolExecution> onToolExecuted,
             Runnable onComplete,
-            Runnable onError);
+            Consumer<Throwable> onError);
 
     /**
      * Checks if the language model service is ready for processing.

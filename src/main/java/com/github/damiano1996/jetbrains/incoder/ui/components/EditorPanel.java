@@ -23,8 +23,7 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
     @Getter private final Language language;
     private final Project project;
 
-    @Nullable
-    private Editor editor;
+    @Nullable private Editor editor;
 
     public EditorPanel(@NotNull Project project, @NotNull Language language) {
         this.language = language;
@@ -82,11 +81,12 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
                 .invokeLater(
                         () ->
                                 ApplicationManager.getApplication()
-                                        .runWriteAction(() -> {
-                                            if (editor != null) {
-                                                editor.getDocument().setText(text);
-                                            }
-                                        }));
+                                        .runWriteAction(
+                                                () -> {
+                                                    if (editor != null) {
+                                                        editor.getDocument().setText(text);
+                                                    }
+                                                }));
     }
 
     @Override

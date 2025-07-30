@@ -8,6 +8,7 @@ import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 public class ChatBody {
@@ -15,7 +16,7 @@ public class ChatBody {
     private JPanel messagesPanel;
     private JScrollPane scrollPane;
 
-    @Getter private MessageComponent currentMessage;
+    @Getter @Nullable private MessageComponent currentMessage;
 
     public ChatBody() {
         createUIComponents();
