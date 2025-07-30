@@ -26,7 +26,6 @@ import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 @AllArgsConstructor
 public class CommandLineTool {
 
-    private static final int COMMAND_TIMEOUT_SECONDS = 30;
     private static final String TERMINAL_TOOL_WINDOW_ID = "Terminal";
 
     private static final int MAX_OUTPUT_LINES = 100;
@@ -79,7 +78,6 @@ Must be an absolute path to an existing directory.
         File workDir;
 
         if (workingDirectory == null || workingDirectory.trim().isEmpty()) {
-            // Use project base directory as default
             String projectPath = project.getBasePath();
             if (projectPath == null) {
                 throw new ToolException("Unable to determine project base directory");
@@ -213,27 +211,33 @@ Must be an absolute path to an existing directory.
         }
     }
 
-    private String truncateOutput(String output) {
+    public static String truncateOutput(String output) {
+        return truncateOutput(output, MAX_OUTPUT_LINES, HEAD_LINES, TAIL_LINES);
+    }
+
+    public static String truncateOutput(
+            String output, int maxOutputLines, int headLines, int tailLines) {
+
         String[] lines = output.split("\n");
 
-        if (lines.length <= MAX_OUTPUT_LINES) {
+        if (lines.length <= maxOutputLines) {
             return output;
         }
 
         StringBuilder result = new StringBuilder();
 
         // Add first N lines
-        for (int i = 0; i < HEAD_LINES; i++) {
+        for (int i = 0; i < headLines; i++) {
             result.append(lines[i]).append("\n");
         }
 
         // Add truncation indicator
         result.append("\n... [OUTPUT TRUNCATED - ")
-                .append(lines.length - HEAD_LINES - TAIL_LINES)
+                .append(lines.length - headLines - tailLines)
                 .append(" lines omitted] ...\n\n");
 
         // Add last N lines
-        for (int i = lines.length - TAIL_LINES; i < lines.length; i++) {
+        for (int i = lines.length - tailLines; i < lines.length; i++) {
             result.append(lines[i]).append("\n");
         }
 

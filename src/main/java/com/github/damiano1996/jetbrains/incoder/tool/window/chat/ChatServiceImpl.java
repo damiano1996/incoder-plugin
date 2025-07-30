@@ -2,6 +2,7 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
 import com.intellij.openapi.project.Project;
+import dev.langchain4j.service.tool.ToolExecution;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,9 +24,9 @@ public class ChatServiceImpl implements ChatService {
             String prompt,
             Runnable onStart,
             Consumer<String> onNewToken,
-            Runnable onToolExecuted,
+            Consumer<ToolExecution> onToolExecuted,
             Runnable onComplete,
-            Runnable onError) {
+            Consumer<Throwable> onError) {
 
         chatState.setState(ChatStateEnum.GENERATING);
         onStart.run();
@@ -43,7 +44,7 @@ public class ChatServiceImpl implements ChatService {
                             })
                     .onToolExecuted(
                             toolExecution -> {
-                                onToolExecuted.run();
+                                onToolExecuted.accept(toolExecution);
                                 chatState.checkStopRequest();
                             })
                     .onCompleteResponse(
@@ -57,7 +58,7 @@ public class ChatServiceImpl implements ChatService {
                                 log.error("Error in chat stream", throwable);
                                 chatState.handleError();
                                 errorHandler.handleError(project, throwable);
-                                onError.run();
+                                onError.accept(throwable);
                             })
                     .start();
 
@@ -65,7 +66,7 @@ public class ChatServiceImpl implements ChatService {
             log.error("Error starting chat stream", e);
             chatState.handleError();
             errorHandler.handleError(project, e);
-            onError.run();
+            onError.accept(e);
         }
     }
 

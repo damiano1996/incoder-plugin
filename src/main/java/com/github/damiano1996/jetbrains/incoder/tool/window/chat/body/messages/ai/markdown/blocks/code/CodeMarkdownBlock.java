@@ -2,7 +2,6 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.
 
 import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel.*;
 
-import com.github.damiano1996.jetbrains.incoder.tool.window.ToolWindowColors;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.PatternFinder;
@@ -41,8 +40,6 @@ public class CodeMarkdownBlock implements MarkdownBlock, Disposable {
         return new JPanel() {
             {
                 setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-                setBackground(ToolWindowColors.AI_MESSAGE_BACKGROUND);
-                setForeground(ToolWindowColors.AI_MESSAGE_FOREGROUND);
                 setFocusable(false);
 
                 add(editorPanel);

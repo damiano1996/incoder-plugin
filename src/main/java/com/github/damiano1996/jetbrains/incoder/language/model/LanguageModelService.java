@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 public interface LanguageModelService {
 
-    void init() throws LanguageModelException;
+    void startWithDefaultServer() throws LanguageModelException;
 
-    void init(LanguageModelServer server) throws LanguageModelException;
+    void startWith(LanguageModelServer server) throws LanguageModelException;
 
     boolean isReady();
 

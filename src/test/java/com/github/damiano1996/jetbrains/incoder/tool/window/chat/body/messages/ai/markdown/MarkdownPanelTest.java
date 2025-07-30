@@ -7,10 +7,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class MarkdownPanelTest extends BasePlatformTestCase {
 
+    private MarkdownPanel markdownPanel;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        markdownPanel = new MarkdownPanel(getProject());
+    }
+
     public void testWrite_StreamACode() {
-
-        MarkdownPanel markdownPanel = new MarkdownPanel(null);
-
         var streamedMarkdown =
                 """
                 ```java
@@ -42,9 +47,6 @@ public class MarkdownPanelTest extends BasePlatformTestCase {
     }
 
     public void testWrite_StreamACodeWithCommentAfter() {
-
-        MarkdownPanel markdownPanel = new MarkdownPanel(null);
-
         var streamedMarkdown =
                 """
                 ```java
@@ -83,9 +85,6 @@ A comment
     }
 
     public void testWrite_StreamACodeWithCommentBefore() {
-
-        MarkdownPanel markdownPanel = new MarkdownPanel(null);
-
         var streamedMarkdown =
                 """
                 A comment
@@ -124,9 +123,6 @@ A comment
     }
 
     public void testWrite_StreamMarkdownWithCodesAndANestedMarkdown() {
-
-        MarkdownPanel markdownPanel = new MarkdownPanel(null);
-
         var streamedMarkdown =
                 """
                 A comment
@@ -212,8 +208,6 @@ Another comment
     }
 
     public void testWrite_StreamIncompleteCodeBlock() {
-        MarkdownPanel markdownPanel = new MarkdownPanel(null);
-
         var streamedMarkdown =
                 """
                 Some text
@@ -234,8 +228,6 @@ Another comment
     }
 
     public void testWrite_StreamEmptyCodeBlock() {
-        MarkdownPanel markdownPanel = new MarkdownPanel(null);
-
         var streamedMarkdown =
                 """
                 ```java
@@ -261,8 +253,6 @@ Another comment
     }
 
     public void testWrite_StreamWhitespaceOnlyCodeBlock() {
-        MarkdownPanel markdownPanel = new MarkdownPanel(null);
-
         var streamedMarkdown =
                 """
                 ```java
@@ -290,8 +280,6 @@ Another comment
     }
 
     public void testWrite_StreamInvalidLanguage() {
-        MarkdownPanel markdownPanel = new MarkdownPanel(null);
-
         var streamedMarkdown =
                 """
                 ```nonexistentlanguage
@@ -318,8 +306,6 @@ Another comment
     }
 
     public void testWrite_StreamConsecutiveCodeBlocks() {
-        MarkdownPanel markdownPanel = new MarkdownPanel(null);
-
         var streamedMarkdown =
                 """
                 ```java

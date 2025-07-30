@@ -6,49 +6,65 @@ import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServ
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.error.ErrorMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.human.HumanMessageComponent;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.tool.ToolMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
+import com.github.damiano1996.jetbrains.incoder.ui.components.Layout;
 import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
 import com.intellij.icons.AllIcons;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.JBColor;
+import com.intellij.ui.RoundedLineBorder;
+import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.ui.FormBuilder;
+import com.intellij.util.ui.JBUI;
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class Chat {
 
+    private final Project project;
+
     @Setter @Getter private int chatId;
 
     @Getter private JPanel mainPanel;
-    private ExpandableTextArea prompt;
-    private JScrollPane promptScrollPane;
+    private ExpandableTextArea promptTextArea;
     private JButton submitButton;
     private ChatBody chatBody;
-    private JPanel inputPanel;
 
     private ChatState chatState;
     private ChatService chatService;
 
-    public void setPromptActionListener(Project project) {
-        prompt.addActionListener(e -> handleAction(project));
-        submitButton.addActionListener(e -> handleButtonAction(project));
+    public Chat(Project project) {
+        this.project = project;
+
+        createUIComponents();
+        initActionListeners();
     }
 
-    private void handleButtonAction(Project project) {
+    private void initActionListeners() {
+        promptTextArea.addActionListener(e -> handleAction());
+        submitButton.addActionListener(e -> handleButtonAction());
+    }
+
+    private void handleButtonAction() {
         if (chatState.isGenerating()) {
             chatState.requestStop();
             updateProgressStatus();
         } else {
-            handleAction(project);
+            handleAction();
         }
     }
 
-    private void handleAction(Project project) {
+    private void handleAction() {
         if (!chatService.isLanguageModelReady(project)) {
             NotificationService.getInstance(project)
                     .notifyWithSettingsActionButton(
@@ -56,7 +72,7 @@ public class Chat {
             return;
         }
 
-        String prompt = this.prompt.getText().trim();
+        String prompt = this.promptTextArea.getText().trim();
 
         if (prompt.isEmpty()) {
             log.debug("Prompt is empty.");
@@ -64,15 +80,17 @@ public class Chat {
         }
 
         log.debug("Prompt: {}", prompt);
-        this.prompt.setText("");
+        this.promptTextArea.setText("");
 
         HumanMessageComponent humanMessageComponent = new HumanMessageComponent(prompt);
         chatBody.addMessage(humanMessageComponent);
 
-        var aiMessage = new AiMessageComponent(project);
-        aiMessage.setModelName(
-                LanguageModelServiceImpl.getInstance(project).getSelectedModelName().toLowerCase());
-        chatBody.addMessage(aiMessage);
+        chatBody.addMessage(
+                new AiMessageComponent(
+                        project,
+                        LanguageModelServiceImpl.getInstance(project)
+                                .getSelectedModelName()
+                                .toLowerCase()));
 
         chatService.processPrompt(
                 project,
@@ -80,24 +98,47 @@ public class Chat {
                 prompt,
                 this::updateProgressStatus,
                 token -> {
-                    aiMessage.write(token);
+                    if (chatBody.getCurrentMessage() != null) {
+                        chatBody.getCurrentMessage().write(token);
+                    }
+                    chatBody.updateUI();
+                },
+                toolExecution -> {
+                    log.debug("Tool executed");
+                    closeCurrentMessageStream();
+
+                    log.debug("Adding new tool message component");
+                    chatBody.addMessage(new ToolMessageComponent(toolExecution));
+
+                    log.debug("Resuming with an ai message");
+                    chatBody.addMessage(new AiMessageComponent(project));
+
                     chatBody.updateUI();
                 },
                 () -> {
-                    aiMessage.write("\n\n");
-                    chatBody.updateUI();
-                },
-                () -> {
-                    aiMessage.streamClosed();
+                    closeCurrentMessageStream();
                     updateProgressStatus();
                 },
-                this::updateProgressStatus);
+                throwable -> {
+                    closeCurrentMessageStream();
+
+                    chatBody.addMessage(new ErrorMessageComponent(throwable));
+                    chatBody.updateUI();
+
+                    updateProgressStatus();
+                });
+    }
+
+    private void closeCurrentMessageStream() {
+        if (chatBody.getCurrentMessage() != null) {
+            chatBody.getCurrentMessage().streamClosed();
+        }
     }
 
     private synchronized void updateProgressStatus() {
         log.debug("Is generating...");
-        this.prompt.setEnabled(!chatState.isGenerating());
-        if (!chatState.isGenerating()) this.prompt.requestFocusInWindow();
+        this.promptTextArea.setEnabled(!chatState.isGenerating());
+        if (!chatState.isGenerating()) this.promptTextArea.requestFocusInWindow();
 
         if (chatState.isGenerating()) {
             this.submitButton.setIcon(AllIcons.Actions.Suspend);
@@ -111,32 +152,96 @@ public class Chat {
     }
 
     private void createUIComponents() {
-        mainPanel = new JPanel();
-        mainPanel.setBackground(JBColor.namedColor("ToolWindow.background"));
+        chatState = new ChatState();
+        chatService = new ChatServiceImpl(chatState);
 
-        prompt = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 1);
+        promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 1);
+        promptTextArea.setMargin(JBUI.insets(2, 9, 2, 6));
+        promptTextArea.setLineWrap(false);
 
-        promptScrollPane =
-                new JScrollPane() {
+        JScrollPane promptScrollPane = getPromptScrollPane();
+
+        submitButton = new JButton();
+        submitButton.setBorderPainted(false);
+        submitButton.setContentAreaFilled(false);
+        submitButton.setFocusPainted(false);
+        submitButton.setOpaque(false);
+        submitButton.setHorizontalAlignment(SwingConstants.RIGHT);
+        submitButton.setToolTipText(SEND_MESSAGE_TOOLTIP);
+
+        Dimension buttonSize = new Dimension(40, 40);
+        submitButton.setMinimumSize(buttonSize);
+        submitButton.setPreferredSize(buttonSize);
+        submitButton.setMaximumSize(buttonSize);
+
+        chatBody = new ChatBody();
+
+        Border focusBorder =
+                new RoundedLineBorder(
+                        JBUI.CurrentTheme.Focus.focusColor(), ARC_DIAMETER, THICKNESS);
+        Border unfocusBorder =
+                new RoundedLineBorder(
+                        JBUI.CurrentTheme.Label.disabledForeground(), ARC_DIAMETER, THICKNESS);
+        Border padding = JBUI.Borders.empty(PADDING);
+
+        FocusAwarePanel inputPanel =
+                new FocusAwarePanel(
+                        new CompoundBorder(focusBorder, padding),
+                        new CompoundBorder(unfocusBorder, padding));
+        inputPanel.addFocusTrackingFor(promptTextArea);
+
+        JPanel inputContent =
+                FormBuilder.createFormBuilder()
+                        .addComponent(promptScrollPane)
+                        .addVerticalGap(4)
+                        .addComponent(Layout.componentToRight(submitButton))
+                        .getPanel();
+
+        inputPanel.setLayout(new BorderLayout());
+        inputPanel.add(inputContent, BorderLayout.CENTER);
+
+        mainPanel =
+                FormBuilder.createFormBuilder()
+                        .addComponentFillVertically(chatBody.getMainPanel(), 0)
+                        .addVerticalGap(4)
+                        .addComponent(inputPanel)
+                        .getPanel();
+
+        mainPanel.setBorder(JBUI.Borders.empty(20));
+        mainPanel.setMinimumSize(new Dimension(400, 400));
+        mainPanel.setPreferredSize(new Dimension(400, 400));
+
+        updateProgressStatus();
+    }
+
+    private @NotNull JScrollPane getPromptScrollPane() {
+        JScrollPane promptScrollPane =
+                new JBScrollPane() {
+                    private final int MIN_HEIGHT = 50;
+                    private final int MAX_HEIGHT = 200;
+                    private final int PREFERRED_WIDTH = 100;
+
                     @Override
-                    public boolean isWheelScrollingEnabled() {
-                        return false;
+                    public Dimension getPreferredSize() {
+                        Component view = getViewport().getView();
+                        int viewHeight = view != null ? view.getPreferredSize().height : MIN_HEIGHT;
+                        int height = Math.max(MIN_HEIGHT, Math.min(viewHeight, MAX_HEIGHT));
+                        return new Dimension(PREFERRED_WIDTH, height);
                     }
 
                     @Override
                     public Dimension getMinimumSize() {
-                        return getPreferredSize();
+                        return new Dimension(PREFERRED_WIDTH, MIN_HEIGHT);
                     }
 
                     @Override
-                    public Dimension getPreferredSize() {
-                        Dimension size = super.getPreferredSize();
-                        if (getViewport() != null && getViewport().getView() != null) {
-                            size.height = getViewport().getView().getPreferredSize().height;
-                        }
-                        return size;
+                    public Dimension getMaximumSize() {
+                        Dimension viewPreferredSize = getViewport().getView().getPreferredSize();
+                        int maxHeight = Math.min(viewPreferredSize.height, MAX_HEIGHT);
+                        return new Dimension(PREFERRED_WIDTH, maxHeight);
                     }
                 };
+
         promptScrollPane.setBorder(BorderFactory.createEmptyBorder());
         promptScrollPane.setOpaque(false);
         promptScrollPane.getViewport().setOpaque(false);
@@ -144,19 +249,8 @@ public class Chat {
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         promptScrollPane.setVerticalScrollBarPolicy(
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        promptScrollPane.setViewportView(promptTextArea);
 
-        submitButton = new JButton();
-        submitButton.setBorderPainted(false);
-        submitButton.setContentAreaFilled(false);
-        submitButton.setFocusPainted(false);
-        submitButton.setOpaque(false);
-
-        inputPanel = new FocusAwarePanel();
-        ((FocusAwarePanel) inputPanel).addFocusTrackingFor(prompt);
-
-        chatState = new ChatState();
-        chatService = new ChatServiceImpl(chatState);
-
-        updateProgressStatus();
+        return promptScrollPane;
     }
 }

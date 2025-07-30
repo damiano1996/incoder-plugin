@@ -7,7 +7,6 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
-import javax.swing.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,14 +15,10 @@ public final class InCoderToolWindowFactory implements ToolWindowFactory, DumbAw
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-
-        ChatContainer chatContainer = new ChatContainer();
-        chatContainer.setProject(project);
-        addContent(chatContainer.getMainPanel(), "Chat", toolWindow);
-    }
-
-    private static void addContent(JPanel jPanel, String title, @NotNull ToolWindow toolWindow) {
-        Content content = ContentFactory.getInstance().createContent(jPanel, title, false);
+        ChatContainer chatContainer = new ChatContainer(project);
+        Content content =
+                ContentFactory.getInstance()
+                        .createContent(chatContainer.getMainPanel(), null, false);
         toolWindow.getContentManager().addContent(content);
     }
 }

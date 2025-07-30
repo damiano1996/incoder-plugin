@@ -72,7 +72,7 @@ public abstract class BaseServerConfigurable implements Configurable {
                                         LanguageModelServiceImpl.getInstance(
                                                         Objects.requireNonNull(
                                                                 ProjectUtil.getActiveProject()))
-                                                .init(getServerFactory().createServer());
+                                                .startWith(getServerFactory().createServer());
                                         return null;
                                     } catch (LanguageModelException e) {
                                         //noinspection DialogTitleCapitalization

@@ -40,18 +40,16 @@ public final class CodeCompletionService
         log.debug("Staring async code completion queue...");
         codeCompletionQueue = new CodeCompletionQueue(project, this);
         CompletableFuture.runAsync(codeCompletionQueue);
-    }
 
-    public static CodeCompletionService getInstance(@NotNull Project project) {
-        return project.getService(CodeCompletionService.class);
-    }
-
-    public void init() {
         log.debug("Initializing {}...", CodeCompletionService.class.getSimpleName());
         log.debug("Adding listener for document");
         EditorFactory.getInstance().getEventMulticaster().addDocumentListener(this, this);
         log.debug("Adding listeners for mouse");
         EditorFactory.getInstance().getEventMulticaster().addEditorMouseListener(this, this);
+    }
+
+    public static CodeCompletionService getInstance(@NotNull Project project) {
+        return project.getService(CodeCompletionService.class);
     }
 
     public void next(@NotNull State state) {
