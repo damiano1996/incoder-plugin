@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 @AllArgsConstructor
 public class EditorTool {
 
-    private Project project;
+    private final Project project;
 
     private static String getOriginalContent(VirtualFile virtualFile) {
         try {
