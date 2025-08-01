@@ -53,7 +53,7 @@ public class HumanMessageComponent implements MessageComponent {
         promptTextArea.setBorder(JBUI.Borders.empty(PADDING * 2));
         promptTextArea.setText(userPrompt);
         promptTextArea.setEditable(false);
-        promptTextArea.setLineWrap(false);
+        promptTextArea.setLineWrap(true);
         promptTextArea.setWrapStyleWord(true);
         promptTextArea.setOpaque(false);
         promptTextArea.setBackground(JBColor.background().darker());
