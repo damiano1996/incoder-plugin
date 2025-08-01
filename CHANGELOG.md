@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-07-30
+
+### Added
+
+- Tools and error in chat
+
+### Changed
+
+- System prompt
+- Chat UI updated
+
 ## [1.2.0] - 2025-07-27
 
 ### Added
@@ -91,7 +102,8 @@
 
 - Qodana recommendations.
 
-[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/damiano1996/incoder-plugin/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/damiano1996/incoder-plugin/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/damiano1996/incoder-plugin/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/damiano1996/incoder-plugin/compare/v0.2.0...v1.0.0
