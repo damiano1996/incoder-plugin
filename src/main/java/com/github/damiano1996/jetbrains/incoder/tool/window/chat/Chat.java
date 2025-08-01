@@ -20,6 +20,8 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CancellationException;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -39,9 +41,9 @@ public class Chat {
     private ExpandableTextArea promptTextArea;
     private JButton submitButton;
     private ChatBody chatBody;
-
     private ChatState chatState;
     private ChatService chatService;
+    private CompletableFuture<Void> currentProcessingTask;
 
     public Chat(Project project) {
         this.project = project;
@@ -57,10 +59,25 @@ public class Chat {
 
     private void handleButtonAction() {
         if (chatState.isGenerating()) {
-            chatState.requestStop();
-            updateProgressStatus();
+            handleStopRequest();
         } else {
             handleAction();
+        }
+    }
+
+    private void handleStopRequest() {
+        if (chatState.getCurrentState() == ChatStateEnum.STOPPING) {
+            // Force cancel if already in stopping state and user clicks again
+            log.debug("Force cancelling current processing task");
+            if (currentProcessingTask != null && !currentProcessingTask.isDone()) {
+                currentProcessingTask.cancel(true);
+                handleProcessingComplete();
+            }
+        } else {
+            // First stop request - graceful stop
+            log.debug("Requesting graceful stop");
+            chatState.requestStop();
+            updateProgressStatus();
         }
     }
 
@@ -91,41 +108,74 @@ public class Chat {
             return;
         }
 
-        chatService.processPrompt(
-                project,
-                chatId,
-                prompt,
-                this::updateProgressStatus,
-                token -> {
-                    if (chatBody.getCurrentMessage() != null) {
-                        chatBody.getCurrentMessage().write(token);
-                    }
-                    chatBody.updateUI();
-                },
-                toolExecution -> {
-                    log.debug("Tool executed");
-                    closeCurrentMessageStream();
+        // Cancel any existing processing task
+        if (currentProcessingTask != null && !currentProcessingTask.isDone()) {
+            currentProcessingTask.cancel(true);
+        }
 
-                    log.debug("Adding new tool message component");
-                    chatBody.addMessage(new ToolMessageComponent(toolExecution));
+        // Start new processing task in CompletableFuture
+        currentProcessingTask = CompletableFuture.runAsync(() -> {
+            chatService.processPrompt(
+                    project,
+                    chatId,
+                    prompt,
+                    this::updateProgressStatus,
+                    token -> {
+                        // Check if task was cancelled
+                        if (Thread.currentThread().isInterrupted()) {
+                            throw new RuntimeException(new InterruptedException("Task was cancelled"));
+                        }
+                        SwingUtilities.invokeLater(() -> {
+                            if (chatBody.getCurrentMessage() != null) {
+                                chatBody.getCurrentMessage().write(token);
+                            }
+                            chatBody.updateUI();
+                        });
+                    },
+                    toolExecution -> {
+                        // Check if task was cancelled
+                        if (Thread.currentThread().isInterrupted()) {
+                            throw new RuntimeException(new InterruptedException("Task was cancelled"));
+                        }
+                        SwingUtilities.invokeLater(() -> {
+                            log.debug("Tool executed");
+                            closeCurrentMessageStream();
 
-                    log.debug("Resuming with an ai message");
-                    chatBody.addMessage(new AiMessageComponent(project));
+                            log.debug("Adding new tool message component");
+                            chatBody.addMessage(new ToolMessageComponent(toolExecution));
 
-                    chatBody.updateUI();
-                },
-                () -> {
-                    closeCurrentMessageStream();
-                    updateProgressStatus();
-                },
-                throwable -> {
-                    closeCurrentMessageStream();
+                            log.debug("Resuming with an ai message");
+                            chatBody.addMessage(new AiMessageComponent(project));
 
-                    chatBody.addMessage(new ErrorMessageComponent(throwable));
-                    chatBody.updateUI();
+                            chatBody.updateUI();
+                        });
+                    },
+                    () -> SwingUtilities.invokeLater(this::handleProcessingComplete),
+                    throwable -> SwingUtilities.invokeLater(() -> handleProcessingError(throwable)));
+        }).exceptionally(throwable -> {
+            SwingUtilities.invokeLater(() -> {
+                if (throwable.getCause() instanceof CancellationException ||
+                    throwable.getCause() instanceof InterruptedException) {
+                    log.debug("Processing task was cancelled");
+                    handleProcessingComplete();
+                } else {
+                    handleProcessingError(throwable);
+                }
+            });
+            return null;
+        });
+    }
 
-                    updateProgressStatus();
-                });
+    private void handleProcessingComplete() {
+        closeCurrentMessageStream();
+        updateProgressStatus();
+    }
+
+    private void handleProcessingError(Throwable throwable) {
+        closeCurrentMessageStream();
+        chatBody.addMessage(new ErrorMessageComponent(throwable));
+        chatBody.updateUI();
+        updateProgressStatus();
     }
 
     private void handleExamplePromptSelected(@NotNull ActionEvent e) {
@@ -145,14 +195,20 @@ public class Chat {
     }
 
     private synchronized void updateProgressStatus() {
-        log.debug("Is generating...");
+        log.debug("Updating progress status. Current state: {}", chatState.getCurrentState());
         this.promptTextArea.setEnabled(!chatState.isGenerating());
         if (!chatState.isGenerating()) this.promptTextArea.requestFocusInWindow();
 
         if (chatState.isGenerating()) {
-            this.submitButton.setIcon(AllIcons.Actions.Suspend);
-            this.submitButton.setToolTipText(STOP_TOOLTIP);
-            this.submitButton.setEnabled(false);
+            if (chatState.getCurrentState() == ChatStateEnum.STOPPING) {
+                this.submitButton.setIcon(AllIcons.Actions.ForceRefresh);
+                this.submitButton.setToolTipText("Force Stop (Click again to cancel immediately)");
+                this.submitButton.setEnabled(true);
+            } else {
+                this.submitButton.setIcon(AllIcons.Actions.Suspend);
+                this.submitButton.setToolTipText(STOP_TOOLTIP);
+                this.submitButton.setEnabled(true);
+            }
         } else {
             this.submitButton.setIcon(AllIcons.Actions.Execute);
             this.submitButton.setToolTipText(SEND_MESSAGE_TOOLTIP);
