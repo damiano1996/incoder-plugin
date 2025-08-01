@@ -20,6 +20,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -85,12 +86,16 @@ public class Chat {
         HumanMessageComponent humanMessageComponent = new HumanMessageComponent(prompt);
         chatBody.addMessage(humanMessageComponent);
 
-        chatBody.addMessage(
-                new AiMessageComponent(
-                        project,
-                        LanguageModelServiceImpl.getInstance(project)
-                                .getSelectedModelName()
-                                .toLowerCase()));
+        try {
+            chatBody.addMessage(
+                    new AiMessageComponent(
+                            project,
+                            LanguageModelServiceImpl.getInstance(project)
+                                    .getSelectedModelName()
+                                    .toLowerCase()));
+        } catch (com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException e) {
+            throw new RuntimeException(e);
+        }
 
         chatService.processPrompt(
                 project,
@@ -129,10 +134,20 @@ public class Chat {
                 });
     }
 
+    private void handleExamplePromptSelected(@NotNull ActionEvent e) {
+        String selectedPrompt = e.getActionCommand();
+        log.debug("Example prompt selected: {}", selectedPrompt);
+        promptTextArea.setText(selectedPrompt);
+        promptTextArea.requestFocusInWindow();
+        promptTextArea.setCaretPosition(selectedPrompt.length());
+    }
+
     private void closeCurrentMessageStream() {
         if (chatBody.getCurrentMessage() != null) {
             chatBody.getCurrentMessage().streamClosed();
         }
+
+        promptTextArea.requestFocusInWindow();
     }
 
     private synchronized void updateProgressStatus() {
@@ -174,7 +189,7 @@ public class Chat {
         submitButton.setPreferredSize(buttonSize);
         submitButton.setMaximumSize(buttonSize);
 
-        chatBody = new ChatBody();
+        chatBody = new ChatBody(this::handleExamplePromptSelected);
 
         Border focusBorder =
                 new RoundedLineBorder(

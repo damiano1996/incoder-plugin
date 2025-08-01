@@ -12,6 +12,10 @@
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="com.github.damiano1996.jetbrains.incoder.InCoderActivity"/>
 
+        <projectService
+                serviceInterface="com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelService"
+                serviceImplementation="com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl"/>
+
         <groupConfigurable descriptionKey="plugin.group.description"
                            displayNameKey="plugin.group.name"
                            id="plugin.group"/>

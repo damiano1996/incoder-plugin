@@ -8,14 +8,12 @@ import com.github.damiano1996.jetbrains.incoder.notification.NotificationService
 import com.github.damiano1996.jetbrains.incoder.settings.PluginSettings;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Slf4j
-@Service(Service.Level.PROJECT)
 public final class LanguageModelServiceImpl implements LanguageModelService, Disposable {
 
     private final Project project;
@@ -41,8 +39,8 @@ public final class LanguageModelServiceImpl implements LanguageModelService, Dis
         }
     }
 
-    public static LanguageModelServiceImpl getInstance(@NotNull Project project) {
-        return project.getService(LanguageModelServiceImpl.class);
+    public static LanguageModelService getInstance(@NotNull Project project) {
+        return project.getService(LanguageModelService.class);
     }
 
     @Override
