@@ -69,9 +69,4 @@ public class ChatServiceImpl implements ChatService {
             onError.accept(e);
         }
     }
-
-    @Override
-    public boolean isLanguageModelReady(Project project) {
-        return LanguageModelServiceImpl.getInstance(project).isReady();
-    }
 }

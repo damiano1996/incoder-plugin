@@ -31,12 +31,4 @@ public interface ChatService {
             Consumer<ToolExecution> onToolExecuted,
             Runnable onComplete,
             Consumer<Throwable> onError);
-
-    /**
-     * Checks if the language model service is ready for processing.
-     *
-     * @param project the current project
-     * @return true if the service is ready, false otherwise
-     */
-    boolean isLanguageModelReady(Project project);
 }

@@ -5,9 +5,9 @@ import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatCons
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.github.damiano1996.jetbrains.incoder.ui.components.RoundedUtils;
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.HelpTooltip;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.util.IconUtil;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import java.awt.*;
@@ -27,10 +27,7 @@ public class ErrorMessageComponent implements MessageComponent {
 
     private void createUIComponents() {
 
-        Icon coloredIcon =
-                IconUtil.colorize(
-                        AllIcons.General.Error,
-                        JBUI.CurrentTheme.NotificationError.foregroundColor());
+        Icon coloredIcon = AllIcons.General.Error;
         JBLabel icon = new JBLabel("Error:", coloredIcon, 10);
 
         JPanel toolPanel =
@@ -39,6 +36,11 @@ public class ErrorMessageComponent implements MessageComponent {
                         .getPanel();
         toolPanel.setOpaque(true);
         toolPanel.setBackground(JBUI.CurrentTheme.NotificationError.backgroundColor());
+
+        new HelpTooltip()
+                .setTitle("Error message")
+                .setDescription(throwable.getMessage())
+                .installOn(toolPanel);
 
         JPanel wrapper =
                 new JBPanel<>(new BorderLayout()) {

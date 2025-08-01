@@ -2,8 +2,8 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat;
 
 import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatConstants.*;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
-import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.error.ErrorMessageComponent;
@@ -13,7 +13,6 @@ import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
 import com.github.damiano1996.jetbrains.incoder.ui.components.Layout;
 import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
 import com.intellij.icons.AllIcons;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBScrollPane;
@@ -66,13 +65,6 @@ public class Chat {
     }
 
     private void handleAction() {
-        if (!chatService.isLanguageModelReady(project)) {
-            NotificationService.getInstance(project)
-                    .notifyWithSettingsActionButton(
-                            LANGUAGE_MODEL_NOT_READY, NotificationType.WARNING);
-            return;
-        }
-
         String prompt = this.promptTextArea.getText().trim();
 
         if (prompt.isEmpty()) {
@@ -93,8 +85,10 @@ public class Chat {
                             LanguageModelServiceImpl.getInstance(project)
                                     .getSelectedModelName()
                                     .toLowerCase()));
-        } catch (com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException e) {
-            throw new RuntimeException(e);
+        } catch (LanguageModelException e) {
+            chatBody.addMessage(new ErrorMessageComponent(e));
+            chatBody.updateUI();
+            return;
         }
 
         chatService.processPrompt(
