@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
+@SuppressWarnings("UnstableApiUsage")
 public class MarkdownEditorPane extends JBHtmlPane {
 
     private final Parser parser = Parser.builder().build();
