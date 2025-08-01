@@ -172,7 +172,7 @@ public class Chat {
 
         promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 1);
         promptTextArea.setMargin(JBUI.insets(2, 9, 2, 6));
-        promptTextArea.setLineWrap(false);
+        promptTextArea.setLineWrap(true);
 
         JScrollPane promptScrollPane = getPromptScrollPane();
 
