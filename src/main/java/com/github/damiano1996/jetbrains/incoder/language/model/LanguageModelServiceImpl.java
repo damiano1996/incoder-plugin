@@ -60,28 +60,19 @@ public final class LanguageModelServiceImpl implements LanguageModelService, Dis
         client = this.server.createClient(project);
         log.debug("Client created successfully!");
 
-        log.debug("Verifying server connection.");
-        client.checkServerConnection();
-        log.debug("Server connection verified.");
-
         PluginSettings.getInstance().getState().isPluginConfigured = true;
         log.debug("Client and server started. Plugin can be considered configured.");
     }
 
     @Override
-    public boolean isReady() {
-        return server != null && client != null;
-    }
-
-    @Override
-    public String getSelectedModelName() {
-        if (server == null) throw new IllegalStateException("Server must be initialized.");
+    public String getSelectedModelName() throws LanguageModelException {
+        if (server == null) throw new LanguageModelException("Server must be initialized.");
         return server.getSelectedModelName();
     }
 
     @Override
-    public @NotNull LanguageModelClient getClient() {
-        if (client == null) throw new IllegalStateException("Client must be initialized.");
+    public @NotNull LanguageModelClient getClient() throws LanguageModelException {
+        if (client == null) throw new LanguageModelException("Client must be initialized.");
         return client;
     }
 

@@ -100,7 +100,11 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
                 .invokeAndWait(
                         () ->
                                 ApplicationManager.getApplication()
-                                        .runWriteAction(() -> editor.getDocument().setText(text)));
+                                        .runWriteAction(
+                                                () -> {
+                                                    if (!editor.isDisposed())
+                                                        editor.getDocument().setText(text);
+                                                }));
     }
 
     public static @NotNull Language guessLanguage(@NotNull String languageName) {

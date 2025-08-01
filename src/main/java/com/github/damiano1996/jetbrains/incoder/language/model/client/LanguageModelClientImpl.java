@@ -1,7 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client;
 
 import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionContext;
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatCodingAssistant;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
@@ -28,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 public class LanguageModelClientImpl implements LanguageModelClient {
 
     private final Project project;
-    private final ChatLanguageModel chatLanguageModel;
 
     private final ChatCodingAssistant chatCodingAssistant;
     private final InlineCodingAssistant inlineCodingAssistant;
@@ -43,7 +41,6 @@ public class LanguageModelClientImpl implements LanguageModelClient {
             ChatLanguageModel chatLanguageModel,
             StreamingChatLanguageModel streamingChatLanguageModel) {
         this.project = project;
-        this.chatLanguageModel = chatLanguageModel;
 
         this.projectName = project.getName();
         this.projectPath = getProjectPath();
@@ -151,14 +148,5 @@ public class LanguageModelClientImpl implements LanguageModelClient {
 
     private String getUserTimezone() {
         return ZoneId.systemDefault().toString();
-    }
-
-    @Override
-    public void checkServerConnection() throws LanguageModelException {
-        try {
-            chatLanguageModel.chat("Hello!");
-        } catch (Exception e) {
-            throw new LanguageModelException(e);
-        }
     }
 }

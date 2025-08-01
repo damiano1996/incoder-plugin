@@ -10,10 +10,8 @@ public interface LanguageModelService {
 
     void startWith(LanguageModelServer server) throws LanguageModelException;
 
-    boolean isReady();
-
     String getSelectedModelName() throws LanguageModelException;
 
     @NotNull
-    LanguageModelClient getClient() throws IllegalStateException;
+    LanguageModelClient getClient() throws LanguageModelException;
 }

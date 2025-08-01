@@ -1,7 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client;
 
 import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionContext;
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import dev.langchain4j.service.TokenStream;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,12 +27,4 @@ public interface LanguageModelClient {
      * @return the completed code suggestion as a string
      */
     String complete(@NotNull CodeCompletionContext codeCompletionContext);
-
-    /**
-     * Checks whether the connection to the language model server is healthy. This method can be
-     * used to verify connectivity and configuration before attempting to use other methods.
-     *
-     * @throws LanguageModelException if the connection or settings are unhealthy
-     */
-    void checkServerConnection() throws LanguageModelException;
 }
