@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.ui.components;
 
-import com.intellij.ide.plugins.newui.EmptyCaret;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBHtmlPane;
 import com.intellij.ui.components.JBHtmlPaneConfiguration;
@@ -27,8 +26,6 @@ public class MarkdownEditorPane extends JBHtmlPane {
 
         setOpaque(false);
         setEditable(false);
-        setCaret(new EmptyCaret());
-        setContentType("text/html");
     }
 
     @Override
@@ -44,7 +41,7 @@ public class MarkdownEditorPane extends JBHtmlPane {
                 .invokeLater(
                         () -> {
                             String html = renderer.render(parser.parse(markdown));
-                            super.setText("<body>" + html + "</body>");
+                            super.setText(html);
                             revalidate();
                             repaint();
                         });
