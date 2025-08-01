@@ -1,10 +1,12 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body;
 
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.examples.ExamplePromptsComponent;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.MessageComponent;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import javax.swing.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -17,18 +19,29 @@ public class ChatBody {
     private JScrollPane scrollPane;
 
     @Getter @Nullable private MessageComponent currentMessage;
+    private ExamplePromptsComponent examplePromptsComponent;
+    private boolean hasMessages = false;
 
-    public ChatBody() {
-        createUIComponents();
+    public ChatBody(ActionListener onExamplePromptSelected) {
+        createUIComponents(onExamplePromptSelected);
     }
 
     public void addMessage(@NotNull MessageComponent messageComponent) {
         SwingUtilities.invokeLater(
                 () -> {
+                    hideExamplePrompts();
+
                     messagesPanel.add(messageComponent.getMainPanel());
                     currentMessage = messageComponent;
                     performUpdate();
                 });
+    }
+
+    private void hideExamplePrompts() {
+        if (!hasMessages && examplePromptsComponent != null) {
+            messagesPanel.remove(examplePromptsComponent.getMainPanel());
+            hasMessages = true;
+        }
     }
 
     public void updateUI() {
@@ -57,8 +70,14 @@ public class ChatBody {
         vertical.setValue(vertical.getMaximum());
     }
 
-    private void createUIComponents() {
+    private void createUIComponents(ActionListener onExamplePromptSelected) {
         messagesPanel = createMessagesPanel();
+
+        if (onExamplePromptSelected != null) {
+            examplePromptsComponent = new ExamplePromptsComponent(onExamplePromptSelected);
+            messagesPanel.add(examplePromptsComponent.getMainPanel());
+        }
+
         JPanel wrapperPanel = createWrapperPanel();
         scrollPane = createScrollPane(wrapperPanel);
 

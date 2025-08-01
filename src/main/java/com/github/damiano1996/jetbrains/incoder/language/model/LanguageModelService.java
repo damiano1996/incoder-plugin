@@ -12,7 +12,7 @@ public interface LanguageModelService {
 
     boolean isReady();
 
-    String getSelectedModelName() throws LanguageModelException, IllegalStateException;
+    String getSelectedModelName() throws LanguageModelException;
 
     @NotNull
     LanguageModelClient getClient() throws IllegalStateException;
