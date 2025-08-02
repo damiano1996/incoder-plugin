@@ -5,6 +5,9 @@ import com.intellij.ui.components.JBHtmlPaneConfiguration;
 import com.intellij.ui.components.JBHtmlPaneStyleConfiguration;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.profile.pegdown.Extensions;
+import com.vladsch.flexmark.profile.pegdown.PegdownOptionsAdapter;
+import com.vladsch.flexmark.util.data.DataHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,8 +15,10 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("UnstableApiUsage")
 public class MarkdownEditorPane extends JBHtmlPane {
 
-    private final Parser parser = Parser.builder().build();
-    private final HtmlRenderer renderer = HtmlRenderer.builder().build();
+    private static final DataHolder OPTIONS = PegdownOptionsAdapter.flexmarkOptions(Extensions.ALL);
+    private static final Parser PARSER = Parser.builder(OPTIONS).build();
+    private static final HtmlRenderer RENDERER = HtmlRenderer.builder(OPTIONS).build();
+
     private String markdown = "";
 
     public MarkdownEditorPane() {
@@ -42,7 +47,7 @@ public class MarkdownEditorPane extends JBHtmlPane {
     @Override
     public void setText(String text) {
         this.markdown = text;
-        String html = renderer.render(parser.parse(markdown));
+        String html = RENDERER.render(PARSER.parse(markdown));
         super.setText(html);
     }
 }

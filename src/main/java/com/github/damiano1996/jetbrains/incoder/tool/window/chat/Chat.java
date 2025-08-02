@@ -175,23 +175,24 @@ public class Chat {
     private void uiGenerating() {
         this.promptTextArea.setEnabled(false);
 
-        updateSubmitButton(AllIcons.Actions.Suspend, STOP_TOOLTIP, true);
+        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, true);
     }
 
     private void uiStopping() {
         this.promptTextArea.setEnabled(false);
 
-        updateSubmitButton(AllIcons.Actions.Suspend, STOP_TOOLTIP, false);
+        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, false);
     }
 
     private void uiIdle() {
         this.promptTextArea.setEnabled(true);
         this.promptTextArea.requestFocusInWindow();
 
-        Icon icon =
-                IconUtil.colorize(AllIcons.Actions.Execute, JBUI.CurrentTheme.Focus.focusColor());
+        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Execute), SEND_MESSAGE_TOOLTIP, true);
+    }
 
-        updateSubmitButton(icon, SEND_MESSAGE_TOOLTIP, true);
+    private static @NotNull Icon getSubmitIcon(@NotNull Icon icon) {
+        return IconUtil.colorize(icon, JBUI.CurrentTheme.Focus.focusColor());
     }
 
     private void updateSubmitButton(@NotNull Icon execute, String sendMessageTooltip, boolean b) {

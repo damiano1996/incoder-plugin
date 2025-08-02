@@ -28,6 +28,15 @@ public class TextMarkdownBlock implements MarkdownBlock {
         markdownEditorPane.setText(text);
     }
 
+    private static @NotNull String getNextCodeLanguage(@NotNull String code) {
+        return code.split("\n")[0].replace(MARKDOWN_CODE_BLOCK_DELIMITER, "").trim();
+    }
+
+    private static @NotNull String getNextCode(String code) {
+        code = code.replaceFirst("^([^\n]*\n)", "");
+        return code;
+    }
+
     @Override
     public void write(String token) {
         markdownEditorPane.setText(markdownEditorPane.getText() + token);
@@ -56,15 +65,6 @@ public class TextMarkdownBlock implements MarkdownBlock {
         log.debug("Updating current block and creating the next");
         markdownEditorPane.setText(textUntilCode);
         markdownPanel.next(new CodeMarkdownBlock(markdownPanel, language, nextCode));
-    }
-
-    private static @NotNull String getNextCodeLanguage(@NotNull String code) {
-        return code.split("\n")[0].replace(MARKDOWN_CODE_BLOCK_DELIMITER, "").trim();
-    }
-
-    private static @NotNull String getNextCode(String code) {
-        code = code.replaceFirst("^([^\n]*\n)", "");
-        return code;
     }
 
     @Override

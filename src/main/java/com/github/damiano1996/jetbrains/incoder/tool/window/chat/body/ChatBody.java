@@ -21,6 +21,7 @@ public class ChatBody {
     @Getter @Nullable private MessageComponent currentMessage;
     private ExamplePromptsComponent examplePromptsComponent;
     private boolean hasMessages = false;
+    private boolean userScrolledUp = false;
 
     public ChatBody(ActionListener onExamplePromptSelected) {
         createUIComponents(onExamplePromptSelected);
@@ -49,25 +50,18 @@ public class ChatBody {
     }
 
     private void performUpdate() {
-        JScrollBar vertical = scrollPane.getVerticalScrollBar();
-        boolean wasAtBottom = isScrollAtBottom(vertical);
-
         messagesPanel.invalidate();
         scrollPane.getViewport().invalidate();
         scrollPane.revalidate();
 
-        if (wasAtBottom) {
+        if (!userScrolledUp) {
             scrollToBottom();
         }
     }
 
-    private boolean isScrollAtBottom(@NotNull JScrollBar vertical) {
-        return vertical.getValue() + vertical.getVisibleAmount() >= vertical.getMaximum() - 10;
-    }
-
     private void scrollToBottom() {
         JScrollBar vertical = scrollPane.getVerticalScrollBar();
-        vertical.setValue(vertical.getMaximum());
+        SwingUtilities.invokeLater(() -> vertical.setValue(vertical.getMaximum()));
     }
 
     private void createUIComponents(ActionListener onExamplePromptSelected) {
@@ -121,6 +115,17 @@ public class ChatBody {
         JViewport viewport = scroll.getViewport();
         viewport.setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
         viewport.setOpaque(true);
+
+        JScrollBar vertical = scroll.getVerticalScrollBar();
+        vertical.addAdjustmentListener(
+                e -> {
+                    int value = vertical.getValue();
+                    int extent = vertical.getModel().getExtent();
+                    int max = vertical.getMaximum();
+
+                    // If scrollbar is exactly at the bottom, re-enable auto-scroll
+                    userScrolledUp = !(value + extent >= max);
+                });
 
         return scroll;
     }
