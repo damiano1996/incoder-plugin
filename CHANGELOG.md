@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-08-02
+
+### Added
+
+- Stop button functionality implemented
+
+### Changed
+
+- Chat messages and streaming strategy
+- Minor changes
+
 ## [1.3.1] - 2025-08-01
 
 ### Changed
@@ -108,7 +119,8 @@
 
 - Qodana recommendations.
 
-[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/damiano1996/incoder-plugin/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/damiano1996/incoder-plugin/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/damiano1996/incoder-plugin/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/damiano1996/incoder-plugin/compare/v1.1.0...v1.2.0
