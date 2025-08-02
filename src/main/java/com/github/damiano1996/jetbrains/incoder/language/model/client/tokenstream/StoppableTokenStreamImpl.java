@@ -48,7 +48,8 @@ public class StoppableTokenStreamImpl implements StoppableTokenStream {
                             if (stopRequested) {
                                 onStop.run();
                                 log.debug("Throwing exception to stop streaming");
-                                // FIXME: AiServiceStreamingResponseHandler is catching the exception
+                                // FIXME: AiServiceStreamingResponseHandler is catching the
+                                // exception
                                 throw new StopTokenStream();
                             }
 
