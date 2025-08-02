@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.ui.components;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBHtmlPane;
 import com.intellij.ui.components.JBHtmlPaneConfiguration;
 import com.intellij.ui.components.JBHtmlPaneStyleConfiguration;
@@ -18,15 +17,21 @@ public class MarkdownEditorPane extends JBHtmlPane {
     private String markdown = "";
 
     public MarkdownEditorPane() {
-        super(
-                JBHtmlPaneStyleConfiguration.builder()
-                        .enableCodeBlocksBackground(true)
-                        .enableInlineCodeBackground(true)
-                        .build(),
-                JBHtmlPaneConfiguration.builder().build());
+        super(getStyleConfiguration(), getPaneConfiguration());
 
         setOpaque(false);
         setEditable(false);
+    }
+
+    private static @NotNull JBHtmlPaneStyleConfiguration getStyleConfiguration() {
+        return JBHtmlPaneStyleConfiguration.builder()
+                .enableCodeBlocksBackground(true)
+                .enableInlineCodeBackground(true)
+                .build();
+    }
+
+    private static @NotNull JBHtmlPaneConfiguration getPaneConfiguration() {
+        return JBHtmlPaneConfiguration.builder().build();
     }
 
     @Override
@@ -37,14 +42,7 @@ public class MarkdownEditorPane extends JBHtmlPane {
     @Override
     public void setText(String text) {
         this.markdown = text;
-
-        ApplicationManager.getApplication()
-                .invokeLater(
-                        () -> {
-                            String html = renderer.render(parser.parse(markdown));
-                            super.setText(html);
-                            revalidate();
-                            repaint();
-                        });
+        String html = renderer.render(parser.parse(markdown));
+        super.setText(html);
     }
 }
