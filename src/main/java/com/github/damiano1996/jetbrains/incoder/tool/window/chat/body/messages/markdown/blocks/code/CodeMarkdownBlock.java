@@ -1,12 +1,12 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code;
+package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.code;
 
-import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel.*;
+import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage.*;
 
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.PatternFinder;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.toolbar.CodeActionToolbar;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.text.TextMarkdownBlock;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.MarkdownBlock;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.PatternFinder;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.code.toolbar.CodeActionToolbar;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.text.TextMarkdownBlock;
 import com.github.damiano1996.jetbrains.incoder.ui.components.EditorPanel;
 import com.intellij.lang.Language;
 import com.intellij.openapi.Disposable;
@@ -20,28 +20,28 @@ import org.jetbrains.annotations.NotNull;
 public class CodeMarkdownBlock implements MarkdownBlock, Disposable {
 
     @Getter(AccessLevel.PROTECTED)
-    private final MarkdownPanel markdownPanel;
+    private final MarkdownChatMessage markdownChatMessage;
 
     @Getter(AccessLevel.PROTECTED)
     private final EditorPanel editorPanel;
 
     public CodeMarkdownBlock(
-            @NotNull MarkdownPanel markdownPanel, String language, @NotNull String text) {
-        this.markdownPanel = markdownPanel;
-        editorPanel =
-                new EditorPanel(markdownPanel.getProject(), EditorPanel.guessLanguage(language));
+            @NotNull MarkdownChatMessage markdownChatMessage,
+            String language,
+            @NotNull String text) {
+        this.markdownChatMessage = markdownChatMessage;
+        editorPanel = new EditorPanel(EditorPanel.guessLanguage(language));
         editorPanel.setText(text);
     }
 
     @Override
-    public JComponent getMainPanel() {
+    public JPanel getMainPanel() {
         var toolbar = CodeActionToolbar.createActionToolbarComponent(editorPanel, this);
 
         return new JPanel() {
             {
                 setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
                 setFocusable(false);
-
                 add(editorPanel);
                 add(toolbar);
             }
@@ -89,7 +89,7 @@ public class CodeMarkdownBlock implements MarkdownBlock, Disposable {
         var nextText = getNextText(markdownUntilCode.substring(delimiterIndex));
 
         editorPanel.setText(markdownUntilCode);
-        markdownPanel.next(new TextMarkdownBlock(markdownPanel, nextText + nextCode));
+        markdownChatMessage.next(new TextMarkdownBlock(markdownChatMessage, nextText + nextCode));
     }
 
     private void lookForNextTextBlock(String code) throws PatternFinder.PatternNotFound {
@@ -102,7 +102,7 @@ public class CodeMarkdownBlock implements MarkdownBlock, Disposable {
         var text = getNextText(code.substring(delimiterIndex));
 
         editorPanel.setText(codeUntilText);
-        markdownPanel.next(new TextMarkdownBlock(markdownPanel, text));
+        markdownChatMessage.next(new TextMarkdownBlock(markdownChatMessage, text));
     }
 
     private static @NotNull String getNextCodeLanguage(@NotNull String code) {
@@ -120,7 +120,7 @@ public class CodeMarkdownBlock implements MarkdownBlock, Disposable {
     }
 
     @Override
-    public void streamClosed() {
+    public void closeStream() {
         var code = editorPanel.getText();
 
         int delimiterIndex;
@@ -135,7 +135,7 @@ public class CodeMarkdownBlock implements MarkdownBlock, Disposable {
         var nextText = getNextText(code.substring(delimiterIndex));
 
         editorPanel.setText(codeUntilText);
-        markdownPanel.next(new TextMarkdownBlock(markdownPanel, nextText));
+        markdownChatMessage.next(new TextMarkdownBlock(markdownChatMessage, nextText));
     }
 
     @Override

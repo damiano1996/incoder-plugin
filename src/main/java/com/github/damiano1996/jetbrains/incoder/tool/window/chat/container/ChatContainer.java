@@ -26,9 +26,7 @@ public class ChatContainer {
     }
 
     private void createUIComponents() {
-
         JComponent chatToolBar = ChatActionToolbar.createActionToolbarComponent(chatPanel, this);
-
         chatToolBar.setPreferredSize(new Dimension(-1, 20));
 
         mainPanel =

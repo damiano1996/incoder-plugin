@@ -22,6 +22,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
                 .apiKey(getState().apiKey)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
+                .timeout(TIMEOUT)
                 .build();
     }
 
@@ -32,6 +33,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
                 .maxTokens(getState().maxTokens)
+                .timeout(TIMEOUT)
                 .build();
     }
 

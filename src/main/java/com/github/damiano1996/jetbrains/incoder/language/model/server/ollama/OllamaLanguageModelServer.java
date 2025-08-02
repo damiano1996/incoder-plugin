@@ -23,6 +23,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
                 .baseUrl(getState().baseUrl)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
+                .timeout(TIMEOUT)
                 .build();
     }
 
@@ -32,6 +33,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
                 .baseUrl(getState().baseUrl)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
+                .timeout(TIMEOUT)
                 .build();
     }
 

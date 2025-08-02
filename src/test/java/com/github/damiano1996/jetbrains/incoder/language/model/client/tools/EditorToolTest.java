@@ -191,13 +191,14 @@ public class EditorToolTest extends BasePlatformTestCase {
 
     public void testApplyPatches_ComplexScenario() {
         String originalContent =
-                "public class Test {\n"
-                        + "    private String field;\n"
-                        + "    \n"
-                        + "    public void method() {\n"
-                        + "        System.out.println(\"old\");\n"
-                        + "    }\n"
-                        + "}";
+                """
+                public class Test {
+                    private String field;
+                   \s
+                    public void method() {
+                        System.out.println("old");
+                    }
+                }""";
 
         List<EditorTool.PatchHunk> patchHunks =
                 Arrays.asList(
@@ -215,15 +216,16 @@ public class EditorToolTest extends BasePlatformTestCase {
         String result = getApplyPatches(originalContent, patchHunks);
 
         String expected =
-                "public class Test {\n"
-                        + "    private String field;\n"
-                        + "    private int count;\n"
-                        + "    \n"
-                        + "    public void method() {\n"
-                        + "        System.out.println(\"new\");\n"
-                        + "        count++;\n"
-                        + "    }\n"
-                        + "}";
+                """
+                public class Test {
+                    private String field;
+                    private int count;
+                   \s
+                    public void method() {
+                        System.out.println("new");
+                        count++;
+                    }
+                }""";
 
         assertEquals(expected, result);
     }

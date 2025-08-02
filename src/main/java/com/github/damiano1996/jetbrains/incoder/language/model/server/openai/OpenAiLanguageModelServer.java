@@ -22,6 +22,7 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
                 .maxTokens(getState().maxTokens)
+                .timeout(TIMEOUT)
                 .build();
     }
 
@@ -31,6 +32,7 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
                 .apiKey(getState().apiKey)
                 .modelName(getState().modelName)
                 .temperature(getState().temperature)
+                .timeout(TIMEOUT)
                 .build();
     }
 

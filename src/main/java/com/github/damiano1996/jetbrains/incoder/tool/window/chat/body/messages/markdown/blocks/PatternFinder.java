@@ -1,4 +1,4 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks;
+package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks;
 
 import java.util.regex.Pattern;
 

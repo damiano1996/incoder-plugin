@@ -4,11 +4,14 @@ import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatCons
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStream;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStreamImpl;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.error.ErrorMessageComponent;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.human.HumanMessageComponent;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.tool.ToolMessageComponent;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.error.ErrorChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.human.HumanChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.tool.ToolChatMessage;
 import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
 import com.github.damiano1996.jetbrains.incoder.ui.components.Layout;
 import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
@@ -16,8 +19,10 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.util.IconUtil;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
+import dev.langchain4j.service.tool.ToolExecution;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
@@ -27,6 +32,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 public class Chat {
@@ -40,8 +46,9 @@ public class Chat {
     private JButton submitButton;
     private ChatBody chatBody;
 
-    private ChatState chatState;
-    private ChatService chatService;
+    private boolean isStreaming = false;
+
+    @Nullable private StoppableTokenStream stoppableTokenStream;
 
     public Chat(Project project) {
         this.project = project;
@@ -56,9 +63,9 @@ public class Chat {
     }
 
     private void handleButtonAction() {
-        if (chatState.isGenerating()) {
-            chatState.requestStop();
-            updateProgressStatus();
+        if (stoppableTokenStream != null && isStreaming) {
+            stoppableTokenStream.stop();
+            uiStopping();
         } else {
             handleAction();
         }
@@ -75,57 +82,70 @@ public class Chat {
         log.debug("Prompt: {}", prompt);
         this.promptTextArea.setText("");
 
-        HumanMessageComponent humanMessageComponent = new HumanMessageComponent(prompt);
-        chatBody.addMessage(humanMessageComponent);
+        HumanChatMessage humanChatMessage = new HumanChatMessage(prompt);
+        chatBody.addChatMessage(humanChatMessage);
 
         try {
-            chatBody.addMessage(
-                    new AiMessageComponent(
-                            project,
+            chatBody.addChatMessage(
+                    new AiChatMessage(
                             LanguageModelServiceImpl.getInstance(project)
                                     .getSelectedModelName()
                                     .toLowerCase()));
+
+            chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
+
+            stoppableTokenStream =
+                    (StoppableTokenStream)
+                            new StoppableTokenStreamImpl(
+                                            LanguageModelServiceImpl.getInstance(project)
+                                                    .getClient()
+                                                    .chat(chatId, prompt))
+                                    .onStart(this::onStart)
+                                    .onStop(this::onStop)
+                                    .onPartialResponse(this::onNewToken)
+                                    .onCompleteResponse(chatResponse -> onComplete())
+                                    .onToolExecuted(this::onToolExecuted)
+                                    .onError(this::onError);
+
+            stoppableTokenStream.start();
+
         } catch (LanguageModelException e) {
-            chatBody.addMessage(new ErrorMessageComponent(e));
-            chatBody.updateUI();
-            return;
+            log.warn("Unable to start stream", e);
+            chatBody.addChatMessage(new ErrorChatMessage(e));
         }
+    }
 
-        chatService.processPrompt(
-                project,
-                chatId,
-                prompt,
-                this::updateProgressStatus,
-                token -> {
-                    if (chatBody.getCurrentMessage() != null) {
-                        chatBody.getCurrentMessage().write(token);
-                    }
-                    chatBody.updateUI();
-                },
-                toolExecution -> {
-                    log.debug("Tool executed");
-                    closeCurrentMessageStream();
+    private void onStop() {
+        isStreaming = false;
+        uiIdle();
+    }
 
-                    log.debug("Adding new tool message component");
-                    chatBody.addMessage(new ToolMessageComponent(toolExecution));
+    private void onStart() {
+        isStreaming = true;
+        uiGenerating();
+    }
 
-                    log.debug("Resuming with an ai message");
-                    chatBody.addMessage(new AiMessageComponent(project));
+    private void onNewToken(String token) {
+        chatBody.write(token);
+    }
 
-                    chatBody.updateUI();
-                },
-                () -> {
-                    closeCurrentMessageStream();
-                    updateProgressStatus();
-                },
-                throwable -> {
-                    closeCurrentMessageStream();
+    private void onToolExecuted(ToolExecution toolExecution) {
+        log.debug("Tool executed");
+        chatBody.closeStream();
+        log.debug("Adding new tool message component");
+        chatBody.addChatMessage(new ToolChatMessage(toolExecution));
+    }
 
-                    chatBody.addMessage(new ErrorMessageComponent(throwable));
-                    chatBody.updateUI();
+    private void onComplete() {
+        isStreaming = false;
+        chatBody.closeStream();
+        uiIdle();
+    }
 
-                    updateProgressStatus();
-                });
+    private void onError(Throwable throwable) {
+        chatBody.closeStream();
+        chatBody.addChatMessage(new ErrorChatMessage(throwable));
+        uiIdle();
     }
 
     private void handleExamplePromptSelected(@NotNull ActionEvent e) {
@@ -136,35 +156,37 @@ public class Chat {
         promptTextArea.setCaretPosition(selectedPrompt.length());
     }
 
-    private void closeCurrentMessageStream() {
-        if (chatBody.getCurrentMessage() != null) {
-            chatBody.getCurrentMessage().streamClosed();
-        }
+    private void uiGenerating() {
+        this.promptTextArea.setEnabled(false);
 
-        promptTextArea.requestFocusInWindow();
+        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, true);
     }
 
-    private synchronized void updateProgressStatus() {
-        log.debug("Is generating...");
-        this.promptTextArea.setEnabled(!chatState.isGenerating());
-        if (!chatState.isGenerating()) this.promptTextArea.requestFocusInWindow();
+    private void uiStopping() {
+        this.promptTextArea.setEnabled(false);
 
-        if (chatState.isGenerating()) {
-            this.submitButton.setIcon(AllIcons.Actions.Suspend);
-            this.submitButton.setToolTipText(STOP_TOOLTIP);
-            this.submitButton.setEnabled(false);
-        } else {
-            this.submitButton.setIcon(AllIcons.Actions.Execute);
-            this.submitButton.setToolTipText(SEND_MESSAGE_TOOLTIP);
-            this.submitButton.setEnabled(true);
-        }
+        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, false);
+    }
+
+    private void uiIdle() {
+        this.promptTextArea.setEnabled(true);
+        this.promptTextArea.requestFocusInWindow();
+
+        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Execute), SEND_MESSAGE_TOOLTIP, true);
+    }
+
+    private static @NotNull Icon getSubmitIcon(@NotNull Icon icon) {
+        return IconUtil.colorize(icon, JBUI.CurrentTheme.Focus.focusColor());
+    }
+
+    private void updateSubmitButton(@NotNull Icon execute, String sendMessageTooltip, boolean b) {
+        this.submitButton.setIcon(execute);
+        this.submitButton.setToolTipText(sendMessageTooltip);
+        this.submitButton.setEnabled(b);
     }
 
     private void createUIComponents() {
-        chatState = new ChatState();
-        chatService = new ChatServiceImpl(chatState);
-
-        promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 1);
+        promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 2);
         promptTextArea.setMargin(JBUI.insets(2, 9, 2, 6));
         promptTextArea.setLineWrap(true);
 
@@ -220,7 +242,7 @@ public class Chat {
         mainPanel.setMinimumSize(new Dimension(400, 400));
         mainPanel.setPreferredSize(new Dimension(400, 400));
 
-        updateProgressStatus();
+        uiIdle();
     }
 
     private @NotNull JScrollPane getPromptScrollPane() {
