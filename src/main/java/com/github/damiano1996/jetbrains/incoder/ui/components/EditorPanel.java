@@ -7,7 +7,6 @@ import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.fileTypes.LanguageFileType;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.TextAccessor;
@@ -23,13 +22,11 @@ import org.jetbrains.annotations.NotNull;
 public class EditorPanel extends JPanel implements TextAccessor, Disposable {
 
     @Getter private final Language language;
-    private final Project project;
 
     private CompletableFuture<Editor> editorFuture = new CompletableFuture<>();
 
-    public EditorPanel(@NotNull Project project, @NotNull Language language) {
+    public EditorPanel(@NotNull Language language) {
         this.language = language;
-        this.project = project;
 
         setLayout(new BorderLayout());
         setFocusable(false);
@@ -55,7 +52,7 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
         Document document = EditorFactory.getInstance().createDocument("");
 
         return EditorFactory.getInstance()
-                .createEditor(document, project, virtualFile, false, EditorKind.PREVIEW);
+                .createEditor(document, null, virtualFile, false, EditorKind.PREVIEW);
     }
 
     private void configureEditor(Editor editor) {

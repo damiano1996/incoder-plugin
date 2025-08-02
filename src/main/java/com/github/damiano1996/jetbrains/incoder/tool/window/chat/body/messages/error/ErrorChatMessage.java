@@ -2,7 +2,7 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.
 
 import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatConstants.ARC_DIAMETER;
 
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.MessageComponent;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ChatMessage;
 import com.github.damiano1996.jetbrains.incoder.ui.components.RoundedUtils;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.HelpTooltip;
@@ -14,13 +14,13 @@ import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
 
-public class ErrorMessageComponent implements MessageComponent {
+public class ErrorChatMessage implements ChatMessage {
 
     private final Throwable throwable;
 
     @Getter private JPanel mainPanel;
 
-    public ErrorMessageComponent(Throwable throwable) {
+    public ErrorChatMessage(Throwable throwable) {
         this.throwable = throwable;
         createUIComponents();
     }
@@ -59,15 +59,4 @@ public class ErrorMessageComponent implements MessageComponent {
         mainPanel.setBorder(JBUI.Borders.empty(10));
         mainPanel.add(wrapper);
     }
-
-    @Override
-    public void write(String token) {}
-
-    @Override
-    public String getText() {
-        return throwable.toString();
-    }
-
-    @Override
-    public void streamClosed() {}
 }

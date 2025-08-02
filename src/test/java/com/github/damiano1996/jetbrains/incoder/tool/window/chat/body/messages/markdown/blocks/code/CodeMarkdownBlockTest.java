@@ -1,7 +1,8 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code;
+package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.code;
 
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.MarkdownBlock;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
 
         if (streamCompleted) {
             try {
-                codeMarkdownBlock.streamClosed();
+                codeMarkdownBlock.closeStream();
             } catch (StopStreamException ignored) {
             }
         }
@@ -65,8 +66,9 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
     }
 
     private @NotNull CodeMarkdownBlock getCodeMarkdownBlock(String language) {
-        MarkdownPanel mockMarkdownPanel =
-                new MarkdownPanel(getProject()) {
+        MarkdownChatMessage mockMarkdownChatMessage =
+                new MarkdownChatMessage(new ChatBody(e -> {})) {
+
                     private boolean initialized = false;
 
                     @Override
@@ -80,8 +82,8 @@ public class CodeMarkdownBlockTest extends BasePlatformTestCase {
                     }
                 };
 
-        var codeBlock = new CodeMarkdownBlock(mockMarkdownPanel, language, "");
-        mockMarkdownPanel.next(codeBlock);
+        var codeBlock = new CodeMarkdownBlock(mockMarkdownChatMessage, language, "");
+        mockMarkdownChatMessage.next(codeBlock);
 
         return codeBlock;
     }

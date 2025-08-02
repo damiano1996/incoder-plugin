@@ -1,132 +1,194 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body;
 
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.examples.ExamplePromptsComponent;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.MessageComponent;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.StreamWriter;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.EmptyStackException;
+import java.util.Stack;
 import javax.swing.*;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@Getter
-public class ChatBody {
-    private JPanel mainPanel;
-    private JPanel messagesPanel;
-    private JScrollPane scrollPane;
+/**
+ * Chat body component that manages the display of messages and example prompts with automatic
+ * scrolling and dynamic content management.
+ */
+@Slf4j
+public class ChatBody implements StreamWriter {
 
-    @Getter @Nullable private MessageComponent currentMessage;
-    private ExamplePromptsComponent examplePromptsComponent;
-    private boolean hasMessages = false;
-    private boolean userScrolledUp = false;
+    private static final int SCROLL_THRESHOLD = 50;
 
-    public ChatBody(ActionListener onExamplePromptSelected) {
-        createUIComponents(onExamplePromptSelected);
+    @Getter private final JPanel mainPanel;
+    private final JPanel messagesPanel;
+    private final JBScrollPane scrollPane;
+
+    @Getter private final Stack<ChatMessage> messages;
+
+    @Nullable private ExamplePromptsComponent examplePromptsComponent;
+
+    private volatile boolean userScrolledUp = false;
+    private volatile boolean programmaticScroll = false;
+
+    public ChatBody(@Nullable ActionListener onExamplePromptSelected) {
+        this.messages = new Stack<>();
+        this.messagesPanel = createMessagesPanel();
+        this.scrollPane = createScrollPane();
+        this.mainPanel = createMainPanel();
+
+        initializeExamplePrompts(onExamplePromptSelected);
+        setupScrollListener();
     }
 
-    public void addMessage(@NotNull MessageComponent messageComponent) {
+    /**
+     * Adds a new message to the chat and updates the UI. Thread-safe method that ensures UI updates
+     * happen on EDT.
+     */
+    public void addChatMessage(ChatMessage chatMessage) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            doAddMessage(chatMessage);
+        } else {
+            SwingUtilities.invokeLater(() -> doAddMessage(chatMessage));
+        }
+    }
+
+    private void doAddMessage(ChatMessage messageComponent) {
+        hideExamplePromptsIfNeeded();
+
+        messages.add(messageComponent);
+        messagesPanel.add(messageComponent.getMainPanel());
+
+        scrollToBottom();
+
+        updateUI();
+    }
+
+    /** Forces a UI refresh and scrolls to bottom if user hasn't scrolled up. */
+    private void updateUI() {
+        if (SwingUtilities.isEventDispatchThread()) {
+            performUpdate();
+        } else {
+            SwingUtilities.invokeLater(this::performUpdate);
+        }
+    }
+
+    /** Scrolls to the bottom of the chat, regardless of current scroll position. */
+    public void scrollToBottom() {
         SwingUtilities.invokeLater(
                 () -> {
-                    hideExamplePrompts();
-
-                    messagesPanel.add(messageComponent.getMainPanel());
-                    currentMessage = messageComponent;
-                    performUpdate();
+                    programmaticScroll = true;
+                    JScrollBar vertical = scrollPane.getVerticalScrollBar();
+                    vertical.setValue(vertical.getMaximum());
+                    userScrolledUp = false;
                 });
     }
 
-    private void hideExamplePrompts() {
-        if (!hasMessages && examplePromptsComponent != null) {
+    private void hideExamplePromptsIfNeeded() {
+        if (messages.isEmpty() && examplePromptsComponent != null) {
             messagesPanel.remove(examplePromptsComponent.getMainPanel());
-            hasMessages = true;
         }
-    }
-
-    public void updateUI() {
-        SwingUtilities.invokeLater(this::performUpdate);
     }
 
     private void performUpdate() {
-        messagesPanel.invalidate();
-        scrollPane.getViewport().invalidate();
-        scrollPane.revalidate();
-
         if (!userScrolledUp) {
-            scrollToBottom();
+            scrollToBottomInternal();
         }
     }
 
-    private void scrollToBottom() {
-        JScrollBar vertical = scrollPane.getVerticalScrollBar();
-        SwingUtilities.invokeLater(() -> vertical.setValue(vertical.getMaximum()));
+    private void scrollToBottomInternal() {
+        SwingUtilities.invokeLater(
+                () -> {
+                    programmaticScroll = true;
+                    JScrollBar vertical = scrollPane.getVerticalScrollBar();
+                    vertical.setValue(vertical.getMaximum());
+                });
     }
 
-    private void createUIComponents(ActionListener onExamplePromptSelected) {
-        messagesPanel = createMessagesPanel();
-
+    private void initializeExamplePrompts(@Nullable ActionListener onExamplePromptSelected) {
         if (onExamplePromptSelected != null) {
             examplePromptsComponent = new ExamplePromptsComponent(onExamplePromptSelected);
             messagesPanel.add(examplePromptsComponent.getMainPanel());
         }
+    }
 
-        JPanel wrapperPanel = createWrapperPanel();
-        scrollPane = createScrollPane(wrapperPanel);
+    private void setupScrollListener() {
+        JScrollBar vertical = scrollPane.getVerticalScrollBar();
+        vertical.addAdjustmentListener(
+                e -> {
+                    if (programmaticScroll) {
+                        programmaticScroll = false;
+                        return;
+                    }
 
-        mainPanel =
-                FormBuilder.createFormBuilder()
-                        .addComponentFillVertically(scrollPane, 0)
-                        .getPanel();
+                    int value = vertical.getValue();
+                    int extent = vertical.getModel().getExtent();
+                    int max = vertical.getMaximum();
 
-        mainPanel.setDoubleBuffered(true);
-        mainPanel.setBorder(JBUI.Borders.empty());
-        mainPanel.setMinimumSize(new Dimension(400, -1));
-        mainPanel.setPreferredSize(new Dimension(400, -1));
-        mainPanel.setOpaque(true);
+                    userScrolledUp = (value + extent + SCROLL_THRESHOLD) < max;
+                });
     }
 
     private @NotNull JPanel createMessagesPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.setAlignmentY(Component.TOP_ALIGNMENT);
-        panel.setDoubleBuffered(true);
-        panel.setBorder(JBUI.Borders.empty());
+        panel.setOpaque(false);
+        panel.setBorder(JBUI.Borders.empty(8));
         return panel;
     }
 
-    private @NotNull JPanel createWrapperPanel() {
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.add(messagesPanel, BorderLayout.NORTH);
-        wrapper.setDoubleBuffered(true);
-        return wrapper;
-    }
+    private @NotNull JBScrollPane createScrollPane() {
+        JPanel wrapperPanel = new JPanel(new BorderLayout());
+        wrapperPanel.add(messagesPanel, BorderLayout.NORTH);
+        wrapperPanel.add(Box.createVerticalGlue(), BorderLayout.CENTER);
+        wrapperPanel.setOpaque(false);
 
-    private @NotNull JBScrollPane createScrollPane(JPanel wrapperPanel) {
         JBScrollPane scroll = new JBScrollPane(wrapperPanel);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scroll.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
-        scroll.setDoubleBuffered(true);
         scroll.setBorder(JBUI.Borders.empty());
 
-        JViewport viewport = scroll.getViewport();
-        viewport.setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
-        viewport.setOpaque(true);
-
-        JScrollBar vertical = scroll.getVerticalScrollBar();
-        vertical.addAdjustmentListener(
-                e -> {
-                    int value = vertical.getValue();
-                    int extent = vertical.getModel().getExtent();
-                    int max = vertical.getMaximum();
-
-                    // If scrollbar is exactly at the bottom, re-enable auto-scroll
-                    userScrolledUp = !(value + extent >= max);
-                });
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.getVerticalScrollBar().setBlockIncrement(64);
 
         return scroll;
+    }
+
+    private @NotNull JPanel createMainPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.setBorder(JBUI.Borders.empty());
+        panel.setOpaque(false);
+        return panel;
+    }
+
+    @Override
+    public void write(String token) {
+        try {
+            messages.peek().write(token);
+            updateUI();
+        } catch (EmptyStackException e) {
+            log.warn("Unable to write token", e);
+        }
+    }
+
+    @Override
+    public String getText() {
+        return "";
+    }
+
+    @Override
+    public void closeStream() {
+        try {
+            messages.peek().closeStream();
+            updateUI();
+        } catch (EmptyStackException e) {
+            log.warn("Unable to close stream", e);
+        }
     }
 }

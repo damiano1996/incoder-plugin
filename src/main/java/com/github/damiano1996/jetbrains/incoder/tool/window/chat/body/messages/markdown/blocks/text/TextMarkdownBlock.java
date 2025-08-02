@@ -1,12 +1,12 @@
-package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.text;
+package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.text;
 
-import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel.MARKDOWN_CODE_BLOCK_DELIMITER;
-import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel.MARKDOWN_CODE_BLOCK_START_REGEX;
+import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage.MARKDOWN_CODE_BLOCK_DELIMITER;
+import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage.MARKDOWN_CODE_BLOCK_START_REGEX;
 
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.MarkdownPanel;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.MarkdownBlock;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.PatternFinder;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.markdown.blocks.code.CodeMarkdownBlock;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.MarkdownBlock;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.PatternFinder;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.code.CodeMarkdownBlock;
 import com.github.damiano1996.jetbrains.incoder.ui.components.MarkdownEditorPane;
 import javax.swing.*;
 import lombok.extern.slf4j.Slf4j;
@@ -15,15 +15,15 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class TextMarkdownBlock implements MarkdownBlock {
 
-    private final MarkdownPanel markdownPanel;
+    private final MarkdownChatMessage markdownChatMessage;
     private final MarkdownEditorPane markdownEditorPane;
 
-    public TextMarkdownBlock(MarkdownPanel markdownPanel) {
-        this(markdownPanel, "");
+    public TextMarkdownBlock(MarkdownChatMessage markdownChatMessage) {
+        this(markdownChatMessage, "");
     }
 
-    public TextMarkdownBlock(MarkdownPanel markdownPanel, String text) {
-        this.markdownPanel = markdownPanel;
+    public TextMarkdownBlock(MarkdownChatMessage markdownChatMessage, String text) {
+        this.markdownChatMessage = markdownChatMessage;
         markdownEditorPane = new MarkdownEditorPane();
         markdownEditorPane.setText(text);
     }
@@ -64,7 +64,7 @@ public class TextMarkdownBlock implements MarkdownBlock {
 
         log.debug("Updating current block and creating the next");
         markdownEditorPane.setText(textUntilCode);
-        markdownPanel.next(new CodeMarkdownBlock(markdownPanel, language, nextCode));
+        markdownChatMessage.next(new CodeMarkdownBlock(markdownChatMessage, language, nextCode));
     }
 
     @Override
@@ -73,10 +73,13 @@ public class TextMarkdownBlock implements MarkdownBlock {
     }
 
     @Override
-    public void streamClosed() {}
-
-    @Override
-    public JComponent getMainPanel() {
-        return markdownEditorPane;
+    public JPanel getMainPanel() {
+        return new JPanel() {
+            {
+                setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+                setFocusable(false);
+                add(markdownEditorPane);
+            }
+        };
     }
 }

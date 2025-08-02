@@ -7,10 +7,11 @@ import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServ
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStream;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStreamImpl;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiMessageComponent;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.error.ErrorMessageComponent;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.human.HumanMessageComponent;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.tool.ToolMessageComponent;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.error.ErrorChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.human.HumanChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.tool.ToolChatMessage;
 import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
 import com.github.damiano1996.jetbrains.incoder.ui.components.Layout;
 import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
@@ -44,6 +45,7 @@ public class Chat {
     private ExpandableTextArea promptTextArea;
     private JButton submitButton;
     private ChatBody chatBody;
+    private MarkdownChatMessage markdownChatMessage;
 
     private boolean isStreaming = false;
 
@@ -81,16 +83,17 @@ public class Chat {
         log.debug("Prompt: {}", prompt);
         this.promptTextArea.setText("");
 
-        HumanMessageComponent humanMessageComponent = new HumanMessageComponent(prompt);
-        chatBody.addMessage(humanMessageComponent);
+        HumanChatMessage humanChatMessage = new HumanChatMessage(prompt);
+        chatBody.addChatMessage(humanChatMessage);
 
         try {
-            chatBody.addMessage(
-                    new AiMessageComponent(
-                            project,
+            chatBody.addChatMessage(
+                    new AiChatMessage(
                             LanguageModelServiceImpl.getInstance(project)
                                     .getSelectedModelName()
                                     .toLowerCase()));
+
+            chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
 
             stoppableTokenStream =
                     (StoppableTokenStream)
@@ -108,8 +111,7 @@ public class Chat {
             stoppableTokenStream.start();
 
         } catch (LanguageModelException e) {
-            chatBody.addMessage(new ErrorMessageComponent(e));
-            chatBody.updateUI();
+            chatBody.addChatMessage(new ErrorChatMessage(e));
         }
     }
 
@@ -124,37 +126,25 @@ public class Chat {
     }
 
     private void onNewToken(String token) {
-        if (chatBody.getCurrentMessage() != null) {
-            chatBody.getCurrentMessage().write(token);
-        }
-        chatBody.updateUI();
+        chatBody.write(token);
     }
 
     private void onToolExecuted(ToolExecution toolExecution) {
         log.debug("Tool executed");
-        closeCurrentMessageStream();
-
+        chatBody.closeStream();
         log.debug("Adding new tool message component");
-        chatBody.addMessage(new ToolMessageComponent(toolExecution));
-
-        log.debug("Resuming with an ai message");
-        chatBody.addMessage(new AiMessageComponent(project));
-
-        chatBody.updateUI();
+        chatBody.addChatMessage(new ToolChatMessage(toolExecution));
     }
 
     private void onComplete() {
         isStreaming = false;
-        closeCurrentMessageStream();
+        chatBody.closeStream();
         uiIdle();
     }
 
     private void onError(Throwable throwable) {
-        closeCurrentMessageStream();
-
-        chatBody.addMessage(new ErrorMessageComponent(throwable));
-        chatBody.updateUI();
-
+        chatBody.closeStream();
+        chatBody.addChatMessage(new ErrorChatMessage(throwable));
         uiIdle();
     }
 
@@ -164,12 +154,6 @@ public class Chat {
         promptTextArea.setText(selectedPrompt);
         promptTextArea.requestFocusInWindow();
         promptTextArea.setCaretPosition(selectedPrompt.length());
-    }
-
-    private void closeCurrentMessageStream() {
-        if (chatBody.getCurrentMessage() != null) {
-            chatBody.getCurrentMessage().streamClosed();
-        }
     }
 
     private void uiGenerating() {

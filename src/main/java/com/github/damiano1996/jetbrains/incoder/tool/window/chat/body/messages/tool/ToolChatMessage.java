@@ -4,7 +4,7 @@ import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatCons
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.commandline.CommandLineTool;
-import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.MessageComponent;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ChatMessage;
 import com.github.damiano1996.jetbrains.incoder.ui.components.RoundedUtils;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.HelpTooltip;
@@ -22,13 +22,13 @@ import javax.swing.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-public class ToolMessageComponent implements MessageComponent {
+public class ToolChatMessage implements ChatMessage {
 
     private final ToolExecution toolExecution;
 
     @Getter private JPanel mainPanel;
 
-    public ToolMessageComponent(ToolExecution toolExecution) {
+    public ToolChatMessage(ToolExecution toolExecution) {
         this.toolExecution = toolExecution;
         createUIComponents();
     }
@@ -92,15 +92,4 @@ public class ToolMessageComponent implements MessageComponent {
         return CommandLineTool.truncateOutput(e.getValue().toString(), 10, 5, 5)
                 .replace("\n", "<br>");
     }
-
-    @Override
-    public void write(String token) {}
-
-    @Override
-    public String getText() {
-        return toolExecution.toString();
-    }
-
-    @Override
-    public void streamClosed() {}
 }
