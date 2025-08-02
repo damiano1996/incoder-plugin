@@ -7,8 +7,10 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.JBUI;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.EmptyStackException;
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Chat body component that manages the display of messages and example prompts with automatic
- * scrolling and dynamic content management.
+ * scrolling and dynamic content management. Thread-safe implementation with proper EDT handling.
  */
 @Slf4j
 public class ChatBody implements StreamWriter {
@@ -27,64 +29,67 @@ public class ChatBody implements StreamWriter {
     @Getter private final JPanel mainPanel;
     private final JPanel messagesPanel;
     private final JBScrollPane scrollPane;
+    private final JScrollBar verticalScrollBar;
 
-    @Getter private final Stack<ChatMessage> messages;
+    // Thread-safe collections and flags
+    private final List<ChatMessage> messages = Collections.synchronizedList(new ArrayList<>());
+    private final AtomicBoolean userScrolledUp = new AtomicBoolean(false);
+    private final AtomicBoolean programmaticScroll = new AtomicBoolean(false);
 
     @Nullable private ExamplePromptsComponent examplePromptsComponent;
 
-    private volatile boolean userScrolledUp = false;
-    private volatile boolean programmaticScroll = false;
-
     public ChatBody(@Nullable ActionListener onExamplePromptSelected) {
-        this.messages = new Stack<>();
         this.messagesPanel = createMessagesPanel();
         this.scrollPane = createScrollPane();
+        this.verticalScrollBar = scrollPane.getVerticalScrollBar();
         this.mainPanel = createMainPanel();
 
         initializeExamplePrompts(onExamplePromptSelected);
         setupScrollListener();
     }
 
+    /** Returns an unmodifiable view of the messages list for safe external access. */
+    public List<ChatMessage> getMessages() {
+        return Collections.unmodifiableList(new ArrayList<>(messages));
+    }
+
     /**
      * Adds a new message to the chat and updates the UI. Thread-safe method that ensures UI updates
      * happen on EDT.
      */
-    public void addChatMessage(ChatMessage chatMessage) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            doAddMessage(chatMessage);
-        } else {
-            SwingUtilities.invokeLater(() -> doAddMessage(chatMessage));
-        }
+    public void addChatMessage(@NotNull ChatMessage chatMessage) {
+        // Ensure UI updates happen on EDT
+        SwingUtilities.invokeLater(() -> doAddMessage(chatMessage));
     }
 
-    private void doAddMessage(ChatMessage messageComponent) {
+    private void doAddMessage(@NotNull ChatMessage chatMessage) {
         hideExamplePromptsIfNeeded();
 
-        messages.add(messageComponent);
-        messagesPanel.add(messageComponent.getMainPanel());
+        messages.add(chatMessage);
+        messagesPanel.add(chatMessage.getMainPanel());
 
-        scrollToBottom();
-
-        updateUI();
+        refreshUI();
+        scrollToBottomIfNeeded();
     }
 
-    /** Forces a UI refresh and scrolls to bottom if user hasn't scrolled up. */
-    private void updateUI() {
-        if (SwingUtilities.isEventDispatchThread()) {
-            performUpdate();
-        } else {
-            SwingUtilities.invokeLater(this::performUpdate);
+    private void refreshUI() {
+        messagesPanel.revalidate();
+        messagesPanel.repaint();
+        mainPanel.revalidate();
+        mainPanel.repaint();
+    }
+
+    private void scrollToBottomIfNeeded() {
+        if (!userScrolledUp.get()) {
+            scrollToBottomInternal();
         }
     }
 
-    /** Scrolls to the bottom of the chat, regardless of current scroll position. */
-    public void scrollToBottom() {
+    private void scrollToBottomInternal() {
         SwingUtilities.invokeLater(
                 () -> {
-                    programmaticScroll = true;
-                    JScrollBar vertical = scrollPane.getVerticalScrollBar();
-                    vertical.setValue(vertical.getMaximum());
-                    userScrolledUp = false;
+                    programmaticScroll.set(true);
+                    verticalScrollBar.setValue(verticalScrollBar.getMaximum());
                 });
     }
 
@@ -94,19 +99,10 @@ public class ChatBody implements StreamWriter {
         }
     }
 
-    private void performUpdate() {
-        if (!userScrolledUp) {
-            scrollToBottomInternal();
+    private void showExamplePromptsIfNeeded() {
+        if (messages.isEmpty() && examplePromptsComponent != null) {
+            messagesPanel.add(examplePromptsComponent.getMainPanel(), 0);
         }
-    }
-
-    private void scrollToBottomInternal() {
-        SwingUtilities.invokeLater(
-                () -> {
-                    programmaticScroll = true;
-                    JScrollBar vertical = scrollPane.getVerticalScrollBar();
-                    vertical.setValue(vertical.getMaximum());
-                });
     }
 
     private void initializeExamplePrompts(@Nullable ActionListener onExamplePromptSelected) {
@@ -117,23 +113,32 @@ public class ChatBody implements StreamWriter {
     }
 
     private void setupScrollListener() {
-        JScrollBar vertical = scrollPane.getVerticalScrollBar();
-        vertical.addAdjustmentListener(
+        verticalScrollBar.addAdjustmentListener(
                 e -> {
-                    if (programmaticScroll) {
-                        programmaticScroll = false;
+                    if (programmaticScroll.compareAndSet(true, false)) {
                         return;
                     }
 
-                    int value = vertical.getValue();
-                    int extent = vertical.getModel().getExtent();
-                    int max = vertical.getMaximum();
+                    int value = verticalScrollBar.getValue();
+                    int extent = verticalScrollBar.getModel().getExtent();
+                    int maximum = verticalScrollBar.getMaximum();
 
-                    userScrolledUp = (value + extent + SCROLL_THRESHOLD) < max;
+                    boolean isNearBottom = (value + extent + SCROLL_THRESHOLD) >= maximum;
+                    userScrolledUp.set(!isNearBottom);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug(
+                                "Scroll position: value={}, extent={}, max={}, userScrolledUp={}",
+                                value,
+                                extent,
+                                maximum,
+                                userScrolledUp.get());
+                    }
                 });
     }
 
-    private @NotNull JPanel createMessagesPanel() {
+    @NotNull
+    private JPanel createMessagesPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -142,7 +147,8 @@ public class ChatBody implements StreamWriter {
         return panel;
     }
 
-    private @NotNull JBScrollPane createScrollPane() {
+    @NotNull
+    private JBScrollPane createScrollPane() {
         JPanel wrapperPanel = new JPanel(new BorderLayout());
         wrapperPanel.add(messagesPanel, BorderLayout.NORTH);
         wrapperPanel.add(Box.createVerticalGlue(), BorderLayout.CENTER);
@@ -152,14 +158,13 @@ public class ChatBody implements StreamWriter {
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scroll.setBorder(JBUI.Borders.empty());
-
         scroll.getVerticalScrollBar().setUnitIncrement(16);
-        scroll.getVerticalScrollBar().setBlockIncrement(64);
 
         return scroll;
     }
 
-    private @NotNull JPanel createMainPanel() {
+    @NotNull
+    private JPanel createMainPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(scrollPane, BorderLayout.CENTER);
         panel.setBorder(JBUI.Borders.empty());
@@ -168,27 +173,80 @@ public class ChatBody implements StreamWriter {
     }
 
     @Override
-    public void write(String token) {
-        try {
-            messages.peek().write(token);
-            updateUI();
-        } catch (EmptyStackException e) {
-            log.warn("Unable to write token", e);
-        }
+    public void write(@NotNull String token) {
+        SwingUtilities.invokeLater(
+                () -> {
+                    synchronized (messages) {
+                        if (messages.isEmpty()) {
+                            log.warn("No messages available to write token to");
+                            return;
+                        }
+
+                        try {
+                            ChatMessage lastMessage = messages.get(messages.size() - 1);
+                            lastMessage.write(token);
+                            // Only refresh UI periodically to avoid performance issues
+                            refreshUIThrottled();
+                        } catch (Exception e) {
+                            log.error("Error writing token to message", e);
+                        }
+                    }
+                });
     }
 
     @Override
     public String getText() {
-        return "";
+        synchronized (messages) {
+            if (messages.isEmpty()) {
+                return "";
+            }
+
+            try {
+                return messages.get(messages.size() - 1).getText();
+            } catch (Exception e) {
+                log.error("Error getting text from last message", e);
+                return "";
+            }
+        }
     }
 
     @Override
     public void closeStream() {
-        try {
-            messages.peek().closeStream();
-            updateUI();
-        } catch (EmptyStackException e) {
-            log.warn("Unable to close stream", e);
+        SwingUtilities.invokeLater(
+                () -> {
+                    synchronized (messages) {
+                        if (messages.isEmpty()) {
+                            log.warn("No messages available to close stream on");
+                            return;
+                        }
+
+                        try {
+                            ChatMessage lastMessage = messages.get(messages.size() - 1);
+                            lastMessage.closeStream();
+                            refreshUI();
+                            scrollToBottomIfNeeded();
+                        } catch (Exception e) {
+                            log.error("Error closing stream on message", e);
+                        }
+                    }
+                });
+    }
+
+    // Throttled UI refresh to prevent excessive repaints during streaming
+    private volatile long lastRefreshTime = 0;
+    private static final long REFRESH_THROTTLE_MS = 50; // Max 20 FPS
+
+    private void refreshUIThrottled() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastRefreshTime > REFRESH_THROTTLE_MS) {
+            lastRefreshTime = currentTime;
+            refreshUI();
+            scrollToBottomIfNeeded();
         }
+    }
+
+    /** Checks if the chat is empty (no messages). */
+    public boolean isEmpty() {
+        return messages.isEmpty();
     }
 }

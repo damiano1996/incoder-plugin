@@ -1,9 +1,13 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown;
 
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ChatMessage;
+import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.MarkdownBlock;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.code.CodeMarkdownBlock;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.text.TextMarkdownBlock;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import java.util.ArrayList;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 public class MarkdownChatMessageTest extends BasePlatformTestCase {
@@ -11,17 +15,27 @@ public class MarkdownChatMessageTest extends BasePlatformTestCase {
     private ChatBody chatBody;
     private MarkdownChatMessage markdownChatMessage;
 
+    private List<ChatMessage> messages;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         chatBody = new ChatBody(e -> {});
 
-        markdownChatMessage = new MarkdownChatMessage(chatBody);
+        messages = new ArrayList<>();
+        markdownChatMessage =
+                new MarkdownChatMessage(chatBody) {
+                    @Override
+                    public void next(MarkdownBlock markdownBlock) {
+                        super.next(markdownBlock);
+                        messages.add(markdownBlock);
+                    }
+                };
     }
 
     @Override
     public void tearDown() throws Exception {
-        chatBody.getMessages().stream()
+        messages.stream()
                 .filter(markdownBlock -> markdownBlock instanceof CodeMarkdownBlock)
                 .forEach(markdownBlock -> ((CodeMarkdownBlock) markdownBlock).dispose());
 
@@ -38,22 +52,21 @@ public class MarkdownChatMessageTest extends BasePlatformTestCase {
 
         simulateStream(streamedMarkdown, markdownChatMessage);
 
-        assertTrue(chatBody.getMessages().get(0).getText().isEmpty());
-        assertInstanceOf(chatBody.getMessages().get(0), TextMarkdownBlock.class);
+        assertTrue(messages.get(0).getText().isEmpty());
+        assertInstanceOf(messages.get(0), TextMarkdownBlock.class);
 
         assertEquals(
                 """
                 // a java code
                 """,
-                chatBody.getMessages().get(1).getText());
-        assertInstanceOf(chatBody.getMessages().get(1), CodeMarkdownBlock.class);
-        assertEquals(
-                "JAVA", ((CodeMarkdownBlock) chatBody.getMessages().get(1)).getLanguage().getID());
+                messages.get(1).getText());
+        assertInstanceOf(messages.get(1), CodeMarkdownBlock.class);
+        assertEquals("JAVA", ((CodeMarkdownBlock) messages.get(1)).getLanguage().getID());
 
-        assertTrue(chatBody.getMessages().get(2).getText().isEmpty());
-        assertInstanceOf(chatBody.getMessages().get(2), TextMarkdownBlock.class);
+        assertTrue(messages.get(2).getText().isEmpty());
+        assertInstanceOf(messages.get(2), TextMarkdownBlock.class);
 
-        assertEquals(3, chatBody.getMessages().size());
+        assertEquals(3, messages.size());
     }
 
     public void testWrite_StreamACodeWithCommentAfter() {
@@ -68,27 +81,26 @@ public class MarkdownChatMessageTest extends BasePlatformTestCase {
 
         simulateStream(streamedMarkdown, markdownChatMessage);
 
-        assertTrue(chatBody.getMessages().get(0).getText().isEmpty());
-        assertInstanceOf(chatBody.getMessages().get(0), TextMarkdownBlock.class);
+        assertTrue(messages.get(0).getText().isEmpty());
+        assertInstanceOf(messages.get(0), TextMarkdownBlock.class);
 
         assertEquals(
                 """
                 // a java code
                 """,
-                chatBody.getMessages().get(1).getText());
-        assertInstanceOf(chatBody.getMessages().get(1), CodeMarkdownBlock.class);
-        assertEquals(
-                "JAVA", ((CodeMarkdownBlock) chatBody.getMessages().get(1)).getLanguage().getID());
+                messages.get(1).getText());
+        assertInstanceOf(messages.get(1), CodeMarkdownBlock.class);
+        assertEquals("JAVA", ((CodeMarkdownBlock) messages.get(1)).getLanguage().getID());
 
         assertEquals(
                 """
 
 A comment
 """,
-                chatBody.getMessages().get(2).getText());
-        assertInstanceOf(chatBody.getMessages().get(2), TextMarkdownBlock.class);
+                messages.get(2).getText());
+        assertInstanceOf(messages.get(2), TextMarkdownBlock.class);
 
-        assertEquals(3, chatBody.getMessages().size());
+        assertEquals(3, messages.size());
     }
 
     public void testWrite_StreamACodeWithCommentBefore() {
@@ -108,22 +120,21 @@ A comment
                 A comment
 
                 """,
-                chatBody.getMessages().get(0).getText());
-        assertInstanceOf(chatBody.getMessages().get(0), TextMarkdownBlock.class);
+                messages.get(0).getText());
+        assertInstanceOf(messages.get(0), TextMarkdownBlock.class);
 
         assertEquals(
                 """
                 // a java code
                 """,
-                chatBody.getMessages().get(1).getText());
-        assertInstanceOf(chatBody.getMessages().get(1), CodeMarkdownBlock.class);
-        assertEquals(
-                "JAVA", ((CodeMarkdownBlock) chatBody.getMessages().get(1)).getLanguage().getID());
+                messages.get(1).getText());
+        assertInstanceOf(messages.get(1), CodeMarkdownBlock.class);
+        assertEquals("JAVA", ((CodeMarkdownBlock) messages.get(1)).getLanguage().getID());
 
-        assertTrue(chatBody.getMessages().get(2).getText().isEmpty());
-        assertInstanceOf(chatBody.getMessages().get(2), TextMarkdownBlock.class);
+        assertTrue(messages.get(2).getText().isEmpty());
+        assertInstanceOf(messages.get(2), TextMarkdownBlock.class);
 
-        assertEquals(3, chatBody.getMessages().size());
+        assertEquals(3, messages.size());
     }
 
     public void testWrite_StreamMarkdownWithCodesAndANestedMarkdown() {
@@ -160,17 +171,16 @@ A comment
                 A comment
 
                 """,
-                chatBody.getMessages().get(0).getText());
-        assertInstanceOf(chatBody.getMessages().get(0), TextMarkdownBlock.class);
+                messages.get(0).getText());
+        assertInstanceOf(messages.get(0), TextMarkdownBlock.class);
 
         assertEquals(
                 """
                 // a java code
                 """,
-                chatBody.getMessages().get(1).getText());
-        assertInstanceOf(chatBody.getMessages().get(1), CodeMarkdownBlock.class);
-        assertEquals(
-                "JAVA", ((CodeMarkdownBlock) chatBody.getMessages().get(1)).getLanguage().getID());
+                messages.get(1).getText());
+        assertInstanceOf(messages.get(1), CodeMarkdownBlock.class);
+        assertEquals("JAVA", ((CodeMarkdownBlock) messages.get(1)).getLanguage().getID());
 
         assertEquals(
                 """
@@ -178,8 +188,8 @@ A comment
 Another comment
 
 """,
-                chatBody.getMessages().get(2).getText());
-        assertInstanceOf(chatBody.getMessages().get(2), TextMarkdownBlock.class);
+                messages.get(2).getText());
+        assertInstanceOf(messages.get(2), TextMarkdownBlock.class);
 
         assertEquals(
                 """
@@ -194,18 +204,18 @@ Another comment
                 A comment
 
                 """,
-                chatBody.getMessages().get(3).getText());
-        assertInstanceOf(chatBody.getMessages().get(3), CodeMarkdownBlock.class);
+                messages.get(3).getText());
+        assertInstanceOf(messages.get(3), CodeMarkdownBlock.class);
 
         assertEquals(
                 """
 
 Another comment
 """,
-                chatBody.getMessages().get(4).getText());
-        assertInstanceOf(chatBody.getMessages().get(4), TextMarkdownBlock.class);
+                messages.get(4).getText());
+        assertInstanceOf(messages.get(4), TextMarkdownBlock.class);
 
-        assertEquals(5, chatBody.getMessages().size());
+        assertEquals(5, messages.size());
     }
 
     public void testWrite_StreamIncompleteCodeBlock() {
@@ -218,10 +228,10 @@ Another comment
 
         simulateStream(streamedMarkdown, markdownChatMessage);
 
-        assertInstanceOf(chatBody.getMessages().get(0), TextMarkdownBlock.class);
-        assertInstanceOf(chatBody.getMessages().get(1), CodeMarkdownBlock.class);
+        assertInstanceOf(messages.get(0), TextMarkdownBlock.class);
+        assertInstanceOf(messages.get(1), CodeMarkdownBlock.class);
 
-        assertEquals(2, chatBody.getMessages().size());
+        assertEquals(2, messages.size());
     }
 
     public void testWrite_StreamEmptyCodeBlock() {
@@ -233,16 +243,16 @@ Another comment
 
         simulateStream(streamedMarkdown, markdownChatMessage);
 
-        assertInstanceOf(chatBody.getMessages().get(0), TextMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(0).getText().isEmpty());
+        assertInstanceOf(messages.get(0), TextMarkdownBlock.class);
+        assertTrue(messages.get(0).getText().isEmpty());
 
-        assertInstanceOf(chatBody.getMessages().get(1), CodeMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(1).getText().isEmpty());
+        assertInstanceOf(messages.get(1), CodeMarkdownBlock.class);
+        assertTrue(messages.get(1).getText().isEmpty());
 
-        assertInstanceOf(chatBody.getMessages().get(2), TextMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(2).getText().isEmpty());
+        assertInstanceOf(messages.get(2), TextMarkdownBlock.class);
+        assertTrue(messages.get(2).getText().isEmpty());
 
-        assertEquals(3, chatBody.getMessages().size());
+        assertEquals(3, messages.size());
     }
 
     public void testWrite_StreamWhitespaceOnlyCodeBlock() {
@@ -256,16 +266,16 @@ Another comment
 
         simulateStream(streamedMarkdown, markdownChatMessage);
 
-        assertInstanceOf(chatBody.getMessages().get(0), TextMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(0).getText().isEmpty());
+        assertInstanceOf(messages.get(0), TextMarkdownBlock.class);
+        assertTrue(messages.get(0).getText().isEmpty());
 
-        assertInstanceOf(chatBody.getMessages().get(1), CodeMarkdownBlock.class);
-        assertFalse(chatBody.getMessages().get(1).getText().isEmpty());
+        assertInstanceOf(messages.get(1), CodeMarkdownBlock.class);
+        assertFalse(messages.get(1).getText().isEmpty());
 
-        assertInstanceOf(chatBody.getMessages().get(2), TextMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(2).getText().isEmpty());
+        assertInstanceOf(messages.get(2), TextMarkdownBlock.class);
+        assertTrue(messages.get(2).getText().isEmpty());
 
-        assertEquals(3, chatBody.getMessages().size());
+        assertEquals(3, messages.size());
     }
 
     public void testWrite_StreamInvalidLanguage() {
@@ -278,16 +288,16 @@ Another comment
 
         simulateStream(streamedMarkdown, markdownChatMessage);
 
-        assertInstanceOf(chatBody.getMessages().get(0), TextMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(0).getText().isEmpty());
+        assertInstanceOf(messages.get(0), TextMarkdownBlock.class);
+        assertTrue(messages.get(0).getText().isEmpty());
 
-        assertInstanceOf(chatBody.getMessages().get(1), CodeMarkdownBlock.class);
-        assertFalse(chatBody.getMessages().get(1).getText().isEmpty());
+        assertInstanceOf(messages.get(1), CodeMarkdownBlock.class);
+        assertFalse(messages.get(1).getText().isEmpty());
 
-        assertInstanceOf(chatBody.getMessages().get(2), TextMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(2).getText().isEmpty());
+        assertInstanceOf(messages.get(2), TextMarkdownBlock.class);
+        assertTrue(messages.get(2).getText().isEmpty());
 
-        assertEquals(3, chatBody.getMessages().size());
+        assertEquals(3, messages.size());
     }
 
     public void testWrite_StreamConsecutiveCodeBlocks() {
@@ -303,32 +313,32 @@ Another comment
 
         simulateStream(streamedMarkdown, markdownChatMessage);
 
-        assertInstanceOf(chatBody.getMessages().get(0), TextMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(0).getText().isEmpty());
+        assertInstanceOf(messages.get(0), TextMarkdownBlock.class);
+        assertTrue(messages.get(0).getText().isEmpty());
 
-        assertInstanceOf(chatBody.getMessages().get(1), CodeMarkdownBlock.class);
-        assertFalse(chatBody.getMessages().get(1).getText().isEmpty());
+        assertInstanceOf(messages.get(1), CodeMarkdownBlock.class);
+        assertFalse(messages.get(1).getText().isEmpty());
         assertEquals(
                 """
                 // first block
                 """,
-                chatBody.getMessages().get(1).getText());
+                messages.get(1).getText());
 
-        assertInstanceOf(chatBody.getMessages().get(2), TextMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(2).getText().isEmpty());
+        assertInstanceOf(messages.get(2), TextMarkdownBlock.class);
+        assertTrue(messages.get(2).getText().isEmpty());
 
-        assertInstanceOf(chatBody.getMessages().get(3), CodeMarkdownBlock.class);
-        assertFalse(chatBody.getMessages().get(3).getText().isEmpty());
+        assertInstanceOf(messages.get(3), CodeMarkdownBlock.class);
+        assertFalse(messages.get(3).getText().isEmpty());
         assertEquals(
                 """
                 # second block immediately after
                 """,
-                chatBody.getMessages().get(3).getText());
+                messages.get(3).getText());
 
-        assertInstanceOf(chatBody.getMessages().get(4), TextMarkdownBlock.class);
-        assertTrue(chatBody.getMessages().get(4).getText().isEmpty());
+        assertInstanceOf(messages.get(4), TextMarkdownBlock.class);
+        assertTrue(messages.get(4).getText().isEmpty());
 
-        assertEquals(5, chatBody.getMessages().size());
+        assertEquals(5, messages.size());
     }
 
     private static void simulateStream(

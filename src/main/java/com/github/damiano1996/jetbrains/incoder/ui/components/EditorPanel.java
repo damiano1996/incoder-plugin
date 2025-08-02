@@ -64,8 +64,6 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
 
     private void addEditorToPanel(Editor editor) {
         add(editor.getComponent(), BorderLayout.CENTER);
-        revalidate();
-        repaint();
     }
 
     @Override

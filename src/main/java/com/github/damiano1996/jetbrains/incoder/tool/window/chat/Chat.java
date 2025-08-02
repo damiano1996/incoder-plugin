@@ -45,7 +45,6 @@ public class Chat {
     private ExpandableTextArea promptTextArea;
     private JButton submitButton;
     private ChatBody chatBody;
-    private MarkdownChatMessage markdownChatMessage;
 
     private boolean isStreaming = false;
 
@@ -111,6 +110,7 @@ public class Chat {
             stoppableTokenStream.start();
 
         } catch (LanguageModelException e) {
+            log.warn("Unable to start stream", e);
             chatBody.addChatMessage(new ErrorChatMessage(e));
         }
     }
@@ -186,7 +186,7 @@ public class Chat {
     }
 
     private void createUIComponents() {
-        promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 1);
+        promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 2);
         promptTextArea.setMargin(JBUI.insets(2, 9, 2, 6));
         promptTextArea.setLineWrap(true);
 
