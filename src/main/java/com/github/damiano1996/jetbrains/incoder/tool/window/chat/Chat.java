@@ -134,6 +134,8 @@ public class Chat {
         chatBody.closeStream();
         log.debug("Adding new tool message component");
         chatBody.addChatMessage(new ToolChatMessage(toolExecution));
+        log.debug("Resuming with markdown");
+        chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
     }
 
     private void onComplete() {

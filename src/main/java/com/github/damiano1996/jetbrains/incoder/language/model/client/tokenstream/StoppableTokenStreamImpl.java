@@ -46,9 +46,9 @@ public class StoppableTokenStreamImpl implements StoppableTokenStream {
                 tokenStream.onPartialResponse(
                         token -> {
                             if (stopRequested) {
-                                stopRequested = false;
                                 onStop.run();
                                 log.debug("Throwing exception to stop streaming");
+                                // FIXME: AiServiceStreamingResponseHandler is catching the exception
                                 throw new StopTokenStream();
                             }
 
@@ -83,14 +83,7 @@ public class StoppableTokenStreamImpl implements StoppableTokenStream {
     @Override
     public StoppableTokenStream onError(Consumer<Throwable> errorHandler) {
         this.errorHandler = errorHandler;
-
-        tokenStream =
-                tokenStream.onError(
-                        throwable -> {
-                            log.warn("Error while streaming", throwable);
-                            stopRequested = false;
-                            errorHandler.accept(throwable);
-                        });
+        tokenStream = tokenStream.onError(errorHandler);
         return this;
     }
 
