@@ -1,8 +1,10 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageModelClient;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageModelClientImpl;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatLanguageModelClient;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatLanguageModelClientImpl;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineLanguageModelClient;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineLanguageModelClientImpl;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import java.time.Duration;
@@ -24,13 +26,27 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
 
     @Contract(" -> new")
     @Override
-    public @NotNull LanguageModelClient createClient() throws LanguageModelException {
+    public @NotNull InlineLanguageModelClient createInlineClient() throws LanguageModelException {
         try {
-            return new LanguageModelClientImpl(
+            return new InlineLanguageModelClientImpl(
                     getModelName(), createChatLanguageModel(), createStreamingChatLanguageModel());
         } catch (Exception e) {
             throw new LanguageModelException(
-                    ("Unable to create the client for %s.\n%s")
+                    ("Unable to create the inline client for %s.\n%s")
+                            .formatted(getName(), e.getMessage()),
+                    e);
+        }
+    }
+
+    @Contract(" -> new")
+    @Override
+    public @NotNull ChatLanguageModelClient createChatClient() throws LanguageModelException {
+        try {
+            return new ChatLanguageModelClientImpl(
+                    getModelName(), createChatLanguageModel(), createStreamingChatLanguageModel());
+        } catch (Exception e) {
+            throw new LanguageModelException(
+                    ("Unable to create the chat client for %s.\n%s")
                             .formatted(getName(), e.getMessage()),
                     e);
         }

@@ -3,8 +3,8 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat;
 import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatConstants.*;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageModelClient;
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelProjectService;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatLanguageModelClient;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStream;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStreamImpl;
@@ -18,9 +18,9 @@ import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.t
 import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
 import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
 import com.intellij.icons.AllIcons;
-import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.IconUtil;
@@ -29,6 +29,8 @@ import com.intellij.util.ui.JBUI;
 import dev.langchain4j.service.tool.ToolExecution;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.util.Set;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -41,8 +43,7 @@ import org.jetbrains.annotations.Nullable;
 @Slf4j
 public class Chat {
 
-    @Nullable
-    private LanguageModelClient languageModelClient;
+    private final Project project;
 
     @Setter @Getter private int chatId;
 
@@ -55,7 +56,8 @@ public class Chat {
 
     @Nullable private StoppableTokenStream stoppableTokenStream;
 
-    public Chat() {
+    public Chat(Project project) {
+        this.project = project;
         createUIComponents();
         initActionListeners();
     }
@@ -85,38 +87,27 @@ public class Chat {
         log.debug("Prompt: {}", prompt);
         this.promptTextArea.setText("");
 
-        HumanChatMessage humanChatMessage = new HumanChatMessage(prompt);
-        chatBody.addChatMessage(humanChatMessage);
-        
-        if (languageModelClient == null) {
-            Project project = ProjectUtil.getActiveProject();
-            if (project == null) {
-                log.warn("Project is null, unable to initialize the LM client.");
-                return;
-            }
+        ChatLanguageModelClient client;
 
-            String serverName = ChatSettings.getInstance().getState().serverName;
-            try {
-                languageModelClient = LanguageModelServiceImpl.getInstance(project).createClient(serverName);
-            } catch (LanguageModelException e) {
-                NotificationService.getInstance(project).notifyWithSettingsActionButton(
-                        "<html>Unable to create the LLM client for %s. Configure it from Settings.<br>%s</html>"
-                                .formatted(serverName, e.getMessage()),
-                        NotificationType.WARNING
-                );
-                chatBody.addChatMessage(new ErrorChatMessage(e));
-                return;
-            }
+        try {
+            client = LanguageModelProjectService.getInstance(project).getOrCreateChatClient();
+        } catch (LanguageModelException e) {
+            NotificationService.getInstance(project)
+                    .notifyWithSettingsActionButton(e.getMessage(), NotificationType.ERROR);
+            promptTextArea.setText(prompt);
+            return;
         }
 
-        chatBody.addChatMessage(
-                new AiChatMessage(languageModelClient.getModelName().toLowerCase()));
+        HumanChatMessage humanChatMessage = new HumanChatMessage(prompt);
+        chatBody.addChatMessage(humanChatMessage);
+
+        chatBody.addChatMessage(new AiChatMessage(client.getModelName().toLowerCase()));
 
         chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
 
         stoppableTokenStream =
                 (StoppableTokenStream)
-                        new StoppableTokenStreamImpl(languageModelClient.chat(chatId, prompt))
+                        new StoppableTokenStreamImpl(client.chat(chatId, prompt))
                                 .onStart(this::onStart)
                                 .onStop(this::onStop)
                                 .onPartialResponse(this::onNewToken)
@@ -238,10 +229,28 @@ public class Chat {
         submitButton.setPreferredSize(buttonSize);
         submitButton.setMaximumSize(buttonSize);
 
+        Set<String> options =
+                LanguageModelProjectService.getInstance(project).getAvailableServerNames();
+        ComboBox<String> serverNamesComboBox = new ComboBox<>(options.toArray(new String[0]));
+        serverNamesComboBox.setSelectedItem(ChatSettings.getInstance().getState().serverName);
+        serverNamesComboBox.addItemListener(
+                e -> {
+                    if (e.getStateChange() == ItemEvent.DESELECTED) return;
+                    ChatSettings.getInstance().getState().serverName = e.getItem().toString();
+                    try {
+                        LanguageModelProjectService.getInstance(project)
+                                .with(ChatSettings.getInstance().getState());
+                    } catch (LanguageModelException ex) {
+                        notifySettingsError(e);
+                    }
+                });
+        serverNamesComboBox.setMaximumSize(serverNamesComboBox.getPreferredSize());
+
         JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
         toolbar.setFloatable(false);
         toolbar.setBorderPainted(false);
         toolbar.setOpaque(false);
+        toolbar.add(serverNamesComboBox);
         toolbar.add(Box.createHorizontalGlue());
         toolbar.add(submitButton);
 
@@ -269,6 +278,19 @@ public class Chat {
         inputPanel.setLayout(new BorderLayout());
         inputPanel.add(inputContent, BorderLayout.CENTER);
         return inputPanel;
+    }
+
+    private void notifySettingsError(ItemEvent e) {
+        NotificationService.getInstance(project)
+                .notifyWithSettingsActionButton(
+                        """
+                        <html>
+                        Unable to start the service with <b>%s</b>.
+                        Please, review configurations from Settings.
+                        </html>
+                        """
+                                .formatted(e.getItem().toString()),
+                        NotificationType.ERROR);
     }
 
     private @NotNull JScrollPane getPromptScrollPane() {

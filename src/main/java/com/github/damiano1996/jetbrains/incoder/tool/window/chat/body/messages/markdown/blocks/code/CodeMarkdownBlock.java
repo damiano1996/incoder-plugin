@@ -10,6 +10,7 @@ import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.m
 import com.github.damiano1996.jetbrains.incoder.ui.components.EditorPanel;
 import com.intellij.lang.Language;
 import com.intellij.openapi.Disposable;
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -44,6 +45,7 @@ public class CodeMarkdownBlock implements MarkdownBlock, Disposable {
                 setFocusable(false);
                 add(editorPanel);
                 add(toolbar);
+                setBorder(JBUI.Borders.empty(0, 40, 10, 0));
             }
         };
     }

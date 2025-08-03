@@ -1,18 +1,12 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
-import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.options.Configurable;
-import javax.swing.*;
-
 import com.intellij.openapi.options.ConfigurationException;
+import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
 
 public final class ChatSettingsConfigurable implements Configurable {
 
@@ -53,11 +47,7 @@ public final class ChatSettingsConfigurable implements Configurable {
                         .getSystemMessageInstructionsField()
                         .getText()
                         .equals(state.systemMessageInstructions)
-                || chatSettingsComponent.getEnableTools().isSelected() != state.enableTools
-                || !chatSettingsComponent
-                        .getServerNamesComboBox()
-                        .getItem()
-                        .equals(state.serverName);
+                || chatSettingsComponent.getEnableTools().isSelected() != state.enableTools;
     }
 
     @Override
@@ -68,16 +58,6 @@ public final class ChatSettingsConfigurable implements Configurable {
         state.systemMessageInstructions =
                 chatSettingsComponent.getSystemMessageInstructionsField().getText();
         state.enableTools = chatSettingsComponent.getEnableTools().isSelected();
-        state.serverName = chatSettingsComponent.getServerNamesComboBox().getItem();
-
-        try {
-            LanguageModelServiceImpl.getInstance(Objects.requireNonNull(ProjectUtil.getActiveProject()))
-                    .createClient(state.serverName);
-        }catch (NullPointerException e) {
-            throw new ConfigurationException("Unable to verify settings.");
-        } catch (LanguageModelException e) {
-            throw new ConfigurationException(e.getMessage());
-        }
     }
 
     @Override
@@ -89,7 +69,6 @@ public final class ChatSettingsConfigurable implements Configurable {
                 .getSystemMessageInstructionsField()
                 .setText(state.systemMessageInstructions);
         chatSettingsComponent.getEnableTools().setSelected(state.enableTools);
-        chatSettingsComponent.getServerNamesComboBox().setSelectedItem(state.serverName);
     }
 
     @Override

@@ -26,7 +26,6 @@ public class HumanChatMessage implements ChatMessage {
     private void createUIComponents() {
         mainPanel = new JBPanel<>(new BorderLayout());
         mainPanel.setOpaque(false);
-        mainPanel.setBorder(JBUI.Borders.empty(10));
 
         JBTextArea promptTextArea =
                 new JBTextArea() {
@@ -45,5 +44,6 @@ public class HumanChatMessage implements ChatMessage {
         promptTextArea.setBackground(JBColor.background().darker());
 
         mainPanel.add(promptTextArea, BorderLayout.CENTER);
+        mainPanel.setBorder(JBUI.Borders.emptyBottom(10));
     }
 }

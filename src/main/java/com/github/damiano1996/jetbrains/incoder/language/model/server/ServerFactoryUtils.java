@@ -15,7 +15,7 @@ public class ServerFactoryUtils {
         if (name.isBlank()) throw new LanguageModelException("Server name must be defined.");
 
         return getServerFactories().stream()
-                .filter(serverFactory -> serverFactory.getName().equals(name))
+                .filter(serverFactory -> serverFactory.createServer().getName().equals(name))
                 .findFirst()
                 .orElseThrow(
                         () ->
@@ -31,19 +31,5 @@ public class ServerFactoryUtils {
      */
     public @NotNull List<ServerFactory> getServerFactories() {
         return ClassInstantiator.findImplementations(ServerFactory.class);
-    }
-
-    public List<String> getServerNames() {
-        return getServerFactories().stream()
-                .map(
-                        serverFactory -> {
-                            try {
-                                return serverFactory.createServer().getName();
-                            } catch (LanguageModelException e) {
-                                log.warn("Unable to create server", e);
-                                return null;
-                            }
-                        })
-                .toList();
     }
 }

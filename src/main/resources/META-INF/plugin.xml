@@ -14,7 +14,7 @@
 
         <projectService
                 serviceInterface="com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelService"
-                serviceImplementation="com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl"/>
+                serviceImplementation="com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelProjectService"/>
 
         <groupConfigurable descriptionKey="plugin.group.description"
                            displayNameKey="plugin.group.name"

@@ -1,10 +1,7 @@
-package com.github.damiano1996.jetbrains.incoder.language.model.client;
+package com.github.damiano1996.jetbrains.incoder.language.model.client.chat;
 
-import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionContext;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatCodingAssistant;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.BaseLanguageModelClient;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.EditorTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.FileTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.commandline.CommandLineTool;
@@ -25,24 +22,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
-public class LanguageModelClientImpl implements LanguageModelClient {
+public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
+        implements ChatLanguageModelClient {
 
     public static final String UNKNOWN = "Unknown";
 
-    private final String modelName;
     private final ChatCodingAssistant chatCodingAssistant;
-    private final InlineCodingAssistant inlineCodingAssistant;
 
     private final String projectName;
     private final String projectPath;
     private final String ideInfo;
     private final String userTimezone;
 
-    public LanguageModelClientImpl(
+    public ChatLanguageModelClientImpl(
             String modelName,
             ChatLanguageModel chatLanguageModel,
             StreamingChatLanguageModel streamingChatLanguageModel) {
-        this.modelName = modelName;
+        super(modelName);
 
         Project project = ProjectUtil.getActiveProject();
 
@@ -52,9 +48,6 @@ public class LanguageModelClientImpl implements LanguageModelClient {
         this.userTimezone = getUserTimezone();
 
         chatCodingAssistant = getChatCodingAssistant(chatLanguageModel, streamingChatLanguageModel);
-
-        inlineCodingAssistant =
-                getInlineCodingAssistant(chatLanguageModel, streamingChatLanguageModel);
     }
 
     private static @NotNull String getProjectName(Project project) {
@@ -81,41 +74,6 @@ public class LanguageModelClientImpl implements LanguageModelClient {
 
         chatCodingAssistant = aiAssistantBuilder.build();
         return chatCodingAssistant;
-    }
-
-    private InlineCodingAssistant getInlineCodingAssistant(
-            ChatLanguageModel chatLanguageModel,
-            StreamingChatLanguageModel streamingChatLanguageModel) {
-        final InlineCodingAssistant inlineCodingAssistant;
-        inlineCodingAssistant =
-                AiServices.builder(InlineCodingAssistant.class)
-                        .streamingChatLanguageModel(streamingChatLanguageModel)
-                        .chatLanguageModel(chatLanguageModel)
-                        .build();
-        return inlineCodingAssistant;
-    }
-
-    @Override
-    public String complete(@NotNull CodeCompletionContext codeCompletionContext) {
-        return inlineCodingAssistant.complete(
-                InlineSettings.getInstance().getState().systemMessageInstructions,
-                codeCompletionContext.leftContext(),
-                codeCompletionContext.rightContext(),
-                getLastLine(codeCompletionContext.leftContext()));
-    }
-
-    private String getLastLine(String s) {
-        if (s == null || s.isEmpty()) {
-            return "";
-        }
-
-        String[] lines = s.split("\n");
-        return lines[lines.length - 1];
-    }
-
-    @Override
-    public String getModelName() {
-        return modelName;
     }
 
     @Override

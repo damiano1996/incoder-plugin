@@ -5,6 +5,7 @@ import static com.github.damiano1996.jetbrains.incoder.InCoderIcons.PLUGIN_ICON;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ChatMessage;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
+import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ public class AiChatMessage implements ChatMessage {
 
         JLabel aiIconLabel = getAiIconLabel();
         JLabel modelNameLabel = getModelNameLabel();
-        mainPanel = builder.addLabeledComponent(aiIconLabel, modelNameLabel, 1, false).getPanel();
+        mainPanel = builder.addLabeledComponent(aiIconLabel, modelNameLabel, 0, false).getPanel();
 
         mainPanel.setEnabled(false);
         mainPanel.setFocusable(false);
@@ -34,7 +35,7 @@ public class AiChatMessage implements ChatMessage {
 
     private static @NotNull JLabel getAiIconLabel() {
         JLabel aiIconLabel = new JBLabel(PLUGIN_ICON);
-        aiIconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        aiIconLabel.setHorizontalAlignment(SwingConstants.LEFT);
         aiIconLabel.setVerticalAlignment(SwingConstants.CENTER);
         aiIconLabel.setFocusable(false);
         aiIconLabel.setOpaque(false);
