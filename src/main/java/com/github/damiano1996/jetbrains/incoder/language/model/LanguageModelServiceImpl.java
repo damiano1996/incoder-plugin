@@ -30,33 +30,13 @@ public final class LanguageModelServiceImpl implements LanguageModelService, Dis
         return ProgressManager.getInstance()
                 .runProcessWithProgressSynchronously(
                         () -> {
-                            try {
                                 var server =
                                         ServerFactoryUtils.findByName(serverName).createServer();
-
-                                PluginSettings.getInstance().getState().isPluginConfigured = true;
-
                                 return server.createClient();
-                            } catch (LanguageModelException e) {
-                                notifyInitializationError(e);
-                                throw e;
-                            }
                         },
                         "Starting the Language Model Service for %s".formatted(serverName),
                         false,
                         project);
-    }
-
-    private void notifyInitializationError(LanguageModelException e) {
-        if (PluginSettings.getInstance().getState().isPluginConfigured) {
-            log.debug("Plugin is configured, notifying with error.");
-            NotificationService.getInstance(project)
-                    .notifyWithSettingsActionButton(e.getMessage(), NotificationType.ERROR);
-        } else {
-            log.debug(
-                    "Plugin is not configured. " + "Showing default message with settings button.");
-            NotificationService.getInstance(project).notifyWithSettingsActionButton();
-        }
     }
 
     @Override

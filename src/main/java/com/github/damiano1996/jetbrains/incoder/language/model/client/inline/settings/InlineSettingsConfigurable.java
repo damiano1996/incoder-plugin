@@ -1,11 +1,18 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.options.Configurable;
 import javax.swing.*;
+
+import com.intellij.openapi.options.ConfigurationException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 public final class InlineSettingsConfigurable implements Configurable {
 
@@ -50,7 +57,7 @@ public final class InlineSettingsConfigurable implements Configurable {
     }
 
     @Override
-    public void apply() {
+    public void apply() throws ConfigurationException {
         var state = getState();
 
         state.enable = inlineSettingsComponent.getEnableCheckbox().isSelected();
@@ -58,6 +65,15 @@ public final class InlineSettingsConfigurable implements Configurable {
         state.systemMessageInstructions =
                 inlineSettingsComponent.getSystemMessageInstructionsField().getText();
         state.serverName = inlineSettingsComponent.getServerNamesComboBox().getItem();
+
+        try {
+            LanguageModelServiceImpl.getInstance(Objects.requireNonNull(ProjectUtil.getActiveProject()))
+                    .createClient(state.serverName);
+        }catch (NullPointerException e) {
+            throw new ConfigurationException("Unable to verify settings.");
+        } catch (LanguageModelException e) {
+            throw new ConfigurationException(e.getMessage());
+        }
     }
 
     @Override

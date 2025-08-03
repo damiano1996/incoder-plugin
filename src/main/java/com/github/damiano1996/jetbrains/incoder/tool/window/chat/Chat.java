@@ -8,6 +8,7 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageMo
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStream;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStreamImpl;
+import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiChatMessage;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.error.ErrorChatMessage;
@@ -17,6 +18,8 @@ import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.t
 import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
 import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.impl.ProjectUtil;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBScrollPane;
@@ -38,8 +41,8 @@ import org.jetbrains.annotations.Nullable;
 @Slf4j
 public class Chat {
 
-    private final Project project;
-    private final LanguageModelClient languageModelClient;
+    @Nullable
+    private LanguageModelClient languageModelClient;
 
     @Setter @Getter private int chatId;
 
@@ -52,12 +55,7 @@ public class Chat {
 
     @Nullable private StoppableTokenStream stoppableTokenStream;
 
-    public Chat(Project project) throws LanguageModelException {
-        this.project = project;
-
-        languageModelClient =
-                LanguageModelServiceImpl.getInstance(project)
-                        .createClient(ChatSettings.getInstance().getState().serverName);
+    public Chat() {
         createUIComponents();
         initActionListeners();
     }
@@ -89,6 +87,27 @@ public class Chat {
 
         HumanChatMessage humanChatMessage = new HumanChatMessage(prompt);
         chatBody.addChatMessage(humanChatMessage);
+        
+        if (languageModelClient == null) {
+            Project project = ProjectUtil.getActiveProject();
+            if (project == null) {
+                log.warn("Project is null, unable to initialize the LM client.");
+                return;
+            }
+
+            String serverName = ChatSettings.getInstance().getState().serverName;
+            try {
+                languageModelClient = LanguageModelServiceImpl.getInstance(project).createClient(serverName);
+            } catch (LanguageModelException e) {
+                NotificationService.getInstance(project).notifyWithSettingsActionButton(
+                        "<html>Unable to create the LLM client for %s. Configure it from Settings.<br>%s</html>"
+                                .formatted(serverName, e.getMessage()),
+                        NotificationType.WARNING
+                );
+                chatBody.addChatMessage(new ErrorChatMessage(e));
+                return;
+            }
+        }
 
         chatBody.addChatMessage(
                 new AiChatMessage(languageModelClient.getModelName().toLowerCase()));

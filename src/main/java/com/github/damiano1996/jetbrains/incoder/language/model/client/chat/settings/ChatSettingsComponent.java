@@ -12,6 +12,9 @@ import com.intellij.util.ui.FormBuilder;
 import javax.swing.*;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 public class ChatSettingsComponent {
 
@@ -24,8 +27,10 @@ public class ChatSettingsComponent {
 
     public ChatSettingsComponent() {
 
+        List<String> serverNames = new ArrayList<>(ServerFactoryUtils.getServerNames());
+        serverNames.add("");
         serverNamesComboBox =
-                new ComboBox<>(ServerFactoryUtils.getServerNames().toArray(new String[0]));
+                new ComboBox<>(serverNames.toArray(new String[0]));
 
         SpinnerNumberModel maxMessagesModel = new SpinnerNumberModel(10, 0, 50, 1);
         maxMessages = new JSpinner(maxMessagesModel);

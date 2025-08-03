@@ -1,11 +1,18 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.options.Configurable;
 import javax.swing.*;
+
+import com.intellij.openapi.options.ConfigurationException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 public final class ChatSettingsConfigurable implements Configurable {
 
@@ -54,7 +61,7 @@ public final class ChatSettingsConfigurable implements Configurable {
     }
 
     @Override
-    public void apply() {
+    public void apply() throws ConfigurationException {
         var state = getState();
 
         state.maxMessages = (int) chatSettingsComponent.getMaxMessages().getValue();
@@ -62,6 +69,15 @@ public final class ChatSettingsConfigurable implements Configurable {
                 chatSettingsComponent.getSystemMessageInstructionsField().getText();
         state.enableTools = chatSettingsComponent.getEnableTools().isSelected();
         state.serverName = chatSettingsComponent.getServerNamesComboBox().getItem();
+
+        try {
+            LanguageModelServiceImpl.getInstance(Objects.requireNonNull(ProjectUtil.getActiveProject()))
+                    .createClient(state.serverName);
+        }catch (NullPointerException e) {
+            throw new ConfigurationException("Unable to verify settings.");
+        } catch (LanguageModelException e) {
+            throw new ConfigurationException(e.getMessage());
+        }
     }
 
     @Override

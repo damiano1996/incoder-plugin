@@ -13,6 +13,9 @@ import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Getter
 public class InlineSettingsComponent {
@@ -24,8 +27,10 @@ public class InlineSettingsComponent {
     private final JBTextArea systemMessageInstructionsField;
 
     public InlineSettingsComponent() {
+        List<String> serverNames = new ArrayList<>(ServerFactoryUtils.getServerNames());
+        serverNames.add("");
         serverNamesComboBox =
-                new ComboBox<>(ServerFactoryUtils.getServerNames().toArray(new String[0]));
+                new ComboBox<>(serverNames.toArray(new String[0]));
 
         enableCheckbox = new JBCheckBox("Inline coding assistant");
         endLineCheckBox = new JBCheckBox("Trigger at end line");
