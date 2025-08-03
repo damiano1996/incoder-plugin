@@ -93,7 +93,14 @@ public class Chat {
             client = LanguageModelProjectService.getInstance(project).getOrCreateChatClient();
         } catch (LanguageModelException e) {
             NotificationService.getInstance(project)
-                    .notifyWithSettingsActionButton(e.getMessage(), NotificationType.ERROR);
+                    .notifyWithSettingsActionButton(
+                            """
+                            <html>
+                            Failed to initialize the client.<br>
+                            Please, review server configurations from Settings.
+                            </html>
+                            """,
+                            NotificationType.ERROR);
             promptTextArea.setText(prompt);
             return;
         }
@@ -285,8 +292,8 @@ public class Chat {
                 .notifyWithSettingsActionButton(
                         """
                         <html>
-                        Unable to start the service with <b>%s</b>.
-                        Please, review configurations from Settings.
+                        Unable to start the service with <b>%s</b>.<br>
+                        Please, review server configurations from Settings.
                         </html>
                         """
                                 .formatted(e.getItem().toString()),
