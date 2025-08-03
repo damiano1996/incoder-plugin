@@ -18,6 +18,11 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
+    public String getModelName() {
+        return getState().modelName;
+    }
+
+    @Override
     public ChatLanguageModel createChatLanguageModel() {
         return OllamaChatModel.builder()
                 .baseUrl(getState().baseUrl)
@@ -62,10 +67,5 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
             log.warn("Unable to get available models.");
             return Collections.emptyList();
         }
-    }
-
-    @Override
-    public String getSelectedModelName() {
-        return getState().modelName;
     }
 }

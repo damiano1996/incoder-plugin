@@ -1,42 +1,23 @@
 package com.github.damiano1996.jetbrains.incoder.language.model;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageModelClient;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactoryUtils;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerSettings;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.settings.PluginSettings;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.progress.*;
 import com.intellij.openapi.project.Project;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 public final class LanguageModelServiceImpl implements LanguageModelService, Disposable {
 
     private final Project project;
 
-    @Nullable private LanguageModelServer server;
-    @Nullable private LanguageModelClient client;
-
     public LanguageModelServiceImpl(Project project) {
         this.project = project;
-        try {
-            startWithDefaultServer();
-        } catch (LanguageModelException e) {
-            if (PluginSettings.getInstance().getState().isPluginConfigured) {
-                log.debug("Plugin is configured, notifying with error.");
-                NotificationService.getInstance(project)
-                        .notifyWithSettingsActionButton(e.getMessage(), NotificationType.ERROR);
-            } else {
-                log.debug(
-                        "Plugin is not configured. "
-                                + "Showing default message with settings button.");
-                NotificationService.getInstance(project).notifyWithSettingsActionButton();
-            }
-        }
     }
 
     public static LanguageModelService getInstance(@NotNull Project project) {
@@ -44,36 +25,38 @@ public final class LanguageModelServiceImpl implements LanguageModelService, Dis
     }
 
     @Override
-    public void startWithDefaultServer() throws LanguageModelException {
-        startWith(
-                ServerFactoryUtils.findByName(
-                                ServerSettings.getInstance().getState().activeServerName)
-                        .createServer());
+    public LanguageModelClient createClient(String serverName) throws LanguageModelException {
+        //noinspection DialogTitleCapitalization
+        return ProgressManager.getInstance()
+                .runProcessWithProgressSynchronously(
+                        () -> {
+                            try {
+                                var server =
+                                        ServerFactoryUtils.findByName(serverName).createServer();
+
+                                PluginSettings.getInstance().getState().isPluginConfigured = true;
+
+                                return server.createClient();
+                            } catch (LanguageModelException e) {
+                                notifyInitializationError(e);
+                                throw e;
+                            }
+                        },
+                        "Starting the Language Model Service for %s".formatted(serverName),
+                        false,
+                        project);
     }
 
-    @Override
-    public void startWith(LanguageModelServer server) throws LanguageModelException {
-        log.debug("Initializing {}...", LanguageModelServiceImpl.class.getSimpleName());
-
-        this.server = server;
-
-        client = this.server.createClient(project);
-        log.debug("Client created successfully!");
-
-        PluginSettings.getInstance().getState().isPluginConfigured = true;
-        log.debug("Client and server started. Plugin can be considered configured.");
-    }
-
-    @Override
-    public String getSelectedModelName() throws LanguageModelException {
-        if (server == null) throw new LanguageModelException("Server must be initialized.");
-        return server.getSelectedModelName();
-    }
-
-    @Override
-    public @NotNull LanguageModelClient getClient() throws LanguageModelException {
-        if (client == null) throw new LanguageModelException("Client must be initialized.");
-        return client;
+    private void notifyInitializationError(LanguageModelException e) {
+        if (PluginSettings.getInstance().getState().isPluginConfigured) {
+            log.debug("Plugin is configured, notifying with error.");
+            NotificationService.getInstance(project)
+                    .notifyWithSettingsActionButton(e.getMessage(), NotificationType.ERROR);
+        } else {
+            log.debug(
+                    "Plugin is not configured. " + "Showing default message with settings button.");
+            NotificationService.getInstance(project).notifyWithSettingsActionButton();
+        }
     }
 
     @Override

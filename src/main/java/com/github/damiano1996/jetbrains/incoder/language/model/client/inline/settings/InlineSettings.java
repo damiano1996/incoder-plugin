@@ -29,6 +29,7 @@ public final class InlineSettings implements PersistentStateComponent<InlineSett
 
     @ToString
     public static class State {
+        public String serverName = "";
         public boolean enable = false;
         public boolean triggerEndLine = true;
 

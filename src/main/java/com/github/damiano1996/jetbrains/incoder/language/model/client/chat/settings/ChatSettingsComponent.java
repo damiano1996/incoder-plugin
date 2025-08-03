@@ -1,8 +1,11 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactoryUtils;
 import com.github.damiano1996.jetbrains.incoder.ui.components.DescriptionLabel;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
@@ -13,11 +16,17 @@ import lombok.Getter;
 public class ChatSettingsComponent {
 
     private final JPanel mainPanel;
+    private final ComboBox<String> serverNamesComboBox;
     private final JSpinner maxMessages;
     private final JBTextArea systemMessageInstructionsField;
     private final JButton reloadDefaultButton;
+    private final JBCheckBox enableTools;
 
     public ChatSettingsComponent() {
+
+        serverNamesComboBox =
+                new ComboBox<>(ServerFactoryUtils.getServerNames().toArray(new String[0]));
+
         SpinnerNumberModel maxMessagesModel = new SpinnerNumberModel(10, 0, 50, 1);
         maxMessages = new JSpinner(maxMessagesModel);
 
@@ -41,10 +50,16 @@ public class ChatSettingsComponent {
         labelPanel.add(Box.createHorizontalGlue());
         labelPanel.add(reloadDefaultButton);
 
+        enableTools = new JBCheckBox("LLM with tools");
+
         mainPanel =
                 FormBuilder.createFormBuilder()
                         .setFormLeftIndent(20)
-                        .addLabeledComponent(new JBLabel("Max messages:"), maxMessages, 1, false)
+                        .addLabeledComponent(
+                                new JBLabel("Server:"), serverNamesComboBox, 0, false)
+                        .addComponent(new DescriptionLabel("Server used in the chat."))
+                        .addVerticalGap(20)
+                        .addLabeledComponent(new JBLabel("Max messages:"), maxMessages, 0, false)
                         .addComponent(new DescriptionLabel("Number of messages to keep in memory."))
                         .addVerticalGap(20)
                         .setFormLeftIndent(0)
@@ -56,6 +71,13 @@ public class ChatSettingsComponent {
                                         "Custom system prompt that defines the AI assistant's"
                                                 + " behavior, role, and response style for all chat"
                                                 + " interactions."))
+                        .addVerticalGap(20)
+                        .addComponent(enableTools)
+                        .addComponent(
+                                new DescriptionLabel(
+                                        "When enabled, allows the AI to use predefined tools and"
+                                                + " functions to enhance code generation and"
+                                                + " problem-solving capabilities."))
                         .addComponentFillVertically(new JPanel(), 0)
                         .getPanel();
     }

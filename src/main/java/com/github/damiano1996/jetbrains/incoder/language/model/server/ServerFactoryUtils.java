@@ -32,4 +32,18 @@ public class ServerFactoryUtils {
     public @NotNull List<ServerFactory> getServerFactories() {
         return ClassInstantiator.findImplementations(ServerFactory.class);
     }
+
+    public List<String> getServerNames() {
+        return getServerFactories().stream()
+                .map(
+                        serverFactory -> {
+                            try {
+                                return serverFactory.createServer().getName();
+                            } catch (LanguageModelException e) {
+                                log.warn("Unable to create server", e);
+                                return null;
+                            }
+                        })
+                .toList();
+    }
 }

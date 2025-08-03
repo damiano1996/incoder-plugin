@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface LanguageModelClient {
 
+    String getModelName();
+
     /**
      * Initiates a chat conversation with the language model.
      *

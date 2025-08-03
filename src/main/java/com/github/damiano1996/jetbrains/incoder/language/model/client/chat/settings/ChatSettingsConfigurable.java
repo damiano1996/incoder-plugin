@@ -45,7 +45,12 @@ public final class ChatSettingsConfigurable implements Configurable {
                 || !chatSettingsComponent
                         .getSystemMessageInstructionsField()
                         .getText()
-                        .equals(state.systemMessageInstructions);
+                        .equals(state.systemMessageInstructions)
+                || chatSettingsComponent.getEnableTools().isSelected() != state.enableTools
+                || !chatSettingsComponent
+                        .getServerNamesComboBox()
+                        .getItem()
+                        .equals(state.serverName);
     }
 
     @Override
@@ -55,6 +60,8 @@ public final class ChatSettingsConfigurable implements Configurable {
         state.maxMessages = (int) chatSettingsComponent.getMaxMessages().getValue();
         state.systemMessageInstructions =
                 chatSettingsComponent.getSystemMessageInstructionsField().getText();
+        state.enableTools = chatSettingsComponent.getEnableTools().isSelected();
+        state.serverName = chatSettingsComponent.getServerNamesComboBox().getItem();
     }
 
     @Override
@@ -65,6 +72,8 @@ public final class ChatSettingsConfigurable implements Configurable {
         chatSettingsComponent
                 .getSystemMessageInstructionsField()
                 .setText(state.systemMessageInstructions);
+        chatSettingsComponent.getEnableTools().setSelected(state.enableTools);
+        chatSettingsComponent.getServerNamesComboBox().setSelectedItem(state.serverName);
     }
 
     @Override

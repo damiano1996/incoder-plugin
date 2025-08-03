@@ -2,6 +2,7 @@ package com.github.damiano1996.jetbrains.incoder.language.model.client.tools.com
 
 import com.github.damiano1996.jetbrains.incoder.InCoderBundle;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.ToolException;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -14,7 +15,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,6 @@ import org.jetbrains.plugins.terminal.TerminalTabState;
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
 @Slf4j
-@AllArgsConstructor
 public class CommandLineTool {
 
     private static final String TERMINAL_TOOL_WINDOW_ID = "Terminal";
@@ -31,8 +30,6 @@ public class CommandLineTool {
     private static final int MAX_OUTPUT_LINES = 100;
     private static final int HEAD_LINES = 50;
     private static final int TAIL_LINES = 50;
-
-    private final Project project;
 
     @Tool(
             name = "COMMAND_LINE_TOOL",
@@ -64,17 +61,19 @@ Must be an absolute path to an existing directory.
                 command,
                 workingDirectory);
 
-        File workDir = prepareWorkingDirectory(workingDirectory);
+        Project project = ProjectUtil.getActiveProject();
 
-        if (!showConfirmationDialog(command, workDir.getAbsolutePath())) {
+        File workDir = prepareWorkingDirectory(project, workingDirectory);
+
+        if (!showConfirmationDialog(project, command, workDir.getAbsolutePath())) {
             return "Command canceled by the user. "
                     + "Ask why to understand their motivation before proceeding.";
         }
 
-        return executeCommandInTerminal(command, workDir);
+        return executeCommandInTerminal(project, command, workDir);
     }
 
-    private @NotNull File prepareWorkingDirectory(String workingDirectory) {
+    private @NotNull File prepareWorkingDirectory(Project project, String workingDirectory) {
         File workDir;
 
         if (workingDirectory == null || workingDirectory.trim().isEmpty()) {
@@ -100,7 +99,8 @@ Must be an absolute path to an existing directory.
         return workDir;
     }
 
-    private boolean showConfirmationDialog(List<String> command, String workingDirectory) {
+    private boolean showConfirmationDialog(
+            Project project, List<String> command, String workingDirectory) {
         CompletableFuture<Boolean> dialogResult = new CompletableFuture<>();
 
         ApplicationManager.getApplication()
@@ -127,7 +127,8 @@ Must be an absolute path to an existing directory.
         }
     }
 
-    private String executeCommandInTerminal(@Nullable List<String> command, File workingDirectory) {
+    private String executeCommandInTerminal(
+            Project project, @Nullable List<String> command, File workingDirectory) {
         log.debug(
                 "Executing command in terminal: '{}' in directory: '{}'",
                 command,

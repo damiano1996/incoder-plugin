@@ -9,7 +9,7 @@ import javax.swing.*;
 import lombok.Getter;
 
 @Getter
-public class AnthropicComponent {
+public class AnthropicSettingsComponent {
 
     private final JPanel mainPanel;
     private final JPasswordField apiKeyField;
@@ -17,7 +17,7 @@ public class AnthropicComponent {
     private final JSpinner temperatureField;
     private final JSpinner maxTokensField;
 
-    public AnthropicComponent() {
+    public AnthropicSettingsComponent() {
         apiKeyField = new JPasswordField();
         apiKeyField.setColumns(40);
 

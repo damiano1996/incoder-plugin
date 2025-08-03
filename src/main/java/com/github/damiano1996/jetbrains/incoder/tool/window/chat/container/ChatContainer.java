@@ -1,5 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.tool.window.chat.container;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.Chat;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.container.toolbar.ChatActionToolbar;
 import com.github.damiano1996.jetbrains.incoder.ui.components.Layout;
@@ -41,16 +42,20 @@ public class ChatContainer {
     }
 
     public void createNewChat() {
-        Chat chat = new Chat(project);
-        chats.add(chat);
-        chat.setChatId(chats.size() - 1);
+        try {
+            Chat chat = new Chat(project);
+            chats.add(chat);
+            chat.setChatId(chats.size() - 1);
 
-        chatPanel.removeAll();
+            chatPanel.removeAll();
 
-        chatPanel.setLayout(new BorderLayout());
-        chatPanel.add(chat.getMainPanel(), BorderLayout.CENTER);
+            chatPanel.setLayout(new BorderLayout());
+            chatPanel.add(chat.getMainPanel(), BorderLayout.CENTER);
 
-        chatPanel.revalidate();
-        chatPanel.repaint();
+            chatPanel.revalidate();
+            chatPanel.repaint();
+        } catch (LanguageModelException e) {
+            // todo
+        }
     }
 }

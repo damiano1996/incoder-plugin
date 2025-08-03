@@ -17,6 +17,11 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
+    public String getModelName() {
+        return getState().modelName;
+    }
+
+    @Override
     public ChatLanguageModel createChatLanguageModel() {
         return AnthropicChatModel.builder()
                 .apiKey(getState().apiKey)
@@ -45,10 +50,5 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     @Override
     public List<String> getAvailableModels() {
         return Arrays.stream(AnthropicChatModelName.values()).map(Enum::toString).toList();
-    }
-
-    @Override
-    public String getSelectedModelName() {
-        return getState().modelName;
     }
 }

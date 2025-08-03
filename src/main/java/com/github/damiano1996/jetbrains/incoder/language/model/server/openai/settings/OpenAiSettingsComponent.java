@@ -10,7 +10,7 @@ import javax.swing.*;
 import lombok.Getter;
 
 @Getter
-public class OpenAiComponent {
+public class OpenAiSettingsComponent {
 
     private final JPanel mainPanel;
     private final JBTextField baseUrlField;
@@ -19,7 +19,7 @@ public class OpenAiComponent {
     private final JSpinner temperatureField;
     private final JSpinner maxTokensField;
 
-    public OpenAiComponent() {
+    public OpenAiSettingsComponent() {
         baseUrlField = new JBTextField();
         baseUrlField.setColumns(40);
 

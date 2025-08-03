@@ -5,6 +5,7 @@ import com.intellij.diff.DiffManager;
 import com.intellij.diff.InvalidDiffRequestException;
 import com.intellij.diff.merge.MergeResult;
 import com.intellij.diff.merge.TextMergeRequest;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -22,16 +23,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
-@AllArgsConstructor
 public class EditorTool {
-
-    private final Project project;
 
     private static String getOriginalContent(VirtualFile virtualFile) {
         try {
@@ -193,6 +190,8 @@ Should be properly formatted and syntactically correct code.
             Consumer<MergeResult> mergeResultConsumer,
             CompletableFuture<String> resultMessage) {
         try {
+            Project project = ProjectUtil.getActiveProject();
+
             TextMergeRequest textMergeRequest =
                     DiffUtils.showDiffWithProposedChange(
                             project,

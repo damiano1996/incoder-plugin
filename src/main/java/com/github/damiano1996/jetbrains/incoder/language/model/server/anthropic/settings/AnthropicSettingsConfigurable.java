@@ -1,33 +1,16 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseServerConfigurable;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactory;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.AnthropicFactory;
+import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.util.NlsContexts;
 import javax.swing.*;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class AnthropicConfigurable extends BaseServerConfigurable {
+public final class AnthropicSettingsConfigurable implements Configurable {
 
-    private AnthropicComponent settingsComponent = new AnthropicComponent();
+    private AnthropicSettingsComponent settingsComponent = new AnthropicSettingsComponent();
 
     private static AnthropicSettings.State getState() {
         return AnthropicSettings.getInstance().getState();
-    }
-
-    @Contract(value = " -> new", pure = true)
-    @Override
-    protected @NotNull ServerFactory getServerFactory() {
-        return new AnthropicFactory();
-    }
-
-    @Contract(pure = true)
-    @Nls(capitalization = Nls.Capitalization.Title)
-    @Override
-    public @NotNull String getDisplayName() {
-        return "Anthropic";
     }
 
     @Override
@@ -56,7 +39,7 @@ public final class AnthropicConfigurable extends BaseServerConfigurable {
     }
 
     @Override
-    public void updateState() {
+    public void apply() {
         var state = getState();
 
         state.apiKey = new String(settingsComponent.getApiKeyField().getPassword());
@@ -78,5 +61,10 @@ public final class AnthropicConfigurable extends BaseServerConfigurable {
     @Override
     public void disposeUIResources() {
         settingsComponent = null;
+    }
+
+    @Override
+    public @NlsContexts.ConfigurableName String getDisplayName() {
+        return "Anthropic";
     }
 }

@@ -34,9 +34,10 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
 
     @ToString
     public static class State {
+        public String serverName = "";
         public int maxMessages = 20;
-
         public String systemMessageInstructions = loadDefaultSystemPrompt();
+        public boolean enableTools = true;
 
         public static @NotNull String loadDefaultSystemPrompt() {
             try (InputStream inputStream =

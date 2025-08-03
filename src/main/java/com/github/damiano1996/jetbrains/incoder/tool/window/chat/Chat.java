@@ -4,6 +4,8 @@ import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatCons
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.LanguageModelClient;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStream;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStreamImpl;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
@@ -13,7 +15,6 @@ import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.h
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.tool.ToolChatMessage;
 import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
-import com.github.damiano1996.jetbrains.incoder.ui.components.Layout;
 import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
@@ -38,6 +39,7 @@ import org.jetbrains.annotations.Nullable;
 public class Chat {
 
     private final Project project;
+    private final LanguageModelClient languageModelClient;
 
     @Setter @Getter private int chatId;
 
@@ -50,9 +52,12 @@ public class Chat {
 
     @Nullable private StoppableTokenStream stoppableTokenStream;
 
-    public Chat(Project project) {
+    public Chat(Project project) throws LanguageModelException {
         this.project = project;
 
+        languageModelClient =
+                LanguageModelServiceImpl.getInstance(project)
+                        .createClient(ChatSettings.getInstance().getState().serverName);
         createUIComponents();
         initActionListeners();
     }
@@ -85,34 +90,22 @@ public class Chat {
         HumanChatMessage humanChatMessage = new HumanChatMessage(prompt);
         chatBody.addChatMessage(humanChatMessage);
 
-        try {
-            chatBody.addChatMessage(
-                    new AiChatMessage(
-                            LanguageModelServiceImpl.getInstance(project)
-                                    .getSelectedModelName()
-                                    .toLowerCase()));
+        chatBody.addChatMessage(
+                new AiChatMessage(languageModelClient.getModelName().toLowerCase()));
 
-            chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
+        chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
 
-            stoppableTokenStream =
-                    (StoppableTokenStream)
-                            new StoppableTokenStreamImpl(
-                                            LanguageModelServiceImpl.getInstance(project)
-                                                    .getClient()
-                                                    .chat(chatId, prompt))
-                                    .onStart(this::onStart)
-                                    .onStop(this::onStop)
-                                    .onPartialResponse(this::onNewToken)
-                                    .onCompleteResponse(chatResponse -> onComplete())
-                                    .onToolExecuted(this::onToolExecuted)
-                                    .onError(this::onError);
+        stoppableTokenStream =
+                (StoppableTokenStream)
+                        new StoppableTokenStreamImpl(languageModelClient.chat(chatId, prompt))
+                                .onStart(this::onStart)
+                                .onStop(this::onStop)
+                                .onPartialResponse(this::onNewToken)
+                                .onCompleteResponse(chatResponse -> onComplete())
+                                .onToolExecuted(this::onToolExecuted)
+                                .onError(this::onError);
 
-            stoppableTokenStream.start();
-
-        } catch (LanguageModelException e) {
-            log.warn("Unable to start stream", e);
-            chatBody.addChatMessage(new ErrorChatMessage(e));
-        }
+        stoppableTokenStream.start();
     }
 
     private void onStop() {
@@ -188,6 +181,25 @@ public class Chat {
     }
 
     private void createUIComponents() {
+        JPanel inputPanel = getInputPanel();
+
+        chatBody = new ChatBody(this::handleExamplePromptSelected);
+
+        mainPanel =
+                FormBuilder.createFormBuilder()
+                        .addComponentFillVertically(chatBody.getMainPanel(), 0)
+                        .addVerticalGap(4)
+                        .addComponent(inputPanel)
+                        .getPanel();
+
+        mainPanel.setBorder(JBUI.Borders.empty(20));
+        mainPanel.setMinimumSize(new Dimension(400, 400));
+        mainPanel.setPreferredSize(new Dimension(400, 400));
+
+        uiIdle();
+    }
+
+    private @NotNull JPanel getInputPanel() {
         promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 2);
         promptTextArea.setMargin(JBUI.insets(2, 9, 2, 6));
         promptTextArea.setLineWrap(true);
@@ -207,7 +219,12 @@ public class Chat {
         submitButton.setPreferredSize(buttonSize);
         submitButton.setMaximumSize(buttonSize);
 
-        chatBody = new ChatBody(this::handleExamplePromptSelected);
+        JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
+        toolbar.setFloatable(false);
+        toolbar.setBorderPainted(false);
+        toolbar.setOpaque(false);
+        toolbar.add(Box.createHorizontalGlue());
+        toolbar.add(submitButton);
 
         Border focusBorder =
                 new RoundedLineBorder(
@@ -227,30 +244,18 @@ public class Chat {
                 FormBuilder.createFormBuilder()
                         .addComponent(promptScrollPane)
                         .addVerticalGap(4)
-                        .addComponent(Layout.componentToRight(submitButton))
+                        .addComponent(toolbar)
                         .getPanel();
 
         inputPanel.setLayout(new BorderLayout());
         inputPanel.add(inputContent, BorderLayout.CENTER);
-
-        mainPanel =
-                FormBuilder.createFormBuilder()
-                        .addComponentFillVertically(chatBody.getMainPanel(), 0)
-                        .addVerticalGap(4)
-                        .addComponent(inputPanel)
-                        .getPanel();
-
-        mainPanel.setBorder(JBUI.Borders.empty(20));
-        mainPanel.setMinimumSize(new Dimension(400, 400));
-        mainPanel.setPreferredSize(new Dimension(400, 400));
-
-        uiIdle();
+        return inputPanel;
     }
 
     private @NotNull JScrollPane getPromptScrollPane() {
         JScrollPane promptScrollPane =
                 new JBScrollPane() {
-                    private final int MIN_HEIGHT = 50;
+                    private final int MIN_HEIGHT = 100;
                     private final int MAX_HEIGHT = 200;
                     private final int PREFERRED_WIDTH = 100;
 

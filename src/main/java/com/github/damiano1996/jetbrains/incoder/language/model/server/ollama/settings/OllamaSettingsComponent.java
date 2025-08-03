@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
-public class OllamaComponent {
+public class OllamaSettingsComponent {
 
     private final JPanel mainPanel;
     private final JBTextField baseUrlField;
@@ -22,7 +22,7 @@ public class OllamaComponent {
     private final JSpinner temperatureField;
     private final JButton refreshButton;
 
-    public OllamaComponent() {
+    public OllamaSettingsComponent() {
         baseUrlField = new JBTextField();
         baseUrlField.setColumns(40);
 
