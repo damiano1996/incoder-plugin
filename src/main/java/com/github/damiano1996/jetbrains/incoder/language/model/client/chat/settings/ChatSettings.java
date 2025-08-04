@@ -1,5 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
@@ -34,7 +35,7 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
 
     @ToString
     public static class State {
-        public String serverName = "";
+        public LanguageModelParameters defaultLanguageModelParameters;
         public int maxMessages = 20;
         public String systemMessageInstructions = loadDefaultSystemPrompt();
         public boolean enableTools = true;

@@ -5,13 +5,13 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.setti
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.EditorTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.FileTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.commandline.CommandLineTool;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
@@ -35,10 +35,9 @@ public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
     private final String userTimezone;
 
     public ChatLanguageModelClientImpl(
-            String modelName,
-            ChatLanguageModel chatLanguageModel,
+            LanguageModelParameters parameters,
             StreamingChatLanguageModel streamingChatLanguageModel) {
-        super(modelName);
+        super(parameters);
 
         Project project = ProjectUtil.getActiveProject();
 
@@ -47,7 +46,7 @@ public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
         this.ideInfo = getIdeInfo();
         this.userTimezone = getUserTimezone();
 
-        chatCodingAssistant = getChatCodingAssistant(chatLanguageModel, streamingChatLanguageModel);
+        chatCodingAssistant = getChatCodingAssistant(streamingChatLanguageModel);
     }
 
     private static @NotNull String getProjectName(Project project) {
@@ -56,13 +55,11 @@ public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
     }
 
     private ChatCodingAssistant getChatCodingAssistant(
-            ChatLanguageModel chatLanguageModel,
             StreamingChatLanguageModel streamingChatLanguageModel) {
         final ChatCodingAssistant chatCodingAssistant;
         AiServices<ChatCodingAssistant> aiAssistantBuilder =
                 AiServices.builder(ChatCodingAssistant.class)
                         .streamingChatLanguageModel(streamingChatLanguageModel)
-                        .chatLanguageModel(chatLanguageModel)
                         .chatMemoryProvider(
                                 memoryId ->
                                         MessageWindowChatMemory.withMaxMessages(

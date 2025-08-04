@@ -8,6 +8,8 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatL
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStream;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStreamImpl;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerSettings;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiChatMessage;
@@ -30,7 +32,7 @@ import dev.langchain4j.service.tool.ToolExecution;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
-import java.util.Set;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -108,7 +110,8 @@ public class Chat {
         HumanChatMessage humanChatMessage = new HumanChatMessage(prompt);
         chatBody.addChatMessage(humanChatMessage);
 
-        chatBody.addChatMessage(new AiChatMessage(client.getModelName().toLowerCase()));
+        chatBody.addChatMessage(
+                new AiChatMessage(client.getParameters().getModelName().toLowerCase()));
 
         chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
 
@@ -236,21 +239,24 @@ public class Chat {
         submitButton.setPreferredSize(buttonSize);
         submitButton.setMaximumSize(buttonSize);
 
-        Set<String> options =
-                LanguageModelProjectService.getInstance(project).getAvailableServerNames();
-        ComboBox<String> serverNamesComboBox = new ComboBox<>(options.toArray(new String[0]));
-        serverNamesComboBox.setSelectedItem(ChatSettings.getInstance().getState().serverName);
-        serverNamesComboBox.addItemListener(
-                e -> {
-                    if (e.getStateChange() == ItemEvent.DESELECTED) return;
-                    ChatSettings.getInstance().getState().serverName = e.getItem().toString();
-                    try {
-                        LanguageModelProjectService.getInstance(project)
-                                .with(ChatSettings.getInstance().getState());
-                    } catch (LanguageModelException ex) {
-                        notifySettingsError(e);
-                    }
-                });
+        List<LanguageModelParameters> options =
+                ServerSettings.getInstance().getState().configuredLanguageModels;
+        ComboBox<LanguageModelParameters> serverNamesComboBox =
+                new ComboBox<>(options.toArray(new LanguageModelParameters[0]));
+        serverNamesComboBox.setSelectedItem(
+                ChatSettings.getInstance().getState().defaultLanguageModelParameters);
+        //        serverNamesComboBox.addItemListener(
+        //                e -> {
+        //                    if (e.getStateChange() == ItemEvent.DESELECTED) return;
+        //                    ChatSettings.getInstance().getState().serverName =
+        // e.getItem().toString();
+        //                    try {
+        //                        LanguageModelProjectService.getInstance(project)
+        //                                .with(ChatSettings.getInstance().getState());
+        //                    } catch (LanguageModelException ex) {
+        //                        notifySettingsError(e);
+        //                    }
+        //                });
         serverNamesComboBox.setMaximumSize(serverNamesComboBox.getPreferredSize());
 
         JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);

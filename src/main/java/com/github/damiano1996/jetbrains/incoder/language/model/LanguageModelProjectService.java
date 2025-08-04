@@ -46,9 +46,12 @@ public final class LanguageModelProjectService implements LanguageModelService, 
                         .runProcessWithProgressSynchronously(
                                 () -> {
                                     LanguageModelServer server =
-                                            ServerFactoryUtils.findByName(settings.serverName)
+                                            ServerFactoryUtils.findByName(
+                                                            settings.selectedLanguageModelParameters
+                                                                    .getServerName())
                                                     .createServer();
-                                    return server.createInlineClient();
+                                    return server.createInlineClient(
+                                            settings.selectedLanguageModelParameters);
                                 },
                                 "Creating the inline client for %s".formatted(settings),
                                 false,
@@ -64,9 +67,12 @@ public final class LanguageModelProjectService implements LanguageModelService, 
                         .runProcessWithProgressSynchronously(
                                 () -> {
                                     LanguageModelServer server =
-                                            ServerFactoryUtils.findByName(settings.serverName)
+                                            ServerFactoryUtils.findByName(
+                                                            settings.defaultLanguageModelParameters
+                                                                    .getServerName())
                                                     .createServer();
-                                    return server.createChatClient();
+                                    return server.createChatClient(
+                                            settings.defaultLanguageModelParameters);
                                 },
                                 "Creating the chat client for %s".formatted(settings),
                                 false,

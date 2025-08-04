@@ -16,20 +16,20 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public abstract class BaseLanguageModelServer implements LanguageModelServer {
 
-    public static final Duration TIMEOUT = Duration.of(10, ChronoUnit.SECONDS);
+    public static final Duration DEFAULT_TIMEOUT = Duration.of(10, ChronoUnit.SECONDS);
 
-    public abstract String getModelName();
+    public abstract ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters);
 
-    public abstract ChatLanguageModel createChatLanguageModel();
+    public abstract StreamingChatLanguageModel createStreamingChatLanguageModel(
+            LanguageModelParameters parameters);
 
-    public abstract StreamingChatLanguageModel createStreamingChatLanguageModel();
-
-    @Contract(" -> new")
+    @Contract("_ -> new")
     @Override
-    public @NotNull InlineLanguageModelClient createInlineClient() throws LanguageModelException {
+    public @NotNull InlineLanguageModelClient createInlineClient(LanguageModelParameters parameters)
+            throws LanguageModelException {
         try {
             return new InlineLanguageModelClientImpl(
-                    getModelName(), createChatLanguageModel(), createStreamingChatLanguageModel());
+                    parameters, createChatLanguageModel(parameters));
         } catch (Exception e) {
             throw new LanguageModelException(
                     ("Unable to create the inline client for %s.\n%s")
@@ -38,12 +38,13 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
         }
     }
 
-    @Contract(" -> new")
+    @Contract("_ -> new")
     @Override
-    public @NotNull ChatLanguageModelClient createChatClient() throws LanguageModelException {
+    public @NotNull ChatLanguageModelClient createChatClient(LanguageModelParameters parameters)
+            throws LanguageModelException {
         try {
             return new ChatLanguageModelClientImpl(
-                    getModelName(), createChatLanguageModel(), createStreamingChatLanguageModel());
+                    parameters, createStreamingChatLanguageModel(parameters));
         } catch (Exception e) {
             throw new LanguageModelException(
                     ("Unable to create the chat client for %s.\n%s")

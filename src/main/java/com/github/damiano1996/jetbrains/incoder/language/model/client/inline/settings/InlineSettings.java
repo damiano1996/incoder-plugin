@@ -1,5 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
@@ -29,7 +30,7 @@ public final class InlineSettings implements PersistentStateComponent<InlineSett
 
     @ToString
     public static class State {
-        public String serverName = "";
+        public LanguageModelParameters selectedLanguageModelParameters;
         public boolean enable = false;
         public boolean triggerEndLine = true;
 

@@ -1,15 +1,17 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+
 public abstract class BaseLanguageModelClient implements LanguageModelClient {
 
-    private final String modelName;
+    private final LanguageModelParameters parameters;
 
-    protected BaseLanguageModelClient(String modelName) {
-        this.modelName = modelName;
+    protected BaseLanguageModelClient(LanguageModelParameters parameters) {
+        this.parameters = parameters;
     }
 
     @Override
-    public String getModelName() {
-        return modelName;
+    public LanguageModelParameters getParameters() {
+        return parameters;
     }
 }

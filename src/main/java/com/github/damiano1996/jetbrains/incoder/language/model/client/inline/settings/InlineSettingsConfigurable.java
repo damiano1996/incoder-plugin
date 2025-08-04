@@ -47,11 +47,11 @@ public final class InlineSettingsConfigurable implements Configurable {
                 || !inlineSettingsComponent
                         .getSystemMessageInstructionsField()
                         .getText()
-                        .equals(state.systemMessageInstructions)
-                || !inlineSettingsComponent
-                        .getServerNamesComboBox()
-                        .getItem()
-                        .equals(state.serverName);
+                        .equals(state.systemMessageInstructions);
+        //                || !inlineSettingsComponent
+        //                        .getServerNamesComboBox()
+        //                        .getItem()
+        //                        .equals(state.selectedLanguageModelParameters.serverName());
     }
 
     @Override
@@ -62,7 +62,7 @@ public final class InlineSettingsConfigurable implements Configurable {
         state.triggerEndLine = inlineSettingsComponent.getEndLineCheckBox().isSelected();
         state.systemMessageInstructions =
                 inlineSettingsComponent.getSystemMessageInstructionsField().getText();
-        state.serverName = inlineSettingsComponent.getServerNamesComboBox().getItem();
+        //        state.serverName = inlineSettingsComponent.getServerNamesComboBox().getItem();
 
         try {
             LanguageModelProjectService.getInstance(
@@ -84,7 +84,8 @@ public final class InlineSettingsConfigurable implements Configurable {
         inlineSettingsComponent
                 .getSystemMessageInstructionsField()
                 .setText(state.systemMessageInstructions);
-        inlineSettingsComponent.getServerNamesComboBox().setSelectedItem(state.serverName);
+        //
+        // inlineSettingsComponent.getServerNamesComboBox().setSelectedItem(state.serverName);
     }
 
     @Override

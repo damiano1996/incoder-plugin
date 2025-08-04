@@ -27,21 +27,9 @@
 
         <applicationConfigurable
                 groupId="server.group"
-                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings.AnthropicSettingsConfigurable"
-                id="com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings.AnthropicSettingsConfigurable"
-                displayName="Anthropic"/>
-
-        <applicationConfigurable
-                groupId="server.group"
-                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings.OllamaSettingsConfigurable"
-                id="com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings.OllamaSettingsConfigurable"
-                displayName="Ollama"/>
-
-        <applicationConfigurable
-                groupId="server.group"
-                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.openai.settings.OpenAiSettingsConfigurable"
-                id="com.github.damiano1996.jetbrains.incoder.language.model.server.openai.settings.OpenAiSettingsConfigurable"
-                displayName="Open AI"/>
+                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.settings.LanguageModelSettingsConfigurable"
+                id="com.github.damiano1996.jetbrains.incoder.language.model.server.settings.LanguageModelSettingsConfigurable"
+                displayName="Language Models"/>
 
         <applicationConfigurable
                 instance="com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"

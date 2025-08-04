@@ -10,11 +10,15 @@ public interface LanguageModelServer {
 
     String getName();
 
-    List<String> getAvailableModels();
+    List<String> getAvailableModels(String baseUrl);
+
+    LanguageModelParameters getDefaultParameters();
 
     @NotNull
-    InlineLanguageModelClient createInlineClient() throws LanguageModelException;
+    InlineLanguageModelClient createInlineClient(LanguageModelParameters parameters)
+            throws LanguageModelException;
 
     @NotNull
-    ChatLanguageModelClient createChatClient() throws LanguageModelException;
+    ChatLanguageModelClient createChatClient(LanguageModelParameters parameters)
+            throws LanguageModelException;
 }

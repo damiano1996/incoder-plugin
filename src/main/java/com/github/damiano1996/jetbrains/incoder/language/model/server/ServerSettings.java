@@ -5,6 +5,8 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
@@ -28,5 +30,7 @@ public final class ServerSettings implements PersistentStateComponent<ServerSett
     }
 
     @ToString
-    public static class State {}
+    public static class State {
+        public List<LanguageModelParameters> configuredLanguageModels = new ArrayList<>();
+    }
 }
