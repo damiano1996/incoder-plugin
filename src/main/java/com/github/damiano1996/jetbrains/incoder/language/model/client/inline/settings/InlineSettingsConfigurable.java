@@ -62,17 +62,7 @@ public final class InlineSettingsConfigurable implements Configurable {
         state.triggerEndLine = inlineSettingsComponent.getEndLineCheckBox().isSelected();
         state.systemMessageInstructions =
                 inlineSettingsComponent.getSystemMessageInstructionsField().getText();
-        //        state.serverName = inlineSettingsComponent.getServerNamesComboBox().getItem();
-
-        try {
-            LanguageModelProjectService.getInstance(
-                            Objects.requireNonNull(ProjectUtil.getActiveProject()))
-                    .with(state);
-        } catch (NullPointerException e) {
-            throw new ConfigurationException("Unable to verify settings.");
-        } catch (LanguageModelException e) {
-            throw new ConfigurationException(e.getMessage());
-        }
+        //        state.serverName = inlineSettingsComponent.getServerNamesComboBox().getItem(); //todo
     }
 
     @Override

@@ -46,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
 public class Chat {
 
     private final Project project;
+    private ChatLanguageModelClient client;
 
     @Setter @Getter private int chatId;
 
@@ -89,29 +90,10 @@ public class Chat {
         log.debug("Prompt: {}", prompt);
         this.promptTextArea.setText("");
 
-        ChatLanguageModelClient client;
-
-        try {
-            client = LanguageModelProjectService.getInstance(project).getOrCreateChatClient();
-        } catch (LanguageModelException e) {
-            NotificationService.getInstance(project)
-                    .notifyWithSettingsActionButton(
-                            """
-                            <html>
-                            Failed to initialize the client.<br>
-                            Please, review server configurations from Settings.
-                            </html>
-                            """,
-                            NotificationType.ERROR);
-            promptTextArea.setText(prompt);
-            return;
-        }
-
         HumanChatMessage humanChatMessage = new HumanChatMessage(prompt);
         chatBody.addChatMessage(humanChatMessage);
 
-        chatBody.addChatMessage(
-                new AiChatMessage(client.getParameters().getModelName().toLowerCase()));
+        chatBody.addChatMessage(new AiChatMessage(client.getParameters().modelName.toLowerCase()));
 
         chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
 
@@ -245,18 +227,17 @@ public class Chat {
                 new ComboBox<>(options.toArray(new LanguageModelParameters[0]));
         serverNamesComboBox.setSelectedItem(
                 ChatSettings.getInstance().getState().defaultLanguageModelParameters);
-        //        serverNamesComboBox.addItemListener(
-        //                e -> {
-        //                    if (e.getStateChange() == ItemEvent.DESELECTED) return;
-        //                    ChatSettings.getInstance().getState().serverName =
-        // e.getItem().toString();
-        //                    try {
-        //                        LanguageModelProjectService.getInstance(project)
-        //                                .with(ChatSettings.getInstance().getState());
-        //                    } catch (LanguageModelException ex) {
-        //                        notifySettingsError(e);
-        //                    }
-        //                });
+        serverNamesComboBox.addItemListener(
+                e -> {
+                    if (e.getStateChange() == ItemEvent.DESELECTED) return;
+                    try {
+                        client =
+                                LanguageModelProjectService.getInstance(project)
+                                        .createChatClientWithDefaultSettings((LanguageModelParameters) e.getItem()).compute();
+                    } catch (LanguageModelException ex) {
+                        notifySettingsError(e);
+                    }
+                });
         serverNamesComboBox.setMaximumSize(serverNamesComboBox.getPreferredSize());
 
         JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);

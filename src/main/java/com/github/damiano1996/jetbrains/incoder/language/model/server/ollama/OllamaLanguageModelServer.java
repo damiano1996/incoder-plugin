@@ -15,9 +15,9 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     @Override
     public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
         return OllamaChatModel.builder()
-                .baseUrl(parameters.getBaseUrl())
-                .modelName(parameters.getModelName())
-                .temperature(parameters.getTemperature())
+                .baseUrl(parameters.baseUrl)
+                .modelName(parameters.modelName)
+                .temperature(parameters.temperature)
                 .timeout(DEFAULT_TIMEOUT)
                 .build();
     }
@@ -26,9 +26,9 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     public StreamingChatLanguageModel createStreamingChatLanguageModel(
             LanguageModelParameters parameters) {
         return OllamaStreamingChatModel.builder()
-                .baseUrl(parameters.getBaseUrl())
-                .modelName(parameters.getModelName())
-                .temperature(parameters.getTemperature())
+                .baseUrl(parameters.baseUrl)
+                .modelName(parameters.modelName)
+                .temperature(parameters.temperature)
                 .timeout(DEFAULT_TIMEOUT)
                 .build();
     }

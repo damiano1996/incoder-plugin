@@ -52,4 +52,13 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
                     e);
         }
     }
+
+    @Override
+    public void verify(LanguageModelParameters parameters) throws LanguageModelException {
+        try {
+            createChatLanguageModel(parameters).chat("Say OK. Nothing else");
+        } catch (Exception e) {
+            throw new LanguageModelException("Parameters are not valid. Error from %s: %s".formatted(getName(), e.getMessage()), e);
+        }
+    }
 }

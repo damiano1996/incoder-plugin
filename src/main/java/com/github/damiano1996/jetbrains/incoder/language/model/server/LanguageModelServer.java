@@ -21,4 +21,6 @@ public interface LanguageModelServer {
     @NotNull
     ChatLanguageModelClient createChatClient(LanguageModelParameters parameters)
             throws LanguageModelException;
+
+    void verify(LanguageModelParameters parameters) throws LanguageModelException;
 }

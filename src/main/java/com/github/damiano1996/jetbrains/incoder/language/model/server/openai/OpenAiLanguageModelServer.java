@@ -13,11 +13,11 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
     @Override
     public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
         return OpenAiChatModel.builder()
-                .baseUrl(parameters.getBaseUrl())
-                .apiKey(parameters.getApiKey())
-                .modelName(parameters.getModelName())
-                .temperature(parameters.getTemperature())
-                .maxTokens(parameters.getMaxTokens())
+                .baseUrl(parameters.baseUrl)
+                .apiKey(parameters.apiKey)
+                .modelName(parameters.modelName)
+                .temperature(parameters.temperature)
+                .maxTokens(parameters.maxTokens)
                 .timeout(DEFAULT_TIMEOUT)
                 .build();
     }
@@ -26,9 +26,11 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
     public StreamingChatLanguageModel createStreamingChatLanguageModel(
             LanguageModelParameters parameters) {
         return OpenAiStreamingChatModel.builder()
-                .apiKey(parameters.getApiKey())
-                .modelName(parameters.getModelName())
-                .temperature(parameters.getTemperature())
+                .baseUrl(parameters.baseUrl)
+                .apiKey(parameters.apiKey)
+                .modelName(parameters.modelName)
+                .temperature(parameters.temperature)
+                .maxTokens(parameters.maxTokens)
                 .timeout(DEFAULT_TIMEOUT)
                 .build();
     }

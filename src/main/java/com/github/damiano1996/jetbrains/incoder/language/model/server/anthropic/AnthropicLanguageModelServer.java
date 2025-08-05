@@ -1,5 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
@@ -15,11 +16,11 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     @Override
     public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
         return AnthropicChatModel.builder()
-                .baseUrl(parameters.getBaseUrl())
-                .apiKey(parameters.getApiKey())
-                .modelName(parameters.getModelName())
-                .temperature(parameters.getTemperature())
-                .maxTokens(parameters.getMaxTokens())
+                .baseUrl(parameters.baseUrl)
+                .apiKey(parameters.apiKey)
+                .modelName(parameters.modelName)
+                .temperature(parameters.temperature)
+                .maxTokens(parameters.maxTokens)
                 .timeout(DEFAULT_TIMEOUT)
                 .build();
     }
@@ -28,11 +29,11 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     public StreamingChatLanguageModel createStreamingChatLanguageModel(
             LanguageModelParameters parameters) {
         return AnthropicStreamingChatModel.builder()
-                .baseUrl(parameters.getBaseUrl())
-                .apiKey(parameters.getApiKey())
-                .modelName(parameters.getModelName())
-                .temperature(parameters.getTemperature())
-                .maxTokens(parameters.getMaxTokens())
+                .baseUrl(parameters.baseUrl)
+                .apiKey(parameters.apiKey)
+                .modelName(parameters.modelName)
+                .temperature(parameters.temperature)
+                .maxTokens(parameters.maxTokens)
                 .timeout(DEFAULT_TIMEOUT)
                 .build();
     }

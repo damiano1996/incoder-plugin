@@ -4,17 +4,23 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatL
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineLanguageModelClient;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.intellij.openapi.util.ThrowableComputable;
+
 import java.util.Set;
 
 public interface LanguageModelService {
 
     Set<String> getAvailableServerNames();
 
-    LanguageModelService with(InlineSettings.State settings) throws LanguageModelException;
 
-    LanguageModelService with(ChatSettings.State settings) throws LanguageModelException;
+    ThrowableComputable<ChatLanguageModelClient, LanguageModelException> createChatClient(ChatSettings.State settings, LanguageModelParameters parameters);
 
-    ChatLanguageModelClient getOrCreateChatClient() throws LanguageModelException;
+    ThrowableComputable<ChatLanguageModelClient, LanguageModelException> createChatClientWithDefaultSettings(LanguageModelParameters parameters);
 
-    InlineLanguageModelClient getOrCreateInlineClient() throws LanguageModelException;
+    ThrowableComputable<InlineLanguageModelClient, LanguageModelException> createInlineClient(InlineSettings.State settings, LanguageModelParameters parameters);
+
+    ThrowableComputable<InlineLanguageModelClient, LanguageModelException> createInlineClientWithDefaultSettings(LanguageModelParameters parameters);
+
+    void verify(LanguageModelParameters parameters) throws LanguageModelException;
 }

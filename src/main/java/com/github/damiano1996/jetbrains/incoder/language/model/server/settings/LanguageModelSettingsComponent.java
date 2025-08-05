@@ -6,9 +6,13 @@ import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageMo
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactoryUtils;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.impl.ProjectUtil;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.FormBuilder;
 import java.awt.*;
@@ -16,10 +20,17 @@ import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 @Getter
@@ -35,6 +46,8 @@ public class LanguageModelSettingsComponent {
     public LanguageModelSettingsComponent() {
         tableModel = new LanguageModelTableModel(configurations);
         table = new JBTable(tableModel);
+        table.getColumn("Actions").setCellRenderer(new DeleteButtonRenderer());
+        table.getColumn("Actions").setCellEditor(new DeleteButtonEditor(new JCheckBox()));
         table.setRowHeight(30);
 
         JScrollPane scrollPane = new JBScrollPane(table);
@@ -54,9 +67,10 @@ public class LanguageModelSettingsComponent {
     }
 
     private void showAddDialog() {
+        Project activeProject = ProjectUtil.getActiveProject();
         ComboBox<String> serverNameField =
                 new ComboBox<>(
-                        LanguageModelProjectService.getInstance(ProjectUtil.getActiveProject())
+                        LanguageModelProjectService.getInstance(activeProject)
                                 .getAvailableServerNames()
                                 .toArray(new String[0]));
 
@@ -69,45 +83,37 @@ public class LanguageModelSettingsComponent {
         JSpinner maxTokensSpinner = new JSpinner(new SpinnerNumberModel(2048, 100, 100000, 1));
         JSpinner temperatureSpinner = new JSpinner(new SpinnerNumberModel(0.5, 0.0, 1.0, 0.1));
 
-        JButton refreshButton = new JButton(AllIcons.Actions.Refresh);
-        refreshButton.setPreferredSize(new Dimension(30, 30));
+        JButton refreshButton = getRefreshButton(serverNameField, baseUrlField, modelNameField);
 
-        refreshButton.addActionListener(
-                e -> {
-                    List<String> availableModels;
-                    try {
-                        availableModels =
-                                ServerFactoryUtils.findByName(serverNameField.getItem())
-                                        .createServer()
-                                        .getAvailableModels(baseUrlField.getText());
-                    } catch (LanguageModelException ex) {
-                        availableModels = Collections.emptyList();
-                    }
-                    modelNameField.removeAllItems();
-                    availableModels.forEach(modelNameField::addItem);
-                });
+        // Verification components
+        JButton verifyButton = new JButton("Verify Connection");
+        JTextArea verificationTextArea = new JBTextArea();
+        verificationTextArea.setWrapStyleWord(true);
+        verificationTextArea.setLineWrap(true);
+        verificationTextArea.setPreferredSize(verificationTextArea.getPreferredSize());
+        verificationTextArea.setEditable(false);
 
         serverNameField.addItemListener(
                 e -> {
                     if (e.getStateChange() == ItemEvent.DESELECTED) return;
 
                     String serverName = (String) e.getItem();
-                    updateWithDefault(
+                    resetWithDefault(
                             serverName,
                             baseUrlField,
                             apiKeyField,
                             modelNameField,
                             temperatureSpinner,
-                            maxTokensSpinner);
+                            maxTokensSpinner, verificationTextArea);
                 });
 
-        updateWithDefault(
+        resetWithDefault(
                 serverNameField.getItem(),
                 baseUrlField,
                 apiKeyField,
                 modelNameField,
                 temperatureSpinner,
-                maxTokensSpinner);
+                maxTokensSpinner, verificationTextArea);
 
         JPanel panel =
                 FormBuilder.createFormBuilder()
@@ -129,17 +135,71 @@ public class LanguageModelSettingsComponent {
                         .addLabeledComponent(
                                 new JBLabel("Temperature:"), temperatureSpinner, 0, false)
                         .addLabeledComponent(new JBLabel("Max tokens:"), maxTokensSpinner, 0, false)
+                        .addLabeledComponent(
+                                new JBLabel("Verification:"),
+                                new JPanel() {
+                                    {
+                                        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+                                        add(verifyButton);
+                                    }
+                                },
+                                1,
+                                false)
+                        .addComponent(verificationTextArea, 0)
                         .getPanel();
 
-        int result =
-                JOptionPane.showConfirmDialog(
-                        null,
-                        panel,
-                        "Add Language Model",
-                        JOptionPane.OK_CANCEL_OPTION,
-                        JOptionPane.PLAIN_MESSAGE);
+        // Create custom option pane to control button states
+        JOptionPane optionPane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+        JDialog dialog = optionPane.createDialog(null, "Add Language Model");
 
-        if (result == JOptionPane.OK_OPTION) {
+        var okButton = getOkButton(optionPane);
+        okButton.setEnabled(false);
+
+        // Verification button action
+        verifyButton.addActionListener(e -> {
+
+            verificationTextArea.setText("");
+            verificationTextArea.setBackground(null);
+            verifyButton.setEnabled(false);
+
+            CompletableFuture<VerificationResult> futureVerificationResult = new CompletableFuture<>();
+
+            LanguageModelParameters testParam = new LanguageModelParameters(
+                    serverNameField.getItem(),
+                    modelNameField.getItem(),
+                    baseUrlField.getText(),
+                    new String(apiKeyField.getPassword()),
+                    (Integer) maxTokensSpinner.getValue(),
+                    (Double) temperatureSpinner.getValue());
+
+            verifyParameters(testParam, activeProject, futureVerificationResult);
+
+            try {
+                var result = futureVerificationResult.get(10, TimeUnit.SECONDS);
+                if (result.valid) {
+                    verificationTextArea.setText(result.message);
+                    verificationTextArea.setBackground(JBColor.green);
+                    okButton.setEnabled(true);
+                } else {
+                    verificationTextArea.setText(result.message);
+                    verificationTextArea.setBackground(JBColor.red);
+                    okButton.setEnabled(false);
+                }
+
+            } catch (Exception ex) {
+                verificationTextArea.setText(ex.getMessage());
+                verificationTextArea.setBackground(JBColor.red);
+                okButton.setEnabled(false);
+            }
+
+            verifyButton.setEnabled(true);
+
+        });
+
+        dialog.setVisible(true);
+
+        Object result = optionPane.getValue();
+        if (result != null && result.equals(JOptionPane.OK_OPTION)) {
             LanguageModelParameters param =
                     new LanguageModelParameters(
                             serverNameField.getItem(),
@@ -148,29 +208,162 @@ public class LanguageModelSettingsComponent {
                             new String(apiKeyField.getPassword()),
                             (Integer) maxTokensSpinner.getValue(),
                             (Double) temperatureSpinner.getValue());
-            configurations.add(param);
-            tableModel.fireTableDataChanged();
+
+                configurations.add(param);
+                tableModel.fireTableDataChanged();
         }
     }
 
-    private static void updateWithDefault(
+    private static void verifyParameters(LanguageModelParameters testParam, Project activeProject, CompletableFuture<VerificationResult> futureVerificationResult) {
+        ProgressManager.getInstance()
+                .runProcessWithProgressSynchronously(() -> {
+                    try {
+                        LanguageModelProjectService.getInstance(activeProject)
+                                .verify(testParam);
+                        futureVerificationResult.complete(new VerificationResult(true, "Parameters are valid."));
+                    } catch (Exception ex) {
+                        futureVerificationResult.complete(new VerificationResult(false, ex.getMessage()));
+                    }
+                }, "Verifying Parameters", false, activeProject);
+    }
+
+    @AllArgsConstructor
+    private static class VerificationResult{
+        Boolean valid;
+        String message;
+    }
+
+    private static JButton getOkButton(@NotNull JOptionPane optionPane) {
+        for (Component comp : optionPane.getComponents()) {
+            if (comp instanceof JPanel buttonPanel) {
+                for (Component button : buttonPanel.getComponents()) {
+                    if (button instanceof JButton btn) {
+                        if ("OK".equals(btn.getText())) {
+                            return btn;
+                        }
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException("No OK button was found in the given option pane.");
+    }
+
+    private static @NotNull JButton getRefreshButton(ComboBox<String> serverNameField, JTextField baseUrlField, ComboBox<String> modelNameField) {
+        JButton refreshButton = new JButton(AllIcons.Actions.Refresh);
+        refreshButton.setPreferredSize(new Dimension(30, 30));
+
+        refreshButton.addActionListener(
+                e -> {
+                    List<String> availableModels;
+                    try {
+                        availableModels =
+                                ServerFactoryUtils.findByName(serverNameField.getItem())
+                                        .createServer()
+                                        .getAvailableModels(baseUrlField.getText());
+                    } catch (LanguageModelException ex) {
+                        availableModels = Collections.emptyList();
+                    }
+                    modelNameField.removeAllItems();
+                    availableModels.forEach(modelNameField::addItem);
+                });
+        return refreshButton;
+    }
+
+    private static void resetWithDefault(
             String serverName,
             JTextField baseUrlField,
             JPasswordField apiKeyField,
             ComboBox<String> modelNameField,
             JSpinner temperatureSpinner,
-            JSpinner maxTokensSpinner) {
+            JSpinner maxTokensSpinner, JTextArea verificationTextArea) {
         try {
             LanguageModelParameters defaultParam =
                     ServerFactoryUtils.findByName(serverName).createServer().getDefaultParameters();
-            baseUrlField.setText(defaultParam.getBaseUrl());
-            apiKeyField.setText(defaultParam.getApiKey());
-            modelNameField.setSelectedItem(defaultParam.getModelName());
-            temperatureSpinner.setValue(defaultParam.getTemperature());
-            maxTokensSpinner.setValue(defaultParam.getMaxTokens());
+            baseUrlField.setText(defaultParam.baseUrl);
+            apiKeyField.setText(defaultParam.apiKey);
+            modelNameField.setSelectedItem(defaultParam.modelName);
+            temperatureSpinner.setValue(defaultParam.temperature);
+            maxTokensSpinner.setValue(defaultParam.maxTokens);
+            verificationTextArea.setText("");
+            verificationTextArea.setBackground(null);
 
         } catch (LanguageModelException ex) {
             log.warn("Unable to load default params", ex);
+        }
+    }
+
+    private static class DeleteButtonRenderer extends JButton implements TableCellRenderer {
+        public DeleteButtonRenderer() {
+            setOpaque(true);
+            setText("Delete");
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table,
+                Object value,
+                boolean isSelected,
+                boolean hasFocus,
+                int row,
+                int column) {
+            if (isSelected) {
+                setForeground(table.getSelectionForeground());
+                setBackground(table.getSelectionBackground());
+            } else {
+                setForeground(table.getForeground());
+                setBackground(UIManager.getColor("Button.background"));
+            }
+            return this;
+        }
+    }
+
+    private static class DeleteButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+        private String label;
+        private boolean isPushed;
+        private JTable table;
+        private int row;
+
+        public DeleteButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(e -> fireEditingStopped());
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(
+                JTable table, Object value, boolean isSelected, int row, int column) {
+            this.table = table;
+            this.row = row;
+            if (isSelected) {
+                button.setForeground(table.getSelectionForeground());
+                button.setBackground(table.getSelectionBackground());
+            } else {
+                button.setForeground(table.getForeground());
+                button.setBackground(table.getBackground());
+            }
+            label = (value == null) ? "Delete" : value.toString();
+            button.setText(label);
+            isPushed = true;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                LanguageModelTableModel model = (LanguageModelTableModel) table.getModel();
+                model.data.remove(row);
+                model.fireTableRowsDeleted(row, row);
+            }
+            isPushed = false;
+            return label;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
         }
     }
 
@@ -184,7 +377,6 @@ public class LanguageModelSettingsComponent {
             "Temperature",
             "Actions"
         };
-
         private final List<LanguageModelParameters> data;
 
         public LanguageModelTableModel(List<LanguageModelParameters> data) {
@@ -202,15 +394,15 @@ public class LanguageModelSettingsComponent {
         }
 
         @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
+        public @Nullable Object getValueAt(int rowIndex, int columnIndex) {
             LanguageModelParameters param = data.get(rowIndex);
             return switch (columnIndex) {
-                case 0 -> param.getServerName();
-                case 1 -> param.getModelName();
-                case 2 -> param.getBaseUrl();
-                case 3 -> param.getApiKey().isEmpty() ? "" : "****";
-                case 4 -> param.getMaxTokens();
-                case 5 -> param.getTemperature();
+                case 0 -> param.serverName;
+                case 1 -> param.modelName;
+                case 2 -> param.baseUrl;
+                case 3 -> param.apiKey.isEmpty() ? "" : "****";
+                case 4 -> param.maxTokens;
+                case 5 -> param.temperature;
                 case 6 -> "Delete";
                 default -> null;
             };
@@ -227,16 +419,8 @@ public class LanguageModelSettingsComponent {
         }
 
         @Override
-        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            if (columnIndex == 6 && "Delete".equals(aValue)) {
-                data.remove(rowIndex);
-                fireTableRowsDeleted(rowIndex, rowIndex);
-            }
-        }
-
-        @Override
         public Class<?> getColumnClass(int columnIndex) {
-            return String.class;
+            return columnIndex == 6 ? JButton.class : String.class;
         }
     }
 }
