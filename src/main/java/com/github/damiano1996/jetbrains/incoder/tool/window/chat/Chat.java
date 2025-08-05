@@ -23,6 +23,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.IconUtil;
@@ -62,12 +63,6 @@ public class Chat {
     public Chat(Project project) {
         this.project = project;
         createUIComponents();
-        initActionListeners();
-    }
-
-    private void initActionListeners() {
-        promptTextArea.addActionListener(e -> handleAction());
-        submitButton.addActionListener(e -> handleButtonAction());
     }
 
     private void handleButtonAction() {
@@ -205,46 +200,114 @@ public class Chat {
         promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 2);
         promptTextArea.setMargin(JBUI.insets(2, 9, 2, 6));
         promptTextArea.setLineWrap(true);
+        promptTextArea.addActionListener(e -> handleAction());
 
         JScrollPane promptScrollPane = getPromptScrollPane();
 
-        submitButton = new JButton();
-        submitButton.setBorderPainted(false);
-        submitButton.setContentAreaFilled(false);
-        submitButton.setFocusPainted(false);
-        submitButton.setOpaque(false);
-        submitButton.setHorizontalAlignment(SwingConstants.RIGHT);
-        submitButton.setToolTipText(SEND_MESSAGE_TOOLTIP);
-
-        Dimension buttonSize = new Dimension(40, 40);
-        submitButton.setMinimumSize(buttonSize);
-        submitButton.setPreferredSize(buttonSize);
-        submitButton.setMaximumSize(buttonSize);
+        submitButton = createToolBarButton(SEND_MESSAGE_TOOLTIP);
+        submitButton.addActionListener(e -> handleButtonAction());
 
         List<LanguageModelParameters> options =
                 ServerSettings.getInstance().getState().configuredLanguageModels;
+
         ComboBox<LanguageModelParameters> serverNamesComboBox =
                 new ComboBox<>(options.toArray(new LanguageModelParameters[0]));
+        serverNamesComboBox.setMaximumSize(serverNamesComboBox.getPreferredSize());
         serverNamesComboBox.setSelectedItem(
                 ChatSettings.getInstance().getState().defaultLanguageModelParameters);
-        serverNamesComboBox.addItemListener(
-                e -> {
-                    if (e.getStateChange() == ItemEvent.DESELECTED) return;
-                    try {
-                        client =
-                                LanguageModelProjectService.getInstance(project)
-                                        .createChatClientWithDefaultSettings((LanguageModelParameters) e.getItem()).compute();
-                    } catch (LanguageModelException ex) {
-                        notifySettingsError(e);
-                    }
-                });
-        serverNamesComboBox.setMaximumSize(serverNamesComboBox.getPreferredSize());
+
+        serverNamesComboBox.setRenderer(new ListCellRenderer<>() {
+            private final JLabel label = new JLabel();
+            private final JPanel panel = new JPanel(new BorderLayout());
+
+            {
+                label.setOpaque(true);
+                panel.add(label, BorderLayout.CENTER);
+            }
+
+            @Override
+            public Component getListCellRendererComponent(JList<? extends LanguageModelParameters> list,
+                                                          LanguageModelParameters value,
+                                                          int index,
+                                                          boolean isSelected,
+                                                          boolean cellHasFocus) {
+                if (value == null) return new JLabel("");
+
+                // Selected item view (compact)
+                if (index == -1) {
+                    label.setText(value.serverName + " - " + value.modelName);
+                } else {
+                    // Dropdown view (detailed)
+                    String text = String.format(
+                            "<html><b>%s</b> - %s<br/>URL: %s<br/>Tokens: %s | Temp: %.2f</html>",
+                            value.serverName,
+                            value.modelName,
+                            value.baseUrl,
+                            value.maxTokens,
+                            value.temperature
+                    );
+                    label.setText(text);
+                }
+
+                // Highlight selection
+                if (isSelected) {
+                    label.setBackground(list.getSelectionBackground());
+                    label.setForeground(list.getSelectionForeground());
+                } else {
+                    label.setBackground(list.getBackground());
+                    label.setForeground(list.getForeground());
+                }
+
+                return panel;
+            }
+        });
+
+        serverNamesComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.DESELECTED) return;
+            try {
+                client = LanguageModelProjectService.getInstance(project)
+                        .createChatClientWithDefaultSettings((LanguageModelParameters) e.getItem())
+                        .compute();
+            } catch (LanguageModelException ex) {
+                notifySettingsError(e);
+            }
+        });
+
+
+        JButton refreshModelsButton = createToolBarButton("Refresh models");
+        refreshModelsButton.setIcon(AllIcons.Actions.Refresh);
+        refreshModelsButton.addActionListener(e -> {
+            // Clear existing items safely
+            DefaultComboBoxModel<LanguageModelParameters> model =
+                    (DefaultComboBoxModel<LanguageModelParameters>) serverNamesComboBox.getModel();
+            model.removeAllElements();
+
+            // Re-add items from latest settings
+            List<LanguageModelParameters> updatedModels =
+                    ServerSettings.getInstance().getState().configuredLanguageModels;
+
+            for (LanguageModelParameters param : updatedModels) {
+                model.addElement(param);
+            }
+
+            // Optionally restore default selection if it still exists
+            LanguageModelParameters defaultParams =
+                    ChatSettings.getInstance().getState().defaultLanguageModelParameters;
+
+            if (defaultParams != null && updatedModels.contains(defaultParams)) {
+                serverNamesComboBox.setSelectedItem(defaultParams);
+            } else if (!updatedModels.isEmpty()) {
+                serverNamesComboBox.setSelectedIndex(0); // fallback: first item
+            }
+        });
+
 
         JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
         toolbar.setFloatable(false);
         toolbar.setBorderPainted(false);
         toolbar.setOpaque(false);
         toolbar.add(serverNamesComboBox);
+        toolbar.add(refreshModelsButton);
         toolbar.add(Box.createHorizontalGlue());
         toolbar.add(submitButton);
 
@@ -272,6 +335,23 @@ public class Chat {
         inputPanel.setLayout(new BorderLayout());
         inputPanel.add(inputContent, BorderLayout.CENTER);
         return inputPanel;
+    }
+
+    private @NotNull JButton createToolBarButton(String tooltipMessage) {
+        JButton button = new JButton();
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setOpaque(false);
+        button.setHorizontalAlignment(SwingConstants.CENTER);
+        button.setToolTipText(tooltipMessage);
+
+        Dimension buttonSize = new Dimension(40, 40);
+        button.setMinimumSize(buttonSize);
+        button.setPreferredSize(buttonSize);
+        button.setMaximumSize(buttonSize);
+
+        return button;
     }
 
     private void notifySettingsError(ItemEvent e) {
