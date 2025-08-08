@@ -58,7 +58,10 @@ public abstract class BaseLanguageModelServer implements LanguageModelServer {
         try {
             createChatLanguageModel(parameters).chat("Say OK. Nothing else");
         } catch (Exception e) {
-            throw new LanguageModelException("Parameters are not valid. Error from %s: %s".formatted(getName(), e.getMessage()), e);
+            throw new LanguageModelException(
+                    "Parameters are not valid. Error from %s: %s"
+                            .formatted(getName(), e.getMessage()),
+                    e);
         }
     }
 }

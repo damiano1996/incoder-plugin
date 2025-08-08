@@ -1,11 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelProjectService;
-import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
-import java.util.Objects;
 import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
@@ -62,7 +58,8 @@ public final class InlineSettingsConfigurable implements Configurable {
         state.triggerEndLine = inlineSettingsComponent.getEndLineCheckBox().isSelected();
         state.systemMessageInstructions =
                 inlineSettingsComponent.getSystemMessageInstructionsField().getText();
-        //        state.serverName = inlineSettingsComponent.getServerNamesComboBox().getItem(); //todo
+        //        state.serverName = inlineSettingsComponent.getServerNamesComboBox().getItem();
+        // //todo
     }
 
     @Override

@@ -23,7 +23,6 @@ import com.intellij.icons.AllIcons;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.ui.JBColor;
 import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.IconUtil;
@@ -207,100 +206,13 @@ public class Chat {
         submitButton = createToolBarButton(SEND_MESSAGE_TOOLTIP);
         submitButton.addActionListener(e -> handleButtonAction());
 
-        List<LanguageModelParameters> options =
-                ServerSettings.getInstance().getState().configuredLanguageModels;
-
         ComboBox<LanguageModelParameters> serverNamesComboBox =
-                new ComboBox<>(options.toArray(new LanguageModelParameters[0]));
-        serverNamesComboBox.setMaximumSize(serverNamesComboBox.getPreferredSize());
-        serverNamesComboBox.setSelectedItem(
-                ChatSettings.getInstance().getState().defaultLanguageModelParameters);
-
-        serverNamesComboBox.setRenderer(new ListCellRenderer<>() {
-            private final JLabel label = new JLabel();
-            private final JPanel panel = new JPanel(new BorderLayout());
-
-            {
-                label.setOpaque(true);
-                panel.add(label, BorderLayout.CENTER);
-            }
-
-            @Override
-            public Component getListCellRendererComponent(JList<? extends LanguageModelParameters> list,
-                                                          LanguageModelParameters value,
-                                                          int index,
-                                                          boolean isSelected,
-                                                          boolean cellHasFocus) {
-                if (value == null) return new JLabel("");
-
-                // Selected item view (compact)
-                if (index == -1) {
-                    label.setText(value.serverName + " - " + value.modelName);
-                } else {
-                    // Dropdown view (detailed)
-                    String text = String.format(
-                            "<html><b>%s</b> - %s<br/>URL: %s<br/>Tokens: %s | Temp: %.2f</html>",
-                            value.serverName,
-                            value.modelName,
-                            value.baseUrl,
-                            value.maxTokens,
-                            value.temperature
-                    );
-                    label.setText(text);
-                }
-
-                // Highlight selection
-                if (isSelected) {
-                    label.setBackground(list.getSelectionBackground());
-                    label.setForeground(list.getSelectionForeground());
-                } else {
-                    label.setBackground(list.getBackground());
-                    label.setForeground(list.getForeground());
-                }
-
-                return panel;
-            }
-        });
-
-        serverNamesComboBox.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.DESELECTED) return;
-            try {
-                client = LanguageModelProjectService.getInstance(project)
-                        .createChatClientWithDefaultSettings((LanguageModelParameters) e.getItem())
-                        .compute();
-            } catch (LanguageModelException ex) {
-                notifySettingsError(e);
-            }
-        });
-
+                getLanguageModelParametersComboBox();
+        refreshModels(serverNamesComboBox);
 
         JButton refreshModelsButton = createToolBarButton("Refresh models");
         refreshModelsButton.setIcon(AllIcons.Actions.Refresh);
-        refreshModelsButton.addActionListener(e -> {
-            // Clear existing items safely
-            DefaultComboBoxModel<LanguageModelParameters> model =
-                    (DefaultComboBoxModel<LanguageModelParameters>) serverNamesComboBox.getModel();
-            model.removeAllElements();
-
-            // Re-add items from latest settings
-            List<LanguageModelParameters> updatedModels =
-                    ServerSettings.getInstance().getState().configuredLanguageModels;
-
-            for (LanguageModelParameters param : updatedModels) {
-                model.addElement(param);
-            }
-
-            // Optionally restore default selection if it still exists
-            LanguageModelParameters defaultParams =
-                    ChatSettings.getInstance().getState().defaultLanguageModelParameters;
-
-            if (defaultParams != null && updatedModels.contains(defaultParams)) {
-                serverNamesComboBox.setSelectedItem(defaultParams);
-            } else if (!updatedModels.isEmpty()) {
-                serverNamesComboBox.setSelectedIndex(0); // fallback: first item
-            }
-        });
-
+        refreshModelsButton.addActionListener(e -> refreshModels(serverNamesComboBox));
 
         JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
         toolbar.setFloatable(false);
@@ -335,6 +247,95 @@ public class Chat {
         inputPanel.setLayout(new BorderLayout());
         inputPanel.add(inputContent, BorderLayout.CENTER);
         return inputPanel;
+    }
+
+    private @NotNull ComboBox<LanguageModelParameters> getLanguageModelParametersComboBox() {
+        ComboBox<LanguageModelParameters> serverNamesComboBox = new ComboBox<>();
+
+        serverNamesComboBox.setRenderer(
+                new ListCellRenderer<>() {
+                    private final JLabel label = new JLabel();
+                    private final JPanel panel = new JPanel(new BorderLayout());
+
+                    {
+                        panel.add(label, BorderLayout.LINE_START);
+                    }
+
+                    @Override
+                    public Component getListCellRendererComponent(
+                            JList<? extends LanguageModelParameters> list,
+                            LanguageModelParameters value,
+                            int index,
+                            boolean isSelected,
+                            boolean cellHasFocus) {
+                        if (value == null) return new JLabel("");
+
+                        if (index == -1) {
+                            label.setText(value.modelName);
+                        } else {
+                            String text =
+                                    String.format(
+                                            """
+                                            <html>
+                                            <b>%s: %s</b>
+                                            <ul>
+                                                <li>URL: %s</li>
+                                                <li>Tokens: %s</li>
+                                                <li>Temp: %.2f</li>
+                                            </ul>
+                                            </html>
+                                            """,
+                                            value.serverName,
+                                            value.modelName,
+                                            value.baseUrl,
+                                            value.maxTokens,
+                                            value.temperature);
+                            label.setText(text);
+                        }
+
+                        return panel;
+                    }
+                });
+
+        serverNamesComboBox.addItemListener(
+                e -> {
+                    if (e.getStateChange() == ItemEvent.DESELECTED) return;
+                    try {
+                        LanguageModelParameters selectedParameters =
+                                (LanguageModelParameters) e.getItem();
+                        client =
+                                LanguageModelProjectService.getInstance(project)
+                                        .createChatClientWithDefaultSettings(selectedParameters)
+                                        .compute();
+                        ChatSettings.getInstance().getState().defaultLanguageModelParameters =
+                                selectedParameters;
+                    } catch (LanguageModelException ex) {
+                        notifySettingsError(e);
+                    }
+                });
+        return serverNamesComboBox;
+    }
+
+    private static void refreshModels(ComboBox<LanguageModelParameters> serverNamesComboBox) {
+        DefaultComboBoxModel<LanguageModelParameters> model =
+                (DefaultComboBoxModel<LanguageModelParameters>) serverNamesComboBox.getModel();
+        model.removeAllElements();
+
+        List<LanguageModelParameters> updatedModels =
+                ServerSettings.getInstance().getState().configuredLanguageModels;
+
+        for (LanguageModelParameters param : updatedModels) {
+            model.addElement(param);
+        }
+
+        LanguageModelParameters defaultParams =
+                ChatSettings.getInstance().getState().defaultLanguageModelParameters;
+
+        if (defaultParams != null && updatedModels.contains(defaultParams)) {
+            serverNamesComboBox.setSelectedItem(defaultParams);
+        } else if (!updatedModels.isEmpty()) {
+            serverNamesComboBox.setSelectedIndex(0);
+        }
     }
 
     private @NotNull JButton createToolBarButton(String tooltipMessage) {

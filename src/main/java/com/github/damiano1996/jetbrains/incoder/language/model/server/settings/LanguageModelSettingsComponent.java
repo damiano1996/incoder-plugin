@@ -9,10 +9,8 @@ import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
-import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.components.JBTextArea;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.FormBuilder;
 import java.awt.*;
@@ -20,12 +18,12 @@ import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +68,11 @@ public class LanguageModelSettingsComponent {
         Project activeProject = ProjectUtil.getActiveProject();
         ComboBox<String> serverNameField =
                 new ComboBox<>(
-                        LanguageModelProjectService.getInstance(activeProject)
+                        LanguageModelProjectService.getInstance(
+                                        Objects.requireNonNull(
+                                                activeProject,
+                                                "Project must be defined to get available server"
+                                                        + " names."))
                                 .getAvailableServerNames()
                                 .toArray(new String[0]));
 
@@ -84,14 +86,7 @@ public class LanguageModelSettingsComponent {
         JSpinner temperatureSpinner = new JSpinner(new SpinnerNumberModel(0.5, 0.0, 1.0, 0.1));
 
         JButton refreshButton = getRefreshButton(serverNameField, baseUrlField, modelNameField);
-
-        // Verification components
         JButton verifyButton = new JButton("Verify Connection");
-        JTextArea verificationTextArea = new JBTextArea();
-        verificationTextArea.setWrapStyleWord(true);
-        verificationTextArea.setLineWrap(true);
-        verificationTextArea.setPreferredSize(verificationTextArea.getPreferredSize());
-        verificationTextArea.setEditable(false);
 
         serverNameField.addItemListener(
                 e -> {
@@ -104,7 +99,7 @@ public class LanguageModelSettingsComponent {
                             apiKeyField,
                             modelNameField,
                             temperatureSpinner,
-                            maxTokensSpinner, verificationTextArea);
+                            maxTokensSpinner);
                 });
 
         resetWithDefault(
@@ -113,7 +108,7 @@ public class LanguageModelSettingsComponent {
                 apiKeyField,
                 modelNameField,
                 temperatureSpinner,
-                maxTokensSpinner, verificationTextArea);
+                maxTokensSpinner);
 
         JPanel panel =
                 FormBuilder.createFormBuilder()
@@ -135,66 +130,58 @@ public class LanguageModelSettingsComponent {
                         .addLabeledComponent(
                                 new JBLabel("Temperature:"), temperatureSpinner, 0, false)
                         .addLabeledComponent(new JBLabel("Max tokens:"), maxTokensSpinner, 0, false)
-                        .addLabeledComponent(
-                                new JBLabel("Verification:"),
-                                new JPanel() {
-                                    {
-                                        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-                                        add(verifyButton);
-                                    }
-                                },
-                                1,
-                                false)
-                        .addComponent(verificationTextArea, 0)
+                        .addLabeledComponent(new JBLabel("Verification:"), verifyButton, 0, false)
                         .getPanel();
 
         // Create custom option pane to control button states
-        JOptionPane optionPane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+        JOptionPane optionPane =
+                new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
         JDialog dialog = optionPane.createDialog(null, "Add Language Model");
 
         var okButton = getOkButton(optionPane);
         okButton.setEnabled(false);
 
         // Verification button action
-        verifyButton.addActionListener(e -> {
+        verifyButton.addActionListener(
+                e -> {
+                    verifyButton.setEnabled(false);
 
-            verificationTextArea.setText("");
-            verificationTextArea.setBackground(null);
-            verifyButton.setEnabled(false);
+                    CompletableFuture<VerificationResult> futureVerificationResult =
+                            new CompletableFuture<>();
 
-            CompletableFuture<VerificationResult> futureVerificationResult = new CompletableFuture<>();
+                    LanguageModelParameters testParam =
+                            new LanguageModelParameters(
+                                    serverNameField.getItem(),
+                                    modelNameField.getItem(),
+                                    baseUrlField.getText(),
+                                    new String(apiKeyField.getPassword()),
+                                    (Integer) maxTokensSpinner.getValue(),
+                                    (Double) temperatureSpinner.getValue());
 
-            LanguageModelParameters testParam = new LanguageModelParameters(
-                    serverNameField.getItem(),
-                    modelNameField.getItem(),
-                    baseUrlField.getText(),
-                    new String(apiKeyField.getPassword()),
-                    (Integer) maxTokensSpinner.getValue(),
-                    (Double) temperatureSpinner.getValue());
+                    verifyButton.setEnabled(false);
 
-            verifyParameters(testParam, activeProject, futureVerificationResult);
+                    VerificationResult result =
+                            getVerificationResult(
+                                    testParam, activeProject, futureVerificationResult);
 
-            try {
-                var result = futureVerificationResult.get(10, TimeUnit.SECONDS);
-                if (result.valid) {
-                    verificationTextArea.setText(result.message);
-                    verificationTextArea.setBackground(JBColor.green);
-                    okButton.setEnabled(true);
-                } else {
-                    verificationTextArea.setText(result.message);
-                    verificationTextArea.setBackground(JBColor.red);
-                    okButton.setEnabled(false);
-                }
+                    if (result.valid) {
+                        okButton.setEnabled(true);
+                        JOptionPane.showMessageDialog(
+                                null,
+                                result.message,
+                                "Verification Successful",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        okButton.setEnabled(false);
+                        JOptionPane.showMessageDialog(
+                                null,
+                                result.message,
+                                "Verification Failed",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
 
-            } catch (Exception ex) {
-                verificationTextArea.setText(ex.getMessage());
-                verificationTextArea.setBackground(JBColor.red);
-                okButton.setEnabled(false);
-            }
-
-            verifyButton.setEnabled(true);
-
-        });
+                    verifyButton.setEnabled(true);
+                });
 
         dialog.setVisible(true);
 
@@ -209,26 +196,48 @@ public class LanguageModelSettingsComponent {
                             (Integer) maxTokensSpinner.getValue(),
                             (Double) temperatureSpinner.getValue());
 
-                configurations.add(param);
-                tableModel.fireTableDataChanged();
+            configurations.add(param);
+            tableModel.fireTableDataChanged();
         }
     }
 
-    private static void verifyParameters(LanguageModelParameters testParam, Project activeProject, CompletableFuture<VerificationResult> futureVerificationResult) {
+    private static VerificationResult getVerificationResult(
+            LanguageModelParameters testParam,
+            Project activeProject,
+            CompletableFuture<VerificationResult> futureVerificationResult) {
+        verifyParameters(testParam, activeProject, futureVerificationResult);
+
+        try {
+            return futureVerificationResult.get(10, TimeUnit.SECONDS);
+        } catch (Exception ex) {
+            return new VerificationResult(false, ex.getMessage());
+        }
+    }
+
+    private static void verifyParameters(
+            LanguageModelParameters testParam,
+            Project activeProject,
+            CompletableFuture<VerificationResult> futureVerificationResult) {
         ProgressManager.getInstance()
-                .runProcessWithProgressSynchronously(() -> {
-                    try {
-                        LanguageModelProjectService.getInstance(activeProject)
-                                .verify(testParam);
-                        futureVerificationResult.complete(new VerificationResult(true, "Parameters are valid."));
-                    } catch (Exception ex) {
-                        futureVerificationResult.complete(new VerificationResult(false, ex.getMessage()));
-                    }
-                }, "Verifying Parameters", false, activeProject);
+                .runProcessWithProgressSynchronously(
+                        () -> {
+                            try {
+                                LanguageModelProjectService.getInstance(activeProject)
+                                        .verify(testParam);
+                                futureVerificationResult.complete(
+                                        new VerificationResult(true, "Parameters are valid."));
+                            } catch (Exception ex) {
+                                futureVerificationResult.complete(
+                                        new VerificationResult(false, ex.getMessage()));
+                            }
+                        },
+                        "Verifying Parameters",
+                        false,
+                        activeProject);
     }
 
     @AllArgsConstructor
-    private static class VerificationResult{
+    private static class VerificationResult {
         Boolean valid;
         String message;
     }
@@ -248,7 +257,10 @@ public class LanguageModelSettingsComponent {
         throw new IllegalArgumentException("No OK button was found in the given option pane.");
     }
 
-    private static @NotNull JButton getRefreshButton(ComboBox<String> serverNameField, JTextField baseUrlField, ComboBox<String> modelNameField) {
+    private static @NotNull JButton getRefreshButton(
+            ComboBox<String> serverNameField,
+            JTextField baseUrlField,
+            ComboBox<String> modelNameField) {
         JButton refreshButton = new JButton(AllIcons.Actions.Refresh);
         refreshButton.setPreferredSize(new Dimension(30, 30));
 
@@ -275,7 +287,7 @@ public class LanguageModelSettingsComponent {
             JPasswordField apiKeyField,
             ComboBox<String> modelNameField,
             JSpinner temperatureSpinner,
-            JSpinner maxTokensSpinner, JTextArea verificationTextArea) {
+            JSpinner maxTokensSpinner) {
         try {
             LanguageModelParameters defaultParam =
                     ServerFactoryUtils.findByName(serverName).createServer().getDefaultParameters();
@@ -284,8 +296,6 @@ public class LanguageModelSettingsComponent {
             modelNameField.setSelectedItem(defaultParam.modelName);
             temperatureSpinner.setValue(defaultParam.temperature);
             maxTokensSpinner.setValue(defaultParam.maxTokens);
-            verificationTextArea.setText("");
-            verificationTextArea.setBackground(null);
 
         } catch (LanguageModelException ex) {
             log.warn("Unable to load default params", ex);

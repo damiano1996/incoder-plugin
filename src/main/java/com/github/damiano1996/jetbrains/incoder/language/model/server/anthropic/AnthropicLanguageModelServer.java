@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;

@@ -48,7 +48,10 @@ public class CodeCompletionQueue implements Runnable {
                 try {
                     String completion =
                             LanguageModelProjectService.getInstance(project)
-                                    .createInlineClientWithDefaultSettings(InlineSettings.getInstance().getState().selectedLanguageModelParameters)
+                                    .createInlineClientWithDefaultSettings(
+                                            InlineSettings.getInstance()
+                                                    .getState()
+                                                    .selectedLanguageModelParameters)
                                     .compute() // todo
                                     .complete(codeCompletionContext)
                                     .split("\n")[0]
