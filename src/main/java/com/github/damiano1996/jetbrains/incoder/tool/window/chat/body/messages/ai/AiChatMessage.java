@@ -5,7 +5,6 @@ import static com.github.damiano1996.jetbrains.incoder.InCoderIcons.PLUGIN_ICON;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ChatMessage;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
-import java.awt.*;
 import javax.swing.*;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
