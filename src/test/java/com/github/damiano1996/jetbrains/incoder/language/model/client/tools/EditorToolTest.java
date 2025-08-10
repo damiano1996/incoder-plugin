@@ -13,7 +13,7 @@ public class EditorToolTest extends BasePlatformTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        editorTool = new EditorTool(getProject());
+        editorTool = new EditorTool();
     }
 
     public void testApplyPatches_SingleLineReplacement() {
