@@ -1,7 +1,10 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings;
 
 import com.github.damiano1996.jetbrains.incoder.InCoderBundle;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.LanguageModelParametersUtils;
 import com.github.damiano1996.jetbrains.incoder.ui.components.DescriptionLabel;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
@@ -9,16 +12,25 @@ import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
 import javax.swing.*;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
-public class InlineComponent {
+public class InlineSettingsComponent {
 
     private final JPanel mainPanel;
+    private final ComboBox<LanguageModelParameters> languageModelParametersComboBox;
     private final JBCheckBox enableCheckbox;
     private final JBCheckBox endLineCheckBox;
     private final JBTextArea systemMessageInstructionsField;
 
-    public InlineComponent() {
+    public InlineSettingsComponent() {
+        languageModelParametersComboBox =
+                LanguageModelParametersUtils.getLanguageModelParametersComboBox();
+        LanguageModelParametersUtils.refreshModels(
+                languageModelParametersComboBox,
+                InlineSettings.getInstance().getState().selectedLanguageModelParameters);
+
         enableCheckbox = new JBCheckBox("Inline coding assistant");
         endLineCheckBox = new JBCheckBox("Trigger at end line");
 
@@ -32,10 +44,18 @@ public class InlineComponent {
                         .addComponent(
                                 new DescriptionLabel(InCoderBundle.message("inline.description")))
                         .addVerticalGap(20)
+                        .addLabeledComponent(
+                                new JBLabel("Language model:"),
+                                languageModelParametersComboBox,
+                                0,
+                                false)
+                        .addComponent(
+                                new DescriptionLabel("Server used for inline code completion."))
+                        .addVerticalGap(20)
                         .addComponent(enableCheckbox)
                         .addComponent(
                                 new DescriptionLabel(
-                                        "Enable the inline coding assistant functionality."))
+                                        "Enables the inline coding assistant functionality."))
                         .addVerticalGap(20)
                         .addComponent(endLineCheckBox)
                         .addComponent(
@@ -48,7 +68,7 @@ public class InlineComponent {
                         .addLabeledComponent(
                                 new JBLabel("System message instructions:"),
                                 ScrollPaneFactory.createScrollPane(systemMessageInstructionsField),
-                                1,
+                                0,
                                 true)
                         .addComponent(
                                 new DescriptionLabel(

@@ -1,6 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.completion.states.idle;
 
-import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionService;
+import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionProjectService;
 import com.github.damiano1996.jetbrains.incoder.completion.states.BaseState;
 import com.github.damiano1996.jetbrains.incoder.completion.states.generation.StartGenerationState;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class IdleState extends BaseState {
 
-    public IdleState(CodeCompletionService codeCompletionService) {
+    public IdleState(CodeCompletionProjectService codeCompletionService) {
         super(codeCompletionService);
     }
 

@@ -1,6 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.completion.states.decision;
 
-import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionService;
+import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionProjectService;
 import com.github.damiano1996.jetbrains.incoder.completion.states.BaseState;
 import com.github.damiano1996.jetbrains.incoder.completion.states.idle.IdleState;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -21,7 +21,7 @@ public class DecisionState extends BaseState {
 
     private final String prediction;
 
-    public DecisionState(CodeCompletionService codeCompletionService, String prediction) {
+    public DecisionState(CodeCompletionProjectService codeCompletionService, String prediction) {
         super(codeCompletionService);
         this.prediction = prediction;
     }

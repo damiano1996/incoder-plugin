@@ -1,5 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.tools;
 
+import static com.intellij.ide.impl.ProjectUtil.*;
+
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -11,15 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
-@AllArgsConstructor
 public class FileTool {
-
-    private final Project project;
 
     private static void createPath(String filePath, @NotNull File file) {
         File parentDir = file.getParentFile();
@@ -116,7 +114,7 @@ public class FileTool {
                     e);
         }
 
-        refreshProjectStructure(project);
+        refreshProjectStructure(getActiveProject());
 
         return "File created successfully: %s".formatted(filePath);
     }

@@ -41,6 +41,7 @@ public class ChatContainer {
     }
 
     public void createNewChat() {
+
         Chat chat = new Chat(project);
         chats.add(chat);
         chat.setChatId(chats.size() - 1);

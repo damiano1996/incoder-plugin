@@ -1,7 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.completion.states.generation;
 
 import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionContext;
-import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionService;
+import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionProjectService;
 import com.github.damiano1996.jetbrains.incoder.completion.states.BaseState;
 import com.github.damiano1996.jetbrains.incoder.completion.states.idle.IdleState;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class StartGenerationState extends BaseState {
 
-    public StartGenerationState(CodeCompletionService codeCompletionService) {
+    public StartGenerationState(CodeCompletionProjectService codeCompletionService) {
         super(codeCompletionService);
     }
 

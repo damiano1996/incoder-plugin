@@ -66,7 +66,7 @@ public class ToolChatMessage implements ChatMessage {
         wrapper.add(toolPanel);
 
         mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBorder(JBUI.Borders.empty(10));
+        mainPanel.setBorder(JBUI.Borders.empty(0, 40, 10, 0));
         mainPanel.add(wrapper);
     }
 

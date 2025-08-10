@@ -1,19 +1,17 @@
-package com.github.damiano1996.jetbrains.incoder.language.model.client;
+package com.github.damiano1996.jetbrains.incoder.language.model.client.chat;
 
-import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionContext;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatCodingAssistant;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.BaseLanguageModelClient;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineCodingAssistant;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.EditorTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.FileTool;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.commandline.CommandLineTool;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
@@ -24,73 +22,64 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
-public class LanguageModelClientImpl implements LanguageModelClient {
+public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
+        implements ChatLanguageModelClient {
 
-    private final Project project;
+    public static final String UNKNOWN = "Unknown";
 
     private final ChatCodingAssistant chatCodingAssistant;
-    private final InlineCodingAssistant inlineCodingAssistant;
 
     private final String projectName;
     private final String projectPath;
     private final String ideInfo;
     private final String userTimezone;
 
-    public LanguageModelClientImpl(
-            @NotNull Project project,
-            ChatLanguageModel chatLanguageModel,
+    public ChatLanguageModelClientImpl(
+            LanguageModelParameters parameters,
             StreamingChatLanguageModel streamingChatLanguageModel) {
-        this.project = project;
+        super(parameters);
 
-        this.projectName = project.getName();
-        this.projectPath = getProjectPath();
+        Project project = ProjectUtil.getActiveProject();
+
+        this.projectName = getProjectName(project);
+        this.projectPath = getProjectPath(project);
         this.ideInfo = getIdeInfo();
         this.userTimezone = getUserTimezone();
 
-        chatCodingAssistant =
+        chatCodingAssistant = getChatCodingAssistant(streamingChatLanguageModel);
+    }
+
+    private static @NotNull String getProjectName(Project project) {
+        if (project == null) return UNKNOWN;
+        return project.getName();
+    }
+
+    private ChatCodingAssistant getChatCodingAssistant(
+            StreamingChatLanguageModel streamingChatLanguageModel) {
+        final ChatCodingAssistant chatCodingAssistant;
+        AiServices<ChatCodingAssistant> aiAssistantBuilder =
                 AiServices.builder(ChatCodingAssistant.class)
                         .streamingChatLanguageModel(streamingChatLanguageModel)
-                        .chatLanguageModel(chatLanguageModel)
                         .chatMemoryProvider(
                                 memoryId ->
                                         MessageWindowChatMemory.withMaxMessages(
-                                                ChatSettings.getInstance().getState().maxMessages))
-                        .tools(
-                                new FileTool(this.project),
-                                new EditorTool(this.project),
-                                new CommandLineTool(project))
-                        .build();
+                                                ChatSettings.getInstance().getState().maxMessages));
 
-        inlineCodingAssistant =
-                AiServices.builder(InlineCodingAssistant.class)
-                        .streamingChatLanguageModel(streamingChatLanguageModel)
-                        .chatLanguageModel(chatLanguageModel)
-                        .build();
-    }
-
-    @Override
-    public String complete(@NotNull CodeCompletionContext codeCompletionContext) {
-        return inlineCodingAssistant.complete(
-                InlineSettings.getInstance().getState().systemMessageInstructions,
-                codeCompletionContext.leftContext(),
-                codeCompletionContext.rightContext(),
-                getLastLine(codeCompletionContext.leftContext()));
-    }
-
-    private String getLastLine(String s) {
-        if (s == null || s.isEmpty()) {
-            return "";
+        if (ChatSettings.getInstance().getState().enableTools) {
+            aiAssistantBuilder.tools(new FileTool(), new EditorTool(), new CommandLineTool());
         }
 
-        String[] lines = s.split("\n");
-        return lines[lines.length - 1];
+        chatCodingAssistant = aiAssistantBuilder.build();
+        return chatCodingAssistant;
     }
 
     @Override
     public TokenStream chat(int memoryId, String prompt) {
+        Project project = ProjectUtil.getActiveProject();
+
         String currentDate = getCurrentDate();
-        String currentFile = getCurrentFile();
-        String programmingLanguage = getProgrammingLanguage();
+        String currentFile = getCurrentFile(project);
+        String programmingLanguage = getProgrammingLanguage(project);
         String systemMessageInstructions =
                 ChatSettings.getInstance().getState().systemMessageInstructions;
 
@@ -123,22 +112,26 @@ public class LanguageModelClientImpl implements LanguageModelClient {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
-    private String getProjectPath() {
-        return project.getBasePath() != null ? project.getBasePath() : "Unknown";
+    private String getProjectPath(Project project) {
+        if (project == null) return UNKNOWN;
+        return project.getBasePath() != null ? project.getBasePath() : UNKNOWN;
     }
 
-    private @NotNull String getCurrentFile() {
+    private @NotNull String getCurrentFile(Project project) {
+        if (project == null) return UNKNOWN;
         VirtualFile[] selectedFiles = FileEditorManager.getInstance(project).getSelectedFiles();
         return selectedFiles.length > 0 ? selectedFiles[0].getPath() : "No file selected";
     }
 
-    private @NotNull String getProgrammingLanguage() {
+    private @NotNull String getProgrammingLanguage(Project project) {
+        if (project == null) return UNKNOWN;
+
         VirtualFile[] selectedFiles = FileEditorManager.getInstance(project).getSelectedFiles();
         if (selectedFiles.length > 0) {
             String extension = selectedFiles[0].getExtension();
-            return extension != null ? extension : "Unknown";
+            return extension != null ? extension : UNKNOWN;
         }
-        return "Unknown";
+        return UNKNOWN;
     }
 
     private @NotNull String getIdeInfo() {

@@ -1,39 +1,35 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.ollama;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseLanguageModelServer;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings.OllamaSettings;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.ollama.*;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class OllamaLanguageModelServer extends BaseLanguageModelServer {
 
-    private static OllamaSettings.@NotNull State getState() {
-        return OllamaSettings.getInstance().getState();
-    }
-
     @Override
-    public ChatLanguageModel createChatLanguageModel() {
+    public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
         return OllamaChatModel.builder()
-                .baseUrl(getState().baseUrl)
-                .modelName(getState().modelName)
-                .temperature(getState().temperature)
-                .timeout(TIMEOUT)
+                .baseUrl(parameters.baseUrl)
+                .modelName(parameters.modelName)
+                .temperature(parameters.temperature)
+                .timeout(DEFAULT_TIMEOUT)
                 .build();
     }
 
     @Override
-    public StreamingChatLanguageModel createStreamingChatLanguageModel() {
+    public StreamingChatLanguageModel createStreamingChatLanguageModel(
+            LanguageModelParameters parameters) {
         return OllamaStreamingChatModel.builder()
-                .baseUrl(getState().baseUrl)
-                .modelName(getState().modelName)
-                .temperature(getState().temperature)
-                .timeout(TIMEOUT)
+                .baseUrl(parameters.baseUrl)
+                .modelName(parameters.modelName)
+                .temperature(parameters.temperature)
+                .timeout(DEFAULT_TIMEOUT)
                 .build();
     }
 
@@ -43,10 +39,6 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public List<String> getAvailableModels() {
-        return getAvailableModels(getState().baseUrl);
-    }
-
     public List<String> getAvailableModels(String baseUrl) {
         try {
             return OllamaModels.builder()
@@ -65,7 +57,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public String getSelectedModelName() {
-        return getState().modelName;
+    public LanguageModelParameters getDefaultParameters() {
+        return new LanguageModelParameters(getName(), "", "http://localhost:11434/", "", 2048, 0.1);
     }
 }

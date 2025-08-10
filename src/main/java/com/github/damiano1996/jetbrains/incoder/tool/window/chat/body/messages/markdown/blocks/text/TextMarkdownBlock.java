@@ -8,6 +8,7 @@ import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.m
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.PatternFinder;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.blocks.code.CodeMarkdownBlock;
 import com.github.damiano1996.jetbrains.incoder.ui.components.MarkdownEditorPane;
+import com.intellij.util.ui.JBUI;
 import javax.swing.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -79,6 +80,7 @@ public class TextMarkdownBlock implements MarkdownBlock {
                 setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
                 setFocusable(false);
                 add(markdownEditorPane);
+                setBorder(JBUI.Borders.empty(0, 40, 10, 0));
             }
         };
     }

@@ -14,7 +14,11 @@
 
         <projectService
                 serviceInterface="com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelService"
-                serviceImplementation="com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl"/>
+                serviceImplementation="com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelProjectService"/>
+
+        <projectService
+                serviceInterface="com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionService"
+                serviceImplementation="com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionProjectService"/>
 
         <groupConfigurable descriptionKey="plugin.group.description"
                            displayNameKey="plugin.group.name"
@@ -27,21 +31,9 @@
 
         <applicationConfigurable
                 groupId="server.group"
-                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
-                id="com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.settings.AnthropicConfigurable"
-                displayName="Anthropic"/>
-
-        <applicationConfigurable
-                groupId="server.group"
-                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings.OllamaConfigurable"
-                id="com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.settings.OllamaConfigurable"
-                displayName="Ollama"/>
-
-        <applicationConfigurable
-                groupId="server.group"
-                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.openai.settings.OpenAiConfigurable"
-                id="com.github.damiano1996.jetbrains.incoder.language.model.server.openai.settings.OpenAiConfigurable"
-                displayName="Open AI"/>
+                instance="com.github.damiano1996.jetbrains.incoder.language.model.server.settings.LanguageModelSettingsConfigurable"
+                id="com.github.damiano1996.jetbrains.incoder.language.model.server.settings.LanguageModelSettingsConfigurable"
+                displayName="Language Models"/>
 
         <applicationConfigurable
                 instance="com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettingsConfigurable"
@@ -51,8 +43,8 @@
                 displayName="Chat"/>
 
         <applicationConfigurable
-                instance="com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineConfigurable"
-                id="com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineConfigurable"
+                instance="com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettingsConfigurable"
+                id="com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettingsConfigurable"
                 parentId="plugin.group"
                 groupId="plugin.group"
                 displayName="Inline"/>

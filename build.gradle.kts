@@ -65,6 +65,8 @@ dependencies {
 
 spotless {
     java {
+        removeUnusedImports()
+
         googleJavaFormat().aosp().reflowLongStrings()
     }
 }

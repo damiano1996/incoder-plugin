@@ -3,6 +3,7 @@ package com.github.damiano1996.jetbrains.incoder.language.model.client.chat.sett
 import com.github.damiano1996.jetbrains.incoder.ui.components.DescriptionLabel;
 import com.intellij.icons.AllIcons;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
@@ -16,6 +17,7 @@ public class ChatSettingsComponent {
     private final JSpinner maxMessages;
     private final JBTextArea systemMessageInstructionsField;
     private final JButton reloadDefaultButton;
+    private final JBCheckBox enableTools;
 
     public ChatSettingsComponent() {
         SpinnerNumberModel maxMessagesModel = new SpinnerNumberModel(10, 0, 50, 1);
@@ -41,13 +43,15 @@ public class ChatSettingsComponent {
         labelPanel.add(Box.createHorizontalGlue());
         labelPanel.add(reloadDefaultButton);
 
+        enableTools = new JBCheckBox("LLM with tools");
+
         mainPanel =
                 FormBuilder.createFormBuilder()
                         .setFormLeftIndent(20)
-                        .addLabeledComponent(new JBLabel("Max messages:"), maxMessages, 1, false)
+                        .addLabeledComponent(new JBLabel("Max messages:"), maxMessages, 0, false)
                         .addComponent(new DescriptionLabel("Number of messages to keep in memory."))
                         .addVerticalGap(20)
-                        .setFormLeftIndent(0)
+                        .setFormLeftIndent(20)
                         .addComponent(labelPanel)
                         .addComponent(
                                 ScrollPaneFactory.createScrollPane(systemMessageInstructionsField))
@@ -56,6 +60,13 @@ public class ChatSettingsComponent {
                                         "Custom system prompt that defines the AI assistant's"
                                                 + " behavior, role, and response style for all chat"
                                                 + " interactions."))
+                        .addVerticalGap(20)
+                        .addComponent(enableTools)
+                        .addComponent(
+                                new DescriptionLabel(
+                                        "When enabled, allows the AI to use predefined tools and"
+                                                + " functions to enhance code generation and"
+                                                + " problem-solving capabilities."))
                         .addComponentFillVertically(new JPanel(), 0)
                         .getPanel();
     }

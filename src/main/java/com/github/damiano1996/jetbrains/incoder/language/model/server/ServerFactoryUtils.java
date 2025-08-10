@@ -15,7 +15,7 @@ public class ServerFactoryUtils {
         if (name.isBlank()) throw new LanguageModelException("Server name must be defined.");
 
         return getServerFactories().stream()
-                .filter(serverFactory -> serverFactory.getName().equals(name))
+                .filter(serverFactory -> serverFactory.createServer().getName().equals(name))
                 .findFirst()
                 .orElseThrow(
                         () ->

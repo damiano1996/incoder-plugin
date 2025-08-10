@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.completion;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
 import com.intellij.openapi.project.Project;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -46,8 +45,8 @@ public class CodeCompletionQueue implements Runnable {
 
                 try {
                     String completion =
-                            LanguageModelServiceImpl.getInstance(project)
-                                    .getClient()
+                            CodeCompletionProjectService.getInstance(project)
+                                    .getOrCreateInlineLanguageModelClient()
                                     .complete(codeCompletionContext)
                                     .split("\n")[0]
                                     .trim();

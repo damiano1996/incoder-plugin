@@ -3,9 +3,14 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat;
 import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatConstants.*;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelServiceImpl;
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelProjectService;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatLanguageModelClient;
+import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings.ChatSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStream;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStreamImpl;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.LanguageModelParametersUtils;
+import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiChatMessage;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.error.ErrorChatMessage;
@@ -13,10 +18,11 @@ import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.h
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.markdown.MarkdownChatMessage;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.tool.ToolChatMessage;
 import com.github.damiano1996.jetbrains.incoder.ui.components.FocusAwarePanel;
-import com.github.damiano1996.jetbrains.incoder.ui.components.Layout;
 import com.github.damiano1996.jetbrains.incoder.ui.components.expandabletextarea.ExpandableTextArea;
 import com.intellij.icons.AllIcons;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.IconUtil;
@@ -25,6 +31,7 @@ import com.intellij.util.ui.JBUI;
 import dev.langchain4j.service.tool.ToolExecution;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -38,6 +45,7 @@ import org.jetbrains.annotations.Nullable;
 public class Chat {
 
     private final Project project;
+    private ChatLanguageModelClient client;
 
     @Setter @Getter private int chatId;
 
@@ -52,14 +60,7 @@ public class Chat {
 
     public Chat(Project project) {
         this.project = project;
-
         createUIComponents();
-        initActionListeners();
-    }
-
-    private void initActionListeners() {
-        promptTextArea.addActionListener(e -> handleAction());
-        submitButton.addActionListener(e -> handleButtonAction());
     }
 
     private void handleButtonAction() {
@@ -85,34 +86,21 @@ public class Chat {
         HumanChatMessage humanChatMessage = new HumanChatMessage(prompt);
         chatBody.addChatMessage(humanChatMessage);
 
-        try {
-            chatBody.addChatMessage(
-                    new AiChatMessage(
-                            LanguageModelServiceImpl.getInstance(project)
-                                    .getSelectedModelName()
-                                    .toLowerCase()));
+        chatBody.addChatMessage(new AiChatMessage(client.getParameters().modelName.toLowerCase()));
 
-            chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
+        chatBody.addChatMessage(new MarkdownChatMessage(chatBody));
 
-            stoppableTokenStream =
-                    (StoppableTokenStream)
-                            new StoppableTokenStreamImpl(
-                                            LanguageModelServiceImpl.getInstance(project)
-                                                    .getClient()
-                                                    .chat(chatId, prompt))
-                                    .onStart(this::onStart)
-                                    .onStop(this::onStop)
-                                    .onPartialResponse(this::onNewToken)
-                                    .onCompleteResponse(chatResponse -> onComplete())
-                                    .onToolExecuted(this::onToolExecuted)
-                                    .onError(this::onError);
+        stoppableTokenStream =
+                (StoppableTokenStream)
+                        new StoppableTokenStreamImpl(client.chat(chatId, prompt))
+                                .onStart(this::onStart)
+                                .onStop(this::onStop)
+                                .onPartialResponse(this::onNewToken)
+                                .onCompleteResponse(chatResponse -> onComplete())
+                                .onToolExecuted(this::onToolExecuted)
+                                .onError(this::onError);
 
-            stoppableTokenStream.start();
-
-        } catch (LanguageModelException e) {
-            log.warn("Unable to start stream", e);
-            chatBody.addChatMessage(new ErrorChatMessage(e));
-        }
+        stoppableTokenStream.start();
     }
 
     private void onStop() {
@@ -161,23 +149,23 @@ public class Chat {
     private void uiGenerating() {
         this.promptTextArea.setEnabled(false);
 
-        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, true);
+        updateSubmitButton(getColoredIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, true);
     }
 
     private void uiStopping() {
         this.promptTextArea.setEnabled(false);
 
-        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, false);
+        updateSubmitButton(getColoredIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, false);
     }
 
     private void uiIdle() {
         this.promptTextArea.setEnabled(true);
         this.promptTextArea.requestFocusInWindow();
 
-        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Execute), SEND_MESSAGE_TOOLTIP, true);
+        updateSubmitButton(getColoredIcon(AllIcons.Actions.Execute), SEND_MESSAGE_TOOLTIP, true);
     }
 
-    private static @NotNull Icon getSubmitIcon(@NotNull Icon icon) {
+    private static @NotNull Icon getColoredIcon(@NotNull Icon icon) {
         return IconUtil.colorize(icon, JBUI.CurrentTheme.Focus.focusColor());
     }
 
@@ -188,26 +176,59 @@ public class Chat {
     }
 
     private void createUIComponents() {
+        JPanel inputPanel = getInputPanel();
+
+        chatBody = new ChatBody(this::handleExamplePromptSelected);
+
+        mainPanel =
+                FormBuilder.createFormBuilder()
+                        .addComponentFillVertically(chatBody.getMainPanel(), 0)
+                        .addVerticalGap(4)
+                        .addComponent(inputPanel)
+                        .getPanel();
+
+        mainPanel.setBorder(JBUI.Borders.empty(20));
+        mainPanel.setMinimumSize(new Dimension(400, 400));
+        mainPanel.setPreferredSize(new Dimension(400, 400));
+
+        uiIdle();
+    }
+
+    private @NotNull JPanel getInputPanel() {
         promptTextArea = new ExpandableTextArea(PROMPT_PLACEHOLDER, 12, 12, 2);
         promptTextArea.setMargin(JBUI.insets(2, 9, 2, 6));
         promptTextArea.setLineWrap(true);
+        promptTextArea.addActionListener(e -> handleAction());
 
         JScrollPane promptScrollPane = getPromptScrollPane();
 
-        submitButton = new JButton();
-        submitButton.setBorderPainted(false);
-        submitButton.setContentAreaFilled(false);
-        submitButton.setFocusPainted(false);
-        submitButton.setOpaque(false);
-        submitButton.setHorizontalAlignment(SwingConstants.RIGHT);
-        submitButton.setToolTipText(SEND_MESSAGE_TOOLTIP);
+        submitButton = createToolBarButton(SEND_MESSAGE_TOOLTIP);
+        submitButton.addActionListener(e -> handleButtonAction());
 
-        Dimension buttonSize = new Dimension(40, 40);
-        submitButton.setMinimumSize(buttonSize);
-        submitButton.setPreferredSize(buttonSize);
-        submitButton.setMaximumSize(buttonSize);
+        ComboBox<LanguageModelParameters> languageModelParametersComboBox =
+                getLanguageModelParametersComboBox();
+        LanguageModelParametersUtils.refreshModels(
+                languageModelParametersComboBox,
+                ChatSettings.getInstance().getState().defaultLanguageModelParameters);
 
-        chatBody = new ChatBody(this::handleExamplePromptSelected);
+        JButton refreshModelsButton = createToolBarButton("Refresh models");
+        refreshModelsButton.setIcon(getColoredIcon(AllIcons.Actions.Refresh));
+        refreshModelsButton.addActionListener(
+                e ->
+                        LanguageModelParametersUtils.refreshModels(
+                                languageModelParametersComboBox,
+                                ChatSettings.getInstance()
+                                        .getState()
+                                        .defaultLanguageModelParameters));
+
+        JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
+        toolbar.setFloatable(false);
+        toolbar.setBorderPainted(false);
+        toolbar.setOpaque(false);
+        toolbar.add(languageModelParametersComboBox);
+        toolbar.add(refreshModelsButton);
+        toolbar.add(Box.createHorizontalGlue());
+        toolbar.add(submitButton);
 
         Border focusBorder =
                 new RoundedLineBorder(
@@ -227,30 +248,69 @@ public class Chat {
                 FormBuilder.createFormBuilder()
                         .addComponent(promptScrollPane)
                         .addVerticalGap(4)
-                        .addComponent(Layout.componentToRight(submitButton))
+                        .addComponent(toolbar)
                         .getPanel();
 
         inputPanel.setLayout(new BorderLayout());
         inputPanel.add(inputContent, BorderLayout.CENTER);
+        return inputPanel;
+    }
 
-        mainPanel =
-                FormBuilder.createFormBuilder()
-                        .addComponentFillVertically(chatBody.getMainPanel(), 0)
-                        .addVerticalGap(4)
-                        .addComponent(inputPanel)
-                        .getPanel();
+    private @NotNull ComboBox<LanguageModelParameters> getLanguageModelParametersComboBox() {
+        ComboBox<LanguageModelParameters> serverNamesComboBox =
+                LanguageModelParametersUtils.getLanguageModelParametersComboBox();
 
-        mainPanel.setBorder(JBUI.Borders.empty(20));
-        mainPanel.setMinimumSize(new Dimension(400, 400));
-        mainPanel.setPreferredSize(new Dimension(400, 400));
+        serverNamesComboBox.addItemListener(
+                e -> {
+                    if (e.getStateChange() == ItemEvent.DESELECTED) return;
+                    try {
+                        LanguageModelParameters selectedParameters =
+                                (LanguageModelParameters) e.getItem();
+                        client =
+                                LanguageModelProjectService.getInstance(project)
+                                        .createChatClientWithDefaultSettings(selectedParameters)
+                                        .compute();
+                        ChatSettings.getInstance().getState().defaultLanguageModelParameters =
+                                selectedParameters;
+                    } catch (LanguageModelException ex) {
+                        notifySettingsError(e);
+                    }
+                });
+        return serverNamesComboBox;
+    }
 
-        uiIdle();
+    private @NotNull JButton createToolBarButton(String tooltipMessage) {
+        JButton button = new JButton();
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setHorizontalAlignment(SwingConstants.CENTER);
+        button.setToolTipText(tooltipMessage);
+
+        Dimension buttonSize = new Dimension(40, 40);
+        button.setMinimumSize(buttonSize);
+        button.setPreferredSize(buttonSize);
+        button.setMaximumSize(buttonSize);
+
+        return button;
+    }
+
+    private void notifySettingsError(ItemEvent e) {
+        NotificationService.getInstance(project)
+                .notifyWithSettingsActionButton(
+                        """
+                        <html>
+                        Unable to start the service with <b>%s</b>.<br>
+                        Please, review server configurations from Settings.
+                        </html>
+                        """
+                                .formatted(e.getItem().toString()),
+                        NotificationType.ERROR);
     }
 
     private @NotNull JScrollPane getPromptScrollPane() {
         JScrollPane promptScrollPane =
                 new JBScrollPane() {
-                    private final int MIN_HEIGHT = 50;
+                    private final int MIN_HEIGHT = 100;
                     private final int MAX_HEIGHT = 200;
                     private final int PREFERRED_WIDTH = 100;
 
