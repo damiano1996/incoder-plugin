@@ -1,6 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.completion.states;
 
-import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionService;
+import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionProjectService;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.event.DocumentEvent;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 @AllArgsConstructor
 public abstract class BaseState implements State {
 
-    protected final CodeCompletionService codeCompletionService;
+    protected final CodeCompletionProjectService codeCompletionService;
 
     @Override
     public void onCodeCompletionPrediction(String prediction) {

@@ -9,7 +9,7 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.setti
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStream;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStreamImpl;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerSettings;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.LanguageModelParametersUtils;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiChatMessage;
@@ -32,7 +32,6 @@ import dev.langchain4j.service.tool.ToolExecution;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
-import java.util.List;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -150,23 +149,23 @@ public class Chat {
     private void uiGenerating() {
         this.promptTextArea.setEnabled(false);
 
-        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, true);
+        updateSubmitButton(getColoredIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, true);
     }
 
     private void uiStopping() {
         this.promptTextArea.setEnabled(false);
 
-        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, false);
+        updateSubmitButton(getColoredIcon(AllIcons.Actions.Suspend), STOP_TOOLTIP, false);
     }
 
     private void uiIdle() {
         this.promptTextArea.setEnabled(true);
         this.promptTextArea.requestFocusInWindow();
 
-        updateSubmitButton(getSubmitIcon(AllIcons.Actions.Execute), SEND_MESSAGE_TOOLTIP, true);
+        updateSubmitButton(getColoredIcon(AllIcons.Actions.Execute), SEND_MESSAGE_TOOLTIP, true);
     }
 
-    private static @NotNull Icon getSubmitIcon(@NotNull Icon icon) {
+    private static @NotNull Icon getColoredIcon(@NotNull Icon icon) {
         return IconUtil.colorize(icon, JBUI.CurrentTheme.Focus.focusColor());
     }
 
@@ -206,19 +205,27 @@ public class Chat {
         submitButton = createToolBarButton(SEND_MESSAGE_TOOLTIP);
         submitButton.addActionListener(e -> handleButtonAction());
 
-        ComboBox<LanguageModelParameters> serverNamesComboBox =
+        ComboBox<LanguageModelParameters> languageModelParametersComboBox =
                 getLanguageModelParametersComboBox();
-        refreshModels(serverNamesComboBox);
+        LanguageModelParametersUtils.refreshModels(
+                languageModelParametersComboBox,
+                ChatSettings.getInstance().getState().defaultLanguageModelParameters);
 
         JButton refreshModelsButton = createToolBarButton("Refresh models");
-        refreshModelsButton.setIcon(AllIcons.Actions.Refresh);
-        refreshModelsButton.addActionListener(e -> refreshModels(serverNamesComboBox));
+        refreshModelsButton.setIcon(getColoredIcon(AllIcons.Actions.Refresh));
+        refreshModelsButton.addActionListener(
+                e ->
+                        LanguageModelParametersUtils.refreshModels(
+                                languageModelParametersComboBox,
+                                ChatSettings.getInstance()
+                                        .getState()
+                                        .defaultLanguageModelParameters));
 
         JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
         toolbar.setFloatable(false);
         toolbar.setBorderPainted(false);
         toolbar.setOpaque(false);
-        toolbar.add(serverNamesComboBox);
+        toolbar.add(languageModelParametersComboBox);
         toolbar.add(refreshModelsButton);
         toolbar.add(Box.createHorizontalGlue());
         toolbar.add(submitButton);
@@ -250,52 +257,8 @@ public class Chat {
     }
 
     private @NotNull ComboBox<LanguageModelParameters> getLanguageModelParametersComboBox() {
-        ComboBox<LanguageModelParameters> serverNamesComboBox = new ComboBox<>();
-
-        serverNamesComboBox.setRenderer(
-                new ListCellRenderer<>() {
-                    private final JLabel label = new JLabel();
-                    private final JPanel panel = new JPanel(new BorderLayout());
-
-                    {
-                        panel.add(label, BorderLayout.LINE_START);
-                    }
-
-                    @Override
-                    public Component getListCellRendererComponent(
-                            JList<? extends LanguageModelParameters> list,
-                            LanguageModelParameters value,
-                            int index,
-                            boolean isSelected,
-                            boolean cellHasFocus) {
-                        if (value == null) return new JLabel("");
-
-                        if (index == -1) {
-                            label.setText(value.modelName);
-                        } else {
-                            String text =
-                                    String.format(
-                                            """
-                                            <html>
-                                            <b>%s: %s</b>
-                                            <ul>
-                                                <li>URL: %s</li>
-                                                <li>Tokens: %s</li>
-                                                <li>Temp: %.2f</li>
-                                            </ul>
-                                            </html>
-                                            """,
-                                            value.serverName,
-                                            value.modelName,
-                                            value.baseUrl,
-                                            value.maxTokens,
-                                            value.temperature);
-                            label.setText(text);
-                        }
-
-                        return panel;
-                    }
-                });
+        ComboBox<LanguageModelParameters> serverNamesComboBox =
+                LanguageModelParametersUtils.getLanguageModelParametersComboBox();
 
         serverNamesComboBox.addItemListener(
                 e -> {
@@ -316,34 +279,10 @@ public class Chat {
         return serverNamesComboBox;
     }
 
-    private static void refreshModels(ComboBox<LanguageModelParameters> serverNamesComboBox) {
-        DefaultComboBoxModel<LanguageModelParameters> model =
-                (DefaultComboBoxModel<LanguageModelParameters>) serverNamesComboBox.getModel();
-        model.removeAllElements();
-
-        List<LanguageModelParameters> updatedModels =
-                ServerSettings.getInstance().getState().configuredLanguageModels;
-
-        for (LanguageModelParameters param : updatedModels) {
-            model.addElement(param);
-        }
-
-        LanguageModelParameters defaultParams =
-                ChatSettings.getInstance().getState().defaultLanguageModelParameters;
-
-        if (defaultParams != null && updatedModels.contains(defaultParams)) {
-            serverNamesComboBox.setSelectedItem(defaultParams);
-        } else if (!updatedModels.isEmpty()) {
-            serverNamesComboBox.setSelectedIndex(0);
-        }
-    }
-
     private @NotNull JButton createToolBarButton(String tooltipMessage) {
         JButton button = new JButton();
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
-        button.setFocusPainted(false);
-        button.setOpaque(false);
         button.setHorizontalAlignment(SwingConstants.CENTER);
         button.setToolTipText(tooltipMessage);
 

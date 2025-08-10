@@ -1,6 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.completion.states.generation;
 
-import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionService;
+import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionProjectService;
 import com.github.damiano1996.jetbrains.incoder.completion.states.BaseState;
 import com.github.damiano1996.jetbrains.incoder.completion.states.idle.IdleState;
 import com.github.damiano1996.jetbrains.incoder.completion.states.preview.PreviewState;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class WaitGenerationState extends BaseState {
 
-    public WaitGenerationState(CodeCompletionService codeCompletionService) {
+    public WaitGenerationState(CodeCompletionProjectService codeCompletionService) {
         super(codeCompletionService);
     }
 

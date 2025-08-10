@@ -15,7 +15,7 @@ public class CodeCompletionAction extends AnAction implements AnActionListener {
         Project project = anActionEvent.getProject();
         if (project == null) return;
 
-        CodeCompletionService.getInstance(project).actionPerformed(anActionEvent);
+        CodeCompletionProjectService.getInstance(project).actionPerformed(anActionEvent);
     }
 
     @Override
@@ -23,6 +23,6 @@ public class CodeCompletionAction extends AnAction implements AnActionListener {
         Project project = event.getProject();
         if (project == null) return;
 
-        CodeCompletionService.getInstance(project).beforeActionPerformed(action, event);
+        CodeCompletionProjectService.getInstance(project).beforeActionPerformed(action, event);
     }
 }

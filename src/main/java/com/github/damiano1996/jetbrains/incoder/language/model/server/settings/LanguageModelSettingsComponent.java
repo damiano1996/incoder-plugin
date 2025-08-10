@@ -42,10 +42,9 @@ public class LanguageModelSettingsComponent {
         addButton.setIcon(AllIcons.General.Add);
         addButton.addActionListener(
                 e -> {
-                    LanguageModelParametersDialog languageModelParametersDialog =
-                            new LanguageModelParametersDialog(ProjectUtil.getActiveProject());
                     Optional<LanguageModelParameters> optionalParameters =
-                            languageModelParametersDialog.getLanguageModelParameters();
+                            LanguageModelParametersUtils.getLanguageModelParameters(
+                                    ProjectUtil.getActiveProject());
 
                     if (optionalParameters.isPresent()) {
                         languageModelParameters.add(optionalParameters.get());

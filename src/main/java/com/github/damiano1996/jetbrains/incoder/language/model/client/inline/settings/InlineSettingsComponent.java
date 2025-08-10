@@ -1,18 +1,15 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings;
 
 import com.github.damiano1996.jetbrains.incoder.InCoderBundle;
-import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelProjectService;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.LanguageModelParametersUtils;
 import com.github.damiano1996.jetbrains.incoder.ui.components.DescriptionLabel;
-import com.intellij.ide.impl.ProjectUtil;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.FormBuilder;
-import java.util.HashSet;
-import java.util.Set;
 import javax.swing.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,20 +19,17 @@ import lombok.extern.slf4j.Slf4j;
 public class InlineSettingsComponent {
 
     private final JPanel mainPanel;
-    private final ComboBox<String> serverNamesComboBox;
+    private final ComboBox<LanguageModelParameters> languageModelParametersComboBox;
     private final JBCheckBox enableCheckbox;
     private final JBCheckBox endLineCheckBox;
     private final JBTextArea systemMessageInstructionsField;
 
     public InlineSettingsComponent() {
-        Project project = ProjectUtil.getActiveProject();
-        Set<String> serverNames =
-                project == null
-                        ? new HashSet<>()
-                        : LanguageModelProjectService.getInstance(project)
-                                .getAvailableServerNames();
-        serverNames.add("");
-        serverNamesComboBox = new ComboBox<>(serverNames.toArray(new String[0]));
+        languageModelParametersComboBox =
+                LanguageModelParametersUtils.getLanguageModelParametersComboBox();
+        LanguageModelParametersUtils.refreshModels(
+                languageModelParametersComboBox,
+                InlineSettings.getInstance().getState().selectedLanguageModelParameters);
 
         enableCheckbox = new JBCheckBox("Inline coding assistant");
         endLineCheckBox = new JBCheckBox("Trigger at end line");
@@ -50,7 +44,11 @@ public class InlineSettingsComponent {
                         .addComponent(
                                 new DescriptionLabel(InCoderBundle.message("inline.description")))
                         .addVerticalGap(20)
-                        .addLabeledComponent(new JBLabel("Server:"), serverNamesComboBox, 0, false)
+                        .addLabeledComponent(
+                                new JBLabel("Language model:"),
+                                languageModelParametersComboBox,
+                                0,
+                                false)
                         .addComponent(
                                 new DescriptionLabel("Server used for inline code completion."))
                         .addVerticalGap(20)
@@ -70,7 +68,7 @@ public class InlineSettingsComponent {
                         .addLabeledComponent(
                                 new JBLabel("System message instructions:"),
                                 ScrollPaneFactory.createScrollPane(systemMessageInstructionsField),
-                                1,
+                                0,
                                 true)
                         .addComponent(
                                 new DescriptionLabel(

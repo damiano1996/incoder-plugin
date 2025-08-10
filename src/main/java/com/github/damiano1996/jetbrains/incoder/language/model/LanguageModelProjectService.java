@@ -18,12 +18,6 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public final class LanguageModelProjectService implements LanguageModelService, Disposable {
 
-    private final Project project;
-
-    public LanguageModelProjectService(Project project) {
-        this.project = project;
-    }
-
     public static LanguageModelService getInstance(@NotNull Project project) {
         return project.getService(LanguageModelService.class);
     }

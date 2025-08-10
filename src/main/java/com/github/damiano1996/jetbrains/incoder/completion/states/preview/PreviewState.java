@@ -1,6 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.completion.states.preview;
 
-import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionService;
+import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionProjectService;
 import com.github.damiano1996.jetbrains.incoder.completion.states.BaseState;
 import com.github.damiano1996.jetbrains.incoder.completion.states.decision.DecisionState;
 import com.github.damiano1996.jetbrains.incoder.completion.states.preview.renderer.PreviewInlayRenderer;
@@ -22,7 +22,7 @@ public class PreviewState extends BaseState {
 
     private final String prediction;
 
-    public PreviewState(CodeCompletionService codeCompletionService, String prediction) {
+    public PreviewState(CodeCompletionProjectService codeCompletionService, String prediction) {
         super(codeCompletionService);
         this.prediction = prediction;
 

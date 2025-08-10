@@ -1,7 +1,14 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings;
 
+import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionProjectService;
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
+import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelProjectService;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.project.Project;
+import java.util.Objects;
 import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
@@ -38,16 +45,17 @@ public final class InlineSettingsConfigurable implements Configurable {
     public boolean isModified() {
         var state = getState();
 
+        LanguageModelParameters languageModelParameters =
+                inlineSettingsComponent.getLanguageModelParametersComboBox().getItem();
+
         return inlineSettingsComponent.getEnableCheckbox().isSelected() != state.enable
                 || inlineSettingsComponent.getEndLineCheckBox().isSelected() != state.triggerEndLine
                 || !inlineSettingsComponent
                         .getSystemMessageInstructionsField()
                         .getText()
-                        .equals(state.systemMessageInstructions);
-        //                || !inlineSettingsComponent
-        //                        .getServerNamesComboBox()
-        //                        .getItem()
-        //                        .equals(state.selectedLanguageModelParameters.serverName());
+                        .equals(state.systemMessageInstructions)
+                || (languageModelParameters != null
+                        && !languageModelParameters.equals(state.selectedLanguageModelParameters));
     }
 
     @Override
@@ -58,8 +66,21 @@ public final class InlineSettingsConfigurable implements Configurable {
         state.triggerEndLine = inlineSettingsComponent.getEndLineCheckBox().isSelected();
         state.systemMessageInstructions =
                 inlineSettingsComponent.getSystemMessageInstructionsField().getText();
-        //        state.serverName = inlineSettingsComponent.getServerNamesComboBox().getItem();
-        // //todo
+        state.selectedLanguageModelParameters =
+                inlineSettingsComponent.getLanguageModelParametersComboBox().getItem();
+
+        try {
+            Project project = Objects.requireNonNull(ProjectUtil.getActiveProject());
+            CodeCompletionProjectService.getInstance(project)
+                    .setInlineLanguageModelClient(
+                            LanguageModelProjectService.getInstance(project)
+                                    .createInlineClient(
+                                            state, state.selectedLanguageModelParameters)
+                                    .compute());
+        } catch (NullPointerException | LanguageModelException e) {
+            throw new ConfigurationException(
+                    "Unable to create inline client. Error: " + e.getMessage());
+        }
     }
 
     @Override
@@ -71,8 +92,9 @@ public final class InlineSettingsConfigurable implements Configurable {
         inlineSettingsComponent
                 .getSystemMessageInstructionsField()
                 .setText(state.systemMessageInstructions);
-        //
-        // inlineSettingsComponent.getServerNamesComboBox().setSelectedItem(state.serverName);
+        inlineSettingsComponent
+                .getLanguageModelParametersComboBox()
+                .setSelectedItem(state.selectedLanguageModelParameters);
     }
 
     @Override
