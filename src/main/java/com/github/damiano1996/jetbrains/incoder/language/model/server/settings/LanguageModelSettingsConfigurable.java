@@ -29,22 +29,25 @@ public final class LanguageModelSettingsConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         var state = getState();
-        return !settingsComponent.getConfigurations().equals(state.configuredLanguageModels);
+        return !settingsComponent
+                .getLanguageModelParameters()
+                .equals(state.configuredLanguageModels);
     }
 
     @Override
     public void apply() {
         var state = getState();
 
-        state.configuredLanguageModels = new ArrayList<>(settingsComponent.getConfigurations());
+        state.configuredLanguageModels =
+                new ArrayList<>(settingsComponent.getLanguageModelParameters());
     }
 
     @Override
     public void reset() {
         var state = getState();
 
-        settingsComponent.getConfigurations().clear();
-        settingsComponent.getConfigurations().addAll(state.configuredLanguageModels);
+        settingsComponent.getLanguageModelParameters().clear();
+        settingsComponent.getLanguageModelParameters().addAll(state.configuredLanguageModels);
     }
 
     @Override
