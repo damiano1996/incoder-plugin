@@ -13,6 +13,7 @@ import com.intellij.openapi.util.ThrowableComputable;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -29,9 +30,10 @@ public final class LanguageModelProjectService implements LanguageModelService, 
                 .collect(Collectors.toSet());
     }
 
+    @Contract(pure = true)
     @Override
-    public ThrowableComputable<ChatLanguageModelClient, LanguageModelException> createChatClient(
-            ChatSettings.State settings, LanguageModelParameters parameters) {
+    public @NotNull ThrowableComputable<ChatLanguageModelClient, LanguageModelException>
+            createChatClient(ChatSettings.State settings, LanguageModelParameters parameters) {
         return () -> {
             LanguageModelServer server =
                     ServerFactoryUtils.findByName(parameters.serverName).createServer();
@@ -40,13 +42,14 @@ public final class LanguageModelProjectService implements LanguageModelService, 
     }
 
     @Override
-    public ThrowableComputable<ChatLanguageModelClient, LanguageModelException>
+    public @NotNull ThrowableComputable<ChatLanguageModelClient, LanguageModelException>
             createChatClientWithDefaultSettings(LanguageModelParameters parameters) {
         return createChatClient(ChatSettings.getInstance().getState(), parameters);
     }
 
+    @Contract(pure = true)
     @Override
-    public ThrowableComputable<InlineLanguageModelClient, LanguageModelException>
+    public @NotNull ThrowableComputable<InlineLanguageModelClient, LanguageModelException>
             createInlineClient(InlineSettings.State settings, LanguageModelParameters parameters) {
         return () -> {
             LanguageModelServer server =
@@ -56,13 +59,13 @@ public final class LanguageModelProjectService implements LanguageModelService, 
     }
 
     @Override
-    public ThrowableComputable<InlineLanguageModelClient, LanguageModelException>
+    public @NotNull ThrowableComputable<InlineLanguageModelClient, LanguageModelException>
             createInlineClientWithDefaultSettings(LanguageModelParameters parameters) {
         return createInlineClient(InlineSettings.getInstance().getState(), parameters);
     }
 
     @Override
-    public void verify(LanguageModelParameters parameters) throws LanguageModelException {
+    public void verify(@NotNull LanguageModelParameters parameters) throws LanguageModelException {
         ServerFactoryUtils.findByName(parameters.serverName).createServer().verify(parameters);
     }
 

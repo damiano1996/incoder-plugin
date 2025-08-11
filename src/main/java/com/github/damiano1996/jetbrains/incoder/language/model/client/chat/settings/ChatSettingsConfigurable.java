@@ -1,7 +1,6 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings;
 
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
 import javax.swing.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nls;
@@ -51,7 +50,7 @@ public final class ChatSettingsConfigurable implements Configurable {
     }
 
     @Override
-    public void apply() throws ConfigurationException {
+    public void apply() {
         var state = getState();
 
         state.maxMessages = (int) chatSettingsComponent.getMaxMessages().getValue();

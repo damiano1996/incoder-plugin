@@ -88,21 +88,17 @@ public class LanguageModelParametersUtils {
                         VerificationResult result =
                                 getVerificationResult(testParam, project, futureVerificationResult);
 
-                        if (result.valid) {
-                            okButton.setEnabled(true);
-                            JOptionPane.showMessageDialog(
-                                    null,
-                                    result.message,
-                                    "Verification Successful",
-                                    JOptionPane.INFORMATION_MESSAGE);
-                        } else {
-                            okButton.setEnabled(false);
-                            JOptionPane.showMessageDialog(
-                                    null,
-                                    result.message,
-                                    "Verification Failed",
-                                    JOptionPane.ERROR_MESSAGE);
-                        }
+                        okButton.setEnabled(result.valid);
+
+                        String title =
+                                result.valid ? "Verification Successful" : "Verification Failed";
+                        int messageType =
+                                result.valid
+                                        ? JOptionPane.INFORMATION_MESSAGE
+                                        : JOptionPane.ERROR_MESSAGE;
+                        String formattedMessage =
+                                result.message.replaceAll("(.{1,80})(\\s+|$)", "$1\n");
+                        JOptionPane.showMessageDialog(null, formattedMessage, title, messageType);
 
                         verifyButton.setEnabled(true);
                     });

@@ -45,7 +45,7 @@ import org.jetbrains.annotations.Nullable;
 public class Chat {
 
     private final Project project;
-    private ChatLanguageModelClient client;
+    @Nullable private ChatLanguageModelClient client;
 
     @Setter @Getter private int chatId;
 
@@ -77,6 +77,15 @@ public class Chat {
 
         if (prompt.isEmpty()) {
             log.debug("Prompt is empty.");
+            return;
+        }
+
+        if (client == null) {
+            NotificationService.getInstance(project)
+                    .notifyWithSettingsActionButton(
+                            "No language model selected. Please, add one from Settings and select"
+                                    + " it to start chatting.",
+                            NotificationType.WARNING);
             return;
         }
 
