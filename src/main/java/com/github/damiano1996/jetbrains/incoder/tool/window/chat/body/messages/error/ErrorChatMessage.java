@@ -28,11 +28,17 @@ public class ErrorChatMessage implements ChatMessage {
     private void createUIComponents() {
 
         Icon coloredIcon = AllIcons.General.Error;
-        JBLabel icon = new JBLabel("Error:", coloredIcon, 10);
+        JLabel icon = new JBLabel("Error", coloredIcon, 10);
+
+        JTextArea errorTextArea = new JTextArea(throwable.getMessage());
+        errorTextArea.setEditable(false);
+        errorTextArea.setLineWrap(true);
+        errorTextArea.setOpaque(false);
+        errorTextArea.setWrapStyleWord(true);
 
         JPanel toolPanel =
                 FormBuilder.createFormBuilder()
-                        .addLabeledComponent(icon, new JBLabel(throwable.getMessage()), 0, false)
+                        .addLabeledComponent(icon, errorTextArea, 0, true)
                         .getPanel();
         toolPanel.setOpaque(true);
         toolPanel.setBackground(JBUI.CurrentTheme.NotificationError.backgroundColor());
