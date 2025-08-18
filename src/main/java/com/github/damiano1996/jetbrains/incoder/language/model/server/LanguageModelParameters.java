@@ -1,5 +1,7 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server;
 
+import java.time.Duration;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,4 +18,6 @@ public class LanguageModelParameters {
     public String apiKey;
     public Integer maxTokens;
     public Double temperature;
+    public List<String> stopSequences;
+    public Duration timeout;
 }

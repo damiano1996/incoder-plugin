@@ -1,5 +1,6 @@
-package com.github.damiano1996.jetbrains.incoder.language.model.server;
+package com.github.damiano1996.jetbrains.incoder.language.model.server.settings;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
