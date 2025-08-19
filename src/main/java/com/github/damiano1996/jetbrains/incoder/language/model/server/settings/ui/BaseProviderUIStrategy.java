@@ -1,5 +1,6 @@
-package com.github.damiano1996.jetbrains.incoder.language.model.server;
+package com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui;
 
+import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import java.awt.*;
 import javax.swing.*;
 

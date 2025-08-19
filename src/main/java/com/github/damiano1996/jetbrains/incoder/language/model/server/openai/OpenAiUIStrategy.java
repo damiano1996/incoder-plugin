@@ -2,8 +2,9 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server.openai;
 
 import static com.github.damiano1996.jetbrains.incoder.language.model.server.openai.OpenAiLanguageModelServer.OPEN_AI;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseProviderUIStrategy;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.BaseProviderUIStrategy;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.CommonModelParameters;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import javax.swing.*;
@@ -71,7 +72,7 @@ public class OpenAiUIStrategy extends BaseProviderUIStrategy {
     }
 
     @Override
-    public LanguageModelParameters collect(LanguageModelParameters common) {
+    public LanguageModelParameters collect(CommonModelParameters common) {
         OpenAiParameters p = new OpenAiParameters();
         copyCommon(common, p);
         p.maxCompletionTokens = (Integer) maxCompletion.getValue();

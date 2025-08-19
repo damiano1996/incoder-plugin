@@ -1,7 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic;
 
-import static com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.AnthropicParameters.toAnthropic;
-
 import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
@@ -21,8 +19,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
 
     @Override
     public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
-        AnthropicParameters p = toAnthropic(parameters);
-
+        AnthropicParameters p = (AnthropicParameters) parameters;
         return AnthropicChatModel.builder()
                 .baseUrl(p.baseUrl)
                 .apiKey(p.apiKey)
@@ -37,15 +34,14 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
                 .cacheTools(Boolean.TRUE.equals(p.cacheTools))
                 .thinkingType(p.thinkingType)
                 .thinkingBudgetTokens(p.thinkingBudgetTokens)
-                .timeout(p.timeout)
+                .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
 
     @Override
     public StreamingChatLanguageModel createStreamingChatLanguageModel(
             LanguageModelParameters parameters) {
-        AnthropicParameters p = toAnthropic(parameters);
-
+        AnthropicParameters p = (AnthropicParameters) parameters;
         return AnthropicStreamingChatModel.builder()
                 .baseUrl(p.baseUrl)
                 .apiKey(p.apiKey)
@@ -60,7 +56,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
                 .cacheTools(Boolean.TRUE.equals(p.cacheTools))
                 .thinkingType(p.thinkingType)
                 .thinkingBudgetTokens(p.thinkingBudgetTokens)
-                .timeout(p.timeout)
+                .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
 
@@ -85,7 +81,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
         p.temperature = 0.1;
         p.topK = 40;
         p.stopSequences = Collections.emptyList();
-        p.timeout = Duration.of(10, ChronoUnit.SECONDS);
+        p.timeout = 10;
         p.version = "2023-06-01";
         p.beta = null;
         p.cacheSystemMessages = false;

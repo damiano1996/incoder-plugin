@@ -1,7 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.openai;
 
-import static com.github.damiano1996.jetbrains.incoder.language.model.server.openai.OpenAiParameters.toOpenAi;
-
 import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -21,7 +19,7 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
 
     @Override
     public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
-        OpenAiParameters p = toOpenAi(parameters);
+        OpenAiParameters p = (OpenAiParameters) parameters;
 
         return OpenAiChatModel.builder()
                 .baseUrl(p.baseUrl)
@@ -43,14 +41,14 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
                 .store(Boolean.TRUE.equals(p.store))
                 .metadata(p.metadata)
                 .serviceTier(p.serviceTier)
-                .timeout(p.timeout)
+                .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
 
     @Override
     public StreamingChatLanguageModel createStreamingChatLanguageModel(
             LanguageModelParameters parameters) {
-        OpenAiParameters p = toOpenAi(parameters);
+        OpenAiParameters p = (OpenAiParameters) parameters;
 
         return OpenAiStreamingChatModel.builder()
                 .baseUrl(p.baseUrl)
@@ -72,7 +70,7 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
                 .store(Boolean.TRUE.equals(p.store))
                 .metadata(p.metadata)
                 .serviceTier(p.serviceTier)
-                .timeout(p.timeout)
+                .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
 
@@ -97,7 +95,7 @@ public class OpenAiLanguageModelServer extends BaseLanguageModelServer {
         p.temperature = 0.1;
         p.maxCompletionTokens = 2048;
         p.stopSequences = Collections.emptyList();
-        p.timeout = Duration.of(10, ChronoUnit.SECONDS);
+        p.timeout = 10;
         p.presencePenalty = 0.0;
         p.frequencyPenalty = 0.0;
         p.logitBias = Collections.emptyMap();

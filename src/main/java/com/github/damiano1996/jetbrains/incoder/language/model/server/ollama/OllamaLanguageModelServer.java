@@ -1,7 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.ollama;
 
-import static com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.OllamaParameters.toOllama;
-
 import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -23,8 +21,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
 
     @Override
     public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
-        OllamaParameters p = toOllama(parameters);
-
+        OllamaParameters p = (OllamaParameters) parameters;
         return OllamaChatModel.builder()
                 .baseUrl(p.baseUrl)
                 .modelName(p.modelName)
@@ -36,15 +33,14 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
                 .numCtx(p.numCtx)
                 .stop(p.stopSequences)
                 .responseFormat(p.responseFormat)
-                .timeout(p.timeout)
+                .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
 
     @Override
     public StreamingChatLanguageModel createStreamingChatLanguageModel(
             LanguageModelParameters parameters) {
-        OllamaParameters p = toOllama(parameters);
-
+        OllamaParameters p = (OllamaParameters) parameters;
         return OllamaStreamingChatModel.builder()
                 .baseUrl(p.baseUrl)
                 .modelName(p.modelName)
@@ -56,7 +52,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
                 .numCtx(p.numCtx)
                 .stop(p.stopSequences)
                 .responseFormat(p.responseFormat)
-                .timeout(p.timeout)
+                .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
 
@@ -93,7 +89,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
         p.maxTokens = 2048;
         p.temperature = 0.1;
         p.stopSequences = Collections.emptyList();
-        p.timeout = Duration.of(10, ChronoUnit.SECONDS);
+        p.timeout = 10;
 
         p.topK = 40;
         p.repeatPenalty = 1.1;

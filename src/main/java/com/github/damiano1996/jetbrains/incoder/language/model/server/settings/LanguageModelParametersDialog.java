@@ -2,12 +2,13 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server.settings;
 
 import static com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.OllamaLanguageModelServer.OLLAMA;
 
-import com.github.damiano1996.jetbrains.incoder.ClassInstantiator;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelException;
 import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelProjectService;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.ProviderUIStrategy;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactory;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactoryUtils;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.CommonModelParameters;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.ProviderUIStrategy;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
@@ -90,7 +91,8 @@ final class LanguageModelParametersDialog {
     private void initStrategiesAndCards() {
         strategies.clear();
 
-        ClassInstantiator.findImplementations(ProviderUIStrategy.class)
+        ServerFactoryUtils.getServerFactories().stream()
+                .map(ServerFactory::createProviderUIStrategy)
                 .forEach(
                         providerUIStrategy -> {
                             strategies.put(
@@ -136,7 +138,7 @@ final class LanguageModelParametersDialog {
         timeoutSpinner = new JSpinner(new SpinnerNumberModel(60, 1, 3600, 1));
 
         refreshButton = createRefreshButton();
-        verifyButton = new JButton("Verify Connection");
+        verifyButton = new JButton("Verify Settings");
 
         initStrategiesAndCards();
 
@@ -152,17 +154,19 @@ final class LanguageModelParametersDialog {
                 });
 
         if (currentParameters != null) {
-            applyModelParameters(currentParameters);
+            serverNameField.setEditable(false);
+            serverNameField.setEnabled(false);
+            setModelParameters(currentParameters);
         } else {
+            serverNameField.setEditable(true);
+            serverNameField.setEnabled(true);
             applyDefaultParameters(serverNameField.getItem());
         }
 
         providerCards.show(providerPanel, normalize(serverNameField.getItem()).toUpperCase());
 
-        var form =
+        JPanel mainPanel =
                 FormBuilder.createFormBuilder()
-                        .setFormLeftIndent(20)
-                        .addLabeledComponent(new JBLabel("Server:"), serverNameField, 0, false)
                         .addLabeledComponent(new JBLabel("Base URL:"), baseUrlField, 0, false)
                         .addLabeledComponent(new JBLabel("Api key:"), apiKeyField, 0, false)
                         .addLabeledComponent(
@@ -182,50 +186,58 @@ final class LanguageModelParametersDialog {
                                 new JBLabel("Stop sequences (CSV):"), stopSequencesField, 0, false)
                         .addLabeledComponent(new JBLabel("Timeout (s):"), timeoutSpinner, 0, false)
                         .addLabeledComponent(new JBLabel("Max tokens:"), maxTokensSpinner, 0, false)
-                        .addComponent(new JSeparator())
-                        .addLabeledComponent(
-                                new JBLabel("Provider settings:"), providerPanel, 0, false)
-                        .addLabeledComponent(new JBLabel("Verification:"), verifyButton, 0, false)
+                        .addSeparator(10)
+                        .addComponent(providerPanel)
                         .getPanel();
 
         JScrollPane scrollPane =
                 new JBScrollPane(
-                        form,
+                        mainPanel,
                         ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setPreferredSize(new Dimension(700, 500));
+        scrollPane.setPreferredSize(new Dimension(700, 400));
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.add(scrollPane, BorderLayout.CENTER);
-        return wrapper;
+        JPanel scrollablePanel = new JPanel(new BorderLayout());
+        scrollablePanel.add(scrollPane, BorderLayout.CENTER);
+
+        return FormBuilder.createFormBuilder()
+                .setFormLeftIndent(20)
+                .addLabeledComponent(new JBLabel("Server:"), serverNameField, 0, false)
+                .addSeparator(10)
+                .addComponent(scrollablePanel)
+                .addSeparator(10)
+                .addLabeledComponent(new JBLabel("Verification:"), verifyButton, 10, false)
+                .getPanel();
     }
 
     private void applyDefaultParameters(@UnknownNullability String serverName) {
         try {
             LanguageModelParameters defaultParameters =
                     ServerFactoryUtils.findByName(serverName).createServer().getDefaultParameters();
-            applyModelParameters(defaultParameters);
+            setModelParameters(defaultParameters);
         } catch (LanguageModelException e) {
             log.warn("Unable to apply default parameters");
         }
     }
 
     private @NotNull LanguageModelParameters getCurrentParameters() {
-        LanguageModelParameters base =
-                new LanguageModelParameters(
-                        serverNameField.getItem(),
-                        modelNameField.getItem(),
-                        baseUrlField.getText(),
-                        new String(apiKeyField.getPassword()),
-                        (Integer) maxTokensSpinner.getValue(),
-                        (Double) temperatureSpinner.getValue(),
-                        parseStopSequences(stopSequencesField.getText()),
-                        java.time.Duration.ofSeconds((Integer) timeoutSpinner.getValue()));
+        CommonModelParameters base =
+                CommonModelParameters.builder()
+                        .serverName(serverNameField.getItem())
+                        .modelName(modelNameField.getItem())
+                        .baseUrl(baseUrlField.getText())
+                        .apiKey(new String(apiKeyField.getPassword()))
+                        .maxTokens((Integer) maxTokensSpinner.getValue())
+                        .temperature((Double) temperatureSpinner.getValue())
+                        .stopSequences(parseStopSequences(stopSequencesField.getText()))
+                        .timeout((Integer) timeoutSpinner.getValue())
+                        .build();
         return currentStrategy().collect(base);
     }
 
-    private void applyModelParameters(@NotNull LanguageModelParameters modelParameters) {
+    private void setModelParameters(@NotNull LanguageModelParameters modelParameters) {
+        serverNameField.setSelectedItem(modelParameters.serverName);
         baseUrlField.setText(modelParameters.baseUrl);
         apiKeyField.setText(modelParameters.apiKey);
         modelNameField.setSelectedItem(modelParameters.modelName);
@@ -240,9 +252,7 @@ final class LanguageModelParametersDialog {
                         ? String.join(",", modelParameters.stopSequences)
                         : "");
         timeoutSpinner.setValue(
-                modelParameters.timeout != null
-                        ? Math.max(1, (int) modelParameters.timeout.getSeconds())
-                        : 60);
+                modelParameters.timeout != null ? Math.max(1, modelParameters.timeout) : 60);
 
         currentStrategy().applyDefaults(modelParameters);
     }
@@ -327,13 +337,13 @@ final class LanguageModelParametersDialog {
                                 LanguageModelProjectService.getInstance(activeProject)
                                         .verify(testParam);
                                 futureVerificationResult.complete(
-                                        new VerificationResult(true, "Parameters are valid."));
+                                        new VerificationResult(true, "Settings are valid."));
                             } catch (Exception ex) {
                                 futureVerificationResult.complete(
                                         new VerificationResult(false, ex.getMessage()));
                             }
                         },
-                        "Verifying Parameters",
+                        "Verifying Settings",
                         false,
                         activeProject);
     }

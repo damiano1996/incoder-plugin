@@ -2,8 +2,9 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic
 
 import static com.github.damiano1996.jetbrains.incoder.language.model.server.anthropic.AnthropicLanguageModelServer.ANTHROPIC;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseProviderUIStrategy;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.BaseProviderUIStrategy;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.CommonModelParameters;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import javax.swing.*;
@@ -69,7 +70,7 @@ public class AnthropicUIStrategy extends BaseProviderUIStrategy {
     }
 
     @Override
-    public LanguageModelParameters collect(LanguageModelParameters common) {
+    public LanguageModelParameters collect(CommonModelParameters common) {
         AnthropicParameters p = new AnthropicParameters();
         copyCommon(common, p);
         p.topK = (Integer) topK.getValue();

@@ -2,8 +2,9 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server.ollama;
 
 import static com.github.damiano1996.jetbrains.incoder.language.model.server.ollama.OllamaLanguageModelServer.OLLAMA;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseProviderUIStrategy;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.BaseProviderUIStrategy;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.CommonModelParameters;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import javax.swing.*;
@@ -72,7 +73,7 @@ public class OllamaUIStrategy extends BaseProviderUIStrategy {
     }
 
     @Override
-    public LanguageModelParameters collect(LanguageModelParameters common) {
+    public LanguageModelParameters collect(CommonModelParameters common) {
         OllamaParameters p = new OllamaParameters();
         copyCommon(common, p);
         p.topK = (Integer) topK.getValue();
