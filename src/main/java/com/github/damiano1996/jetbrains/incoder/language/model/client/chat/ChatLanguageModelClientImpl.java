@@ -11,6 +11,11 @@ import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import dev.langchain4j.mcp.McpToolProvider;
+import dev.langchain4j.mcp.client.DefaultMcpClient;
+import dev.langchain4j.mcp.client.McpClient;
+import dev.langchain4j.mcp.client.transport.McpTransport;
+import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.service.AiServices;
@@ -18,6 +23,10 @@ import dev.langchain4j.service.TokenStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+
+import dev.langchain4j.service.tool.ToolProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,19 +63,73 @@ public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
         return project.getName();
     }
 
+    // ChatLanguageModelClientImpl.java (solo metodo getChatCodingAssistant)
     private ChatCodingAssistant getChatCodingAssistant(
             StreamingChatLanguageModel streamingChatLanguageModel) {
         final ChatCodingAssistant chatCodingAssistant;
+
+        var state = ChatSettings.getInstance().getState();
+
         AiServices<ChatCodingAssistant> aiAssistantBuilder =
                 AiServices.builder(ChatCodingAssistant.class)
                         .streamingChatLanguageModel(streamingChatLanguageModel)
                         .chatMemoryProvider(
                                 memoryId ->
-                                        MessageWindowChatMemory.withMaxMessages(
-                                                ChatSettings.getInstance().getState().maxMessages));
+                                        MessageWindowChatMemory.withMaxMessages(state.maxMessages));
 
-        if (ChatSettings.getInstance().getState().enableTools) {
-            aiAssistantBuilder.tools(new FileTool(), new EditorTool(), new CommandLineTool());
+        // === Built-in tools per flag ===========================================
+        if (state.enableFileTool) aiAssistantBuilder.tools(new FileTool());
+        if (state.enableEditorTool) aiAssistantBuilder.tools(new EditorTool());
+        if (state.enableCommandLineTool) aiAssistantBuilder.tools(new CommandLineTool());
+
+        // === MCP ================================================================
+        if (state.enableMcp && state.mcpConfigs != null && !state.mcpConfigs.isEmpty()) {
+            List<McpClient> clients = new java.util.ArrayList<>();
+            for (var cfg : state.mcpConfigs) {
+                if (!cfg.enabled) continue;
+                List<String> cmd = cfg.command == null || cfg.command.isEmpty()
+                        ? List.of("npx", "-y", "@modelcontextprotocol/server-memory")
+                        : cfg.command;
+
+                // build env map (+ default persistence se non fornita)
+                java.util.Map<String, String> env = new java.util.HashMap<>();
+                if (cfg.env != null) {
+                    for (var ev : cfg.env) {
+                        if (ev.key != null && !ev.key.isBlank()) {
+                            env.put(ev.key, ev.value == null ? "" : ev.value);
+                        }
+                    }
+                }
+                // default persistence path per memory server (non invasivo)
+                if (cmd.contains("@modelcontextprotocol/server-memory") &&
+                    env.keySet().stream().noneMatch(k -> k.equals("MEMORY_FILE_PATH"))) {
+                    String fallbackPath =
+                            (projectPath != null && !UNKNOWN.equals(projectPath))
+                                    ? projectPath + "/.incoder/memory.json"
+                                    : System.getProperty("user.home") + "/.incoder/memory.json";
+                    env.put("MEMORY_FILE_PATH", fallbackPath);
+                }
+
+                McpTransport transport = new StdioMcpTransport.Builder()
+                        .command(cmd)
+                        .environment(env)
+                        .logEvents(cfg.logEvents)
+                        .build();
+
+                McpClient mcpClient = new DefaultMcpClient.Builder()
+                        .clientName(cfg.key == null || cfg.key.isBlank() ? "mcp" : cfg.key)
+                        .transport(transport)
+                        .build();
+
+                clients.add(mcpClient);
+            }
+
+            if (!clients.isEmpty()) {
+                ToolProvider toolProvider = McpToolProvider.builder()
+                        .mcpClients(clients)
+                        .build();
+                aiAssistantBuilder.toolProvider(toolProvider);
+            }
         }
 
         chatCodingAssistant = aiAssistantBuilder.build();

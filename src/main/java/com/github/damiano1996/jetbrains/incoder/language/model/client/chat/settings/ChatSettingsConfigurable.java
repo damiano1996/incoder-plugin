@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+
 public final class ChatSettingsConfigurable implements Configurable {
 
     private ChatSettingsComponent chatSettingsComponent;
@@ -36,39 +38,62 @@ public final class ChatSettingsConfigurable implements Configurable {
     public JComponent createComponent() {
         return chatSettingsComponent.getMainPanel();
     }
-
+    // ChatSettingsConfigurable.java (solo i metodi aggiornati)
     @Override
     public boolean isModified() {
         var state = getState();
+        boolean modified =
+                !chatSettingsComponent.getMaxMessages().getValue().equals(state.maxMessages)
+                || !chatSettingsComponent.getSystemMessageInstructionsField().getText().equals(state.systemMessageInstructions)
+                || chatSettingsComponent.getEnableFileTool().isSelected() != state.enableFileTool
+                || chatSettingsComponent.getEnableEditorTool().isSelected() != state.enableEditorTool
+                || chatSettingsComponent.getEnableCommandLineTool().isSelected() != state.enableCommandLineTool
+                || chatSettingsComponent.getEnableMcp().isSelected() != state.enableMcp;
 
-        return !chatSettingsComponent.getMaxMessages().getValue().equals(state.maxMessages)
-                || !chatSettingsComponent
-                        .getSystemMessageInstructionsField()
-                        .getText()
-                        .equals(state.systemMessageInstructions)
-                || chatSettingsComponent.getEnableTools().isSelected() != state.enableTools;
+        // confronta lista MCP
+        var uiList = chatSettingsComponent.getMcpConfigs();
+        var stList = state.mcpConfigs;
+        if (uiList.size() != stList.size()) return true;
+        for (int i = 0; i < uiList.size(); i++) {
+            if (!uiList.get(i).toString().equals(stList.get(i).toString())) return true;
+        }
+        return modified;
     }
 
     @Override
     public void apply() {
         var state = getState();
-
         state.maxMessages = (int) chatSettingsComponent.getMaxMessages().getValue();
-        state.systemMessageInstructions =
-                chatSettingsComponent.getSystemMessageInstructionsField().getText();
-        state.enableTools = chatSettingsComponent.getEnableTools().isSelected();
+        state.systemMessageInstructions = chatSettingsComponent.getSystemMessageInstructionsField().getText();
+
+        state.enableFileTool = chatSettingsComponent.getEnableFileTool().isSelected();
+        state.enableEditorTool = chatSettingsComponent.getEnableEditorTool().isSelected();
+        state.enableCommandLineTool = chatSettingsComponent.getEnableCommandLineTool().isSelected();
+
+        state.enableMcp = chatSettingsComponent.getEnableMcp().isSelected();
+        state.mcpConfigs = new ArrayList<>(chatSettingsComponent.getMcpConfigs());
     }
 
     @Override
     public void reset() {
         var state = getState();
-
         chatSettingsComponent.getMaxMessages().setValue(state.maxMessages);
-        chatSettingsComponent
-                .getSystemMessageInstructionsField()
-                .setText(state.systemMessageInstructions);
-        chatSettingsComponent.getEnableTools().setSelected(state.enableTools);
+        chatSettingsComponent.getSystemMessageInstructionsField().setText(state.systemMessageInstructions);
+
+        chatSettingsComponent.getEnableFileTool().setSelected(state.enableFileTool);
+        chatSettingsComponent.getEnableEditorTool().setSelected(state.enableEditorTool);
+        chatSettingsComponent.getEnableCommandLineTool().setSelected(state.enableCommandLineTool);
+
+        chatSettingsComponent.getEnableMcp().setSelected(state.enableMcp);
+
+        // se non c'è nulla, predisponi un preset "memory"
+        if (state.mcpConfigs == null || state.mcpConfigs.isEmpty()) {
+            state.mcpConfigs = new ArrayList<>();
+            state.mcpConfigs.add(ChatSettings.McpConfig.memoryPreset());
+        }
+        chatSettingsComponent.setMcpConfigs(state.mcpConfigs);
     }
+
 
     @Override
     public void disposeUIResources() {

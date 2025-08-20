@@ -41,6 +41,7 @@ dependencies {
     implementation("org.reflections:reflections:0.10.2")
 
     implementation("dev.langchain4j:langchain4j:1.0.0-beta2")
+    implementation("dev.langchain4j:langchain4j-mcp:1.0.0-beta2")
     implementation("dev.langchain4j:langchain4j-ollama:1.0.0-beta2")
     implementation("dev.langchain4j:langchain4j-open-ai:1.0.0-beta2")
     implementation("dev.langchain4j:langchain4j-anthropic:1.0.0-beta2")
