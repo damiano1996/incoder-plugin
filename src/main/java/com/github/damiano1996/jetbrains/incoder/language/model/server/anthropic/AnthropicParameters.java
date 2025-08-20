@@ -16,8 +16,5 @@ public class AnthropicParameters extends LanguageModelParameters {
     public Integer topK;
     public Boolean cacheSystemMessages;
     public Boolean cacheTools;
-    public String thinkingType;
-    public Integer thinkingBudgetTokens;
     public String version;
-    public String beta;
 }

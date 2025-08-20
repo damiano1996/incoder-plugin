@@ -96,8 +96,11 @@ final class LanguageModelParametersDialog {
                         providerUIStrategy -> {
                             strategies.put(
                                     normalize(providerUIStrategy.name()), providerUIStrategy);
-                            providerPanel.add(
-                                    providerUIStrategy.buildPanel(), providerUIStrategy.cardName());
+
+                            JPanel wrapper = new JPanel(new BorderLayout());
+                            wrapper.add(providerUIStrategy.buildPanel(), BorderLayout.NORTH);
+
+                            providerPanel.add(wrapper, providerUIStrategy.cardName());
                         });
     }
 

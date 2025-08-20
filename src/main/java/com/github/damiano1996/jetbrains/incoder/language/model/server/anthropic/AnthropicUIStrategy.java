@@ -11,9 +11,6 @@ import javax.swing.*;
 public class AnthropicUIStrategy extends BaseProviderUIStrategy {
     private JSpinner topK;
     private JTextField version;
-    private JTextField beta;
-    private JTextField thinkingType;
-    private JSpinner thinkingBudget;
     private JCheckBox cacheSystem;
     private JCheckBox cacheTools;
 
@@ -36,19 +33,6 @@ public class AnthropicUIStrategy extends BaseProviderUIStrategy {
                                 (version = new JTextField("2023-06-01")),
                                 0,
                                 false)
-                        .addLabeledComponent(
-                                new JBLabel("Beta:"), (beta = new JTextField()), 0, false)
-                        .addLabeledComponent(
-                                new JBLabel("ThinkingType:"),
-                                (thinkingType = new JTextField()),
-                                0,
-                                false)
-                        .addLabeledComponent(
-                                new JBLabel("ThinkingBudgetTokens:"),
-                                (thinkingBudget =
-                                        new JSpinner(new SpinnerNumberModel(0, 0, 32000, 1))),
-                                0,
-                                false)
                         .addComponent((cacheSystem = new JCheckBox("Cache system messages")))
                         .addComponent((cacheTools = new JCheckBox("Cache tools")))
                         .getPanel();
@@ -60,9 +44,6 @@ public class AnthropicUIStrategy extends BaseProviderUIStrategy {
         if (defaults instanceof AnthropicParameters a) {
             topK.setValue(nz(a.topK, 40));
             version.setText(nz(a.version, "2023-06-01"));
-            beta.setText(nz(a.beta, ""));
-            thinkingType.setText(nz(a.thinkingType, ""));
-            thinkingBudget.setValue(nz(a.thinkingBudgetTokens, 0));
             cacheSystem.setSelected(Boolean.TRUE.equals(a.cacheSystemMessages));
             cacheTools.setSelected(Boolean.TRUE.equals(a.cacheTools));
         }
@@ -75,9 +56,6 @@ public class AnthropicUIStrategy extends BaseProviderUIStrategy {
                 .serverName(ANTHROPIC)
                 .topK((Integer) topK.getValue())
                 .version(version.getText())
-                .beta(beta.getText())
-                .thinkingType(thinkingType.getText())
-                .thinkingBudgetTokens((Integer) thinkingBudget.getValue())
                 .cacheSystemMessages(cacheSystem.isSelected())
                 .cacheTools(cacheTools.isSelected());
     }

@@ -24,7 +24,6 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
                 .baseUrl(p.baseUrl)
                 .apiKey(p.apiKey)
                 .version(p.version)
-                .beta(p.beta)
                 .modelName(p.modelName)
                 .temperature(p.temperature)
                 .topK(p.topK)
@@ -32,8 +31,6 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
                 .stopSequences(p.stopSequences)
                 .cacheSystemMessages(Boolean.TRUE.equals(p.cacheSystemMessages))
                 .cacheTools(Boolean.TRUE.equals(p.cacheTools))
-                .thinkingType(p.thinkingType)
-                .thinkingBudgetTokens(p.thinkingBudgetTokens)
                 .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
@@ -46,7 +43,6 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
                 .baseUrl(p.baseUrl)
                 .apiKey(p.apiKey)
                 .version(p.version)
-                .beta(p.beta)
                 .modelName(p.modelName)
                 .temperature(p.temperature)
                 .topK(p.topK)
@@ -54,8 +50,6 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
                 .stopSequences(p.stopSequences)
                 .cacheSystemMessages(Boolean.TRUE.equals(p.cacheSystemMessages))
                 .cacheTools(Boolean.TRUE.equals(p.cacheTools))
-                .thinkingType(p.thinkingType)
-                .thinkingBudgetTokens(p.thinkingBudgetTokens)
                 .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
@@ -83,11 +77,8 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
         p.stopSequences = Collections.emptyList();
         p.timeout = 10;
         p.version = "2023-06-01";
-        p.beta = null;
         p.cacheSystemMessages = false;
         p.cacheTools = false;
-        p.thinkingType = null;
-        p.thinkingBudgetTokens = null;
         return p;
     }
 }
