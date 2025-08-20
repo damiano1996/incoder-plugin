@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.settings;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerSettings;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.NlsContexts;
 import java.util.ArrayList;

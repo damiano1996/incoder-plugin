@@ -7,39 +7,56 @@ import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.anthropic.AnthropicStreamingChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
 
+    public static final String ANTHROPIC = "Anthropic";
+
     @Override
     public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
+        AnthropicParameters p = (AnthropicParameters) parameters;
         return AnthropicChatModel.builder()
-                .baseUrl(parameters.baseUrl)
-                .apiKey(parameters.apiKey)
-                .modelName(parameters.modelName)
-                .temperature(parameters.temperature)
-                .maxTokens(parameters.maxTokens)
-                .timeout(DEFAULT_TIMEOUT)
+                .baseUrl(p.baseUrl)
+                .apiKey(p.apiKey)
+                .version(p.version)
+                .modelName(p.modelName)
+                .temperature(p.temperature)
+                .topK(p.topK)
+                .maxTokens(p.maxTokens)
+                .stopSequences(p.stopSequences)
+                .cacheSystemMessages(Boolean.TRUE.equals(p.cacheSystemMessages))
+                .cacheTools(Boolean.TRUE.equals(p.cacheTools))
+                .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
 
     @Override
     public StreamingChatLanguageModel createStreamingChatLanguageModel(
             LanguageModelParameters parameters) {
+        AnthropicParameters p = (AnthropicParameters) parameters;
         return AnthropicStreamingChatModel.builder()
-                .baseUrl(parameters.baseUrl)
-                .apiKey(parameters.apiKey)
-                .modelName(parameters.modelName)
-                .temperature(parameters.temperature)
-                .maxTokens(parameters.maxTokens)
-                .timeout(DEFAULT_TIMEOUT)
+                .baseUrl(p.baseUrl)
+                .apiKey(p.apiKey)
+                .version(p.version)
+                .modelName(p.modelName)
+                .temperature(p.temperature)
+                .topK(p.topK)
+                .maxTokens(p.maxTokens)
+                .stopSequences(p.stopSequences)
+                .cacheSystemMessages(Boolean.TRUE.equals(p.cacheSystemMessages))
+                .cacheTools(Boolean.TRUE.equals(p.cacheTools))
+                .timeout(Duration.of(p.timeout, ChronoUnit.SECONDS))
                 .build();
     }
 
     @Override
     public String getName() {
-        return "Anthropic";
+        return ANTHROPIC;
     }
 
     @Override
@@ -49,7 +66,19 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
 
     @Override
     public LanguageModelParameters getDefaultParameters() {
-        return new LanguageModelParameters(
-                getName(), "", "https://api.anthropic.com/v1/", "", 64000, 0.1);
+        AnthropicParameters p = new AnthropicParameters();
+        p.serverName = getName();
+        p.modelName = "";
+        p.baseUrl = "https://api.anthropic.com/v1/";
+        p.apiKey = "";
+        p.maxTokens = 64000;
+        p.temperature = 0.1;
+        p.topK = 40;
+        p.stopSequences = Collections.emptyList();
+        p.timeout = 10;
+        p.version = "2023-06-01";
+        p.cacheSystemMessages = false;
+        p.cacheTools = false;
+        return p;
     }
 }

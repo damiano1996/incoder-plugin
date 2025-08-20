@@ -55,7 +55,8 @@ public final class InlineSettingsConfigurable implements Configurable {
                         .getText()
                         .equals(state.systemMessageInstructions)
                 || (languageModelParameters != null
-                        && !languageModelParameters.equals(state.selectedLanguageModelParameters));
+                        && !languageModelParameters.equals(
+                                state.getSelectedLanguageModelParameters()));
     }
 
     @Override
@@ -66,8 +67,8 @@ public final class InlineSettingsConfigurable implements Configurable {
         state.triggerEndLine = inlineSettingsComponent.getEndLineCheckBox().isSelected();
         state.systemMessageInstructions =
                 inlineSettingsComponent.getSystemMessageInstructionsField().getText();
-        state.selectedLanguageModelParameters =
-                inlineSettingsComponent.getLanguageModelParametersComboBox().getItem();
+        state.setSelectedLanguageModelParameters(
+                inlineSettingsComponent.getLanguageModelParametersComboBox().getItem());
 
         try {
             Project project = Objects.requireNonNull(ProjectUtil.getActiveProject());
@@ -75,7 +76,7 @@ public final class InlineSettingsConfigurable implements Configurable {
                     .setInlineLanguageModelClient(
                             LanguageModelProjectService.getInstance(project)
                                     .createInlineClient(
-                                            state, state.selectedLanguageModelParameters)
+                                            state, state.getSelectedLanguageModelParameters())
                                     .compute());
         } catch (NullPointerException | LanguageModelException e) {
             throw new ConfigurationException(
@@ -94,7 +95,7 @@ public final class InlineSettingsConfigurable implements Configurable {
                 .setText(state.systemMessageInstructions);
         inlineSettingsComponent
                 .getLanguageModelParametersComboBox()
-                .setSelectedItem(state.selectedLanguageModelParameters);
+                .setSelectedItem(state.getSelectedLanguageModelParameters());
     }
 
     @Override
