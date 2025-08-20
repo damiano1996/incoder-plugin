@@ -4,7 +4,6 @@ import static com.github.damiano1996.jetbrains.incoder.language.model.server.ant
 
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.BaseProviderUIStrategy;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.CommonModelParameters;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import javax.swing.*;
@@ -70,16 +69,21 @@ public class AnthropicUIStrategy extends BaseProviderUIStrategy {
     }
 
     @Override
-    public LanguageModelParameters collect(CommonModelParameters common) {
-        AnthropicParameters p = new AnthropicParameters();
-        copyCommon(common, p);
-        p.topK = (Integer) topK.getValue();
-        p.version = version.getText();
-        p.beta = beta.getText();
-        p.thinkingType = thinkingType.getText();
-        p.thinkingBudgetTokens = (Integer) thinkingBudget.getValue();
-        p.cacheSystemMessages = cacheSystem.isSelected();
-        p.cacheTools = cacheTools.isSelected();
-        return p;
+    public LanguageModelParameters.LanguageModelParametersBuilder<?, ?> collect(
+            LanguageModelParameters.LanguageModelParametersBuilder<?, ?> builder) {
+        return ((AnthropicParameters.AnthropicParametersBuilder<?, ?>) builder)
+                .serverName(ANTHROPIC)
+                .topK((Integer) topK.getValue())
+                .version(version.getText())
+                .beta(beta.getText())
+                .thinkingType(thinkingType.getText())
+                .thinkingBudgetTokens((Integer) thinkingBudget.getValue())
+                .cacheSystemMessages(cacheSystem.isSelected())
+                .cacheTools(cacheTools.isSelected());
+    }
+
+    @Override
+    public LanguageModelParameters.LanguageModelParametersBuilder<?, ?> getBuilder() {
+        return AnthropicParameters.builder();
     }
 }

@@ -7,7 +7,6 @@ import com.github.damiano1996.jetbrains.incoder.language.model.LanguageModelProj
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactory;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.ServerFactoryUtils;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.CommonModelParameters;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.ProviderUIStrategy;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.progress.ProgressManager;
@@ -121,6 +120,7 @@ final class LanguageModelParametersDialog {
                                         Objects.requireNonNull(project, "Project must be defined"))
                                 .getAvailableServerNames()
                                 .toArray(new String[0]));
+        serverNameField.setEditable(false);
 
         modelNameField = new ComboBox<>();
         modelNameField.setEditable(true);
@@ -154,11 +154,9 @@ final class LanguageModelParametersDialog {
                 });
 
         if (currentParameters != null) {
-            serverNameField.setEditable(false);
             serverNameField.setEnabled(false);
             setModelParameters(currentParameters);
         } else {
-            serverNameField.setEditable(true);
             serverNameField.setEnabled(true);
             applyDefaultParameters(serverNameField.getItem());
         }
@@ -222,18 +220,18 @@ final class LanguageModelParametersDialog {
     }
 
     private @NotNull LanguageModelParameters getCurrentParameters() {
-        CommonModelParameters base =
-                CommonModelParameters.builder()
-                        .serverName(serverNameField.getItem())
+        LanguageModelParameters.LanguageModelParametersBuilder<?, ?> builder =
+                currentStrategy()
+                        .getBuilder()
                         .modelName(modelNameField.getItem())
                         .baseUrl(baseUrlField.getText())
                         .apiKey(new String(apiKeyField.getPassword()))
                         .maxTokens((Integer) maxTokensSpinner.getValue())
                         .temperature((Double) temperatureSpinner.getValue())
                         .stopSequences(parseStopSequences(stopSequencesField.getText()))
-                        .timeout((Integer) timeoutSpinner.getValue())
-                        .build();
-        return currentStrategy().collect(base);
+                        .timeout((Integer) timeoutSpinner.getValue());
+
+        return currentStrategy().collect(builder).build();
     }
 
     private void setModelParameters(@NotNull LanguageModelParameters modelParameters) {

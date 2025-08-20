@@ -10,7 +10,10 @@ public interface ProviderUIStrategy {
 
     void applyDefaults(LanguageModelParameters defaults);
 
-    LanguageModelParameters collect(CommonModelParameters common);
+    LanguageModelParameters.LanguageModelParametersBuilder<?, ?> collect(
+            LanguageModelParameters.LanguageModelParametersBuilder<?, ?> builder);
 
     String cardName();
+
+    LanguageModelParameters.LanguageModelParametersBuilder<?, ?> getBuilder();
 }

@@ -218,7 +218,7 @@ public class Chat {
                 getLanguageModelParametersComboBox();
         LanguageModelParametersUtils.refreshModels(
                 languageModelParametersComboBox,
-                ChatSettings.getInstance().getState().defaultLanguageModelParameters);
+                ChatSettings.getInstance().getState().getDefaultLanguageModelParameters());
 
         JButton refreshModelsButton = createToolBarButton("Refresh models");
         refreshModelsButton.setIcon(getColoredIcon(AllIcons.Actions.Refresh));
@@ -228,7 +228,7 @@ public class Chat {
                                 languageModelParametersComboBox,
                                 ChatSettings.getInstance()
                                         .getState()
-                                        .defaultLanguageModelParameters));
+                                        .getDefaultLanguageModelParameters()));
 
         JToolBar toolbar = new JToolBar(JToolBar.HORIZONTAL);
         toolbar.setFloatable(false);
@@ -279,8 +279,9 @@ public class Chat {
                                 LanguageModelProjectService.getInstance(project)
                                         .createChatClientWithDefaultSettings(selectedParameters)
                                         .compute();
-                        ChatSettings.getInstance().getState().defaultLanguageModelParameters =
-                                selectedParameters;
+                        ChatSettings.getInstance()
+                                .getState()
+                                .setDefaultLanguageModelParameters(selectedParameters);
                     } catch (LanguageModelException ex) {
                         notifySettingsError(e);
                     }

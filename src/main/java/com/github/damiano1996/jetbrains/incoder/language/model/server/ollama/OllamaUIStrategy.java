@@ -4,7 +4,6 @@ import static com.github.damiano1996.jetbrains.incoder.language.model.server.oll
 
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.BaseProviderUIStrategy;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.CommonModelParameters;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import javax.swing.*;
@@ -73,14 +72,19 @@ public class OllamaUIStrategy extends BaseProviderUIStrategy {
     }
 
     @Override
-    public LanguageModelParameters collect(CommonModelParameters common) {
-        OllamaParameters p = new OllamaParameters();
-        copyCommon(common, p);
-        p.topK = (Integer) topK.getValue();
-        p.repeatPenalty = ((Number) repeatPenalty.getValue()).doubleValue();
-        p.seed = (Integer) seed.getValue();
-        p.numPredict = (Integer) numPredict.getValue();
-        p.numCtx = (Integer) numCtx.getValue();
-        return p;
+    public LanguageModelParameters.LanguageModelParametersBuilder<?, ?> collect(
+            LanguageModelParameters.LanguageModelParametersBuilder<?, ?> builder) {
+        return ((OllamaParameters.OllamaParametersBuilder<?, ?>) builder)
+                .serverName(OLLAMA)
+                .topK((Integer) topK.getValue())
+                .repeatPenalty(((Number) repeatPenalty.getValue()).doubleValue())
+                .seed((Integer) seed.getValue())
+                .numPredict((Integer) numPredict.getValue())
+                .numCtx((Integer) numCtx.getValue());
+    }
+
+    @Override
+    public LanguageModelParameters.LanguageModelParametersBuilder<?, ?> getBuilder() {
+        return OllamaParameters.builder();
     }
 }

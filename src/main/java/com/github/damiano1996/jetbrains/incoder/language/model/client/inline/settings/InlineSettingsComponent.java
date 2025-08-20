@@ -29,7 +29,7 @@ public class InlineSettingsComponent {
                 LanguageModelParametersUtils.getLanguageModelParametersComboBox();
         LanguageModelParametersUtils.refreshModels(
                 languageModelParametersComboBox,
-                InlineSettings.getInstance().getState().selectedLanguageModelParameters);
+                InlineSettings.getInstance().getState().getSelectedLanguageModelParameters());
 
         enableCheckbox = new JBCheckBox("Inline coding assistant");
         endLineCheckBox = new JBCheckBox("Trigger at end line");

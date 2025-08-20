@@ -1,6 +1,5 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui;
 
-import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import java.awt.*;
 import javax.swing.*;
 
@@ -30,16 +29,5 @@ public abstract class BaseProviderUIStrategy implements ProviderUIStrategy {
 
     public static <T> T nz(T v, T def) {
         return v != null ? v : def;
-    }
-
-    public static void copyCommon(LanguageModelParameters src, LanguageModelParameters dst) {
-        dst.serverName = src.serverName;
-        dst.modelName = src.modelName;
-        dst.baseUrl = src.baseUrl;
-        dst.apiKey = src.apiKey;
-        dst.maxTokens = src.maxTokens;
-        dst.temperature = src.temperature;
-        dst.stopSequences = src.stopSequences;
-        dst.timeout = src.timeout;
     }
 }

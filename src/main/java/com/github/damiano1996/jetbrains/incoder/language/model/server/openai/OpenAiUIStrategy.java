@@ -4,7 +4,6 @@ import static com.github.damiano1996.jetbrains.incoder.language.model.server.ope
 
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.BaseProviderUIStrategy;
-import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ui.CommonModelParameters;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import javax.swing.*;
@@ -72,16 +71,21 @@ public class OpenAiUIStrategy extends BaseProviderUIStrategy {
     }
 
     @Override
-    public LanguageModelParameters collect(CommonModelParameters common) {
-        OpenAiParameters p = new OpenAiParameters();
-        copyCommon(common, p);
-        p.maxCompletionTokens = (Integer) maxCompletion.getValue();
-        p.presencePenalty = ((Number) presencePenalty.getValue()).doubleValue();
-        p.frequencyPenalty = ((Number) frequencyPenalty.getValue()).doubleValue();
-        p.strictJsonSchema = strictJson.isSelected();
-        p.strictTools = strictTools.isSelected();
-        p.organizationId = orgId.getText();
-        p.projectId = projectId.getText();
-        return p;
+    public LanguageModelParameters.LanguageModelParametersBuilder<?, ?> collect(
+            LanguageModelParameters.LanguageModelParametersBuilder<?, ?> builder) {
+        return ((OpenAiParameters.OpenAiParametersBuilder<?, ?>) builder)
+                .serverName(OPEN_AI)
+                .maxCompletionTokens((Integer) maxCompletion.getValue())
+                .presencePenalty(((Number) presencePenalty.getValue()).doubleValue())
+                .frequencyPenalty(((Number) frequencyPenalty.getValue()).doubleValue())
+                .strictJsonSchema(strictJson.isSelected())
+                .strictTools(strictTools.isSelected())
+                .organizationId(orgId.getText())
+                .projectId(projectId.getText());
+    }
+
+    @Override
+    public LanguageModelParameters.LanguageModelParametersBuilder<?, ?> getBuilder() {
+        return OpenAiParameters.builder();
     }
 }

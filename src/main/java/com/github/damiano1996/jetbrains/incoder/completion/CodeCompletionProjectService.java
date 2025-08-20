@@ -58,7 +58,7 @@ public final class CodeCompletionProjectService implements CodeCompletionService
                             .createInlineClientWithDefaultSettings(
                                     InlineSettings.getInstance()
                                             .getState()
-                                            .selectedLanguageModelParameters)
+                                            .getSelectedLanguageModelParameters())
                             .compute();
         }
 
