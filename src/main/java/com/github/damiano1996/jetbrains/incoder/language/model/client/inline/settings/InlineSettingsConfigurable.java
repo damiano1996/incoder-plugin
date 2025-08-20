@@ -55,7 +55,8 @@ public final class InlineSettingsConfigurable implements Configurable {
                         .getText()
                         .equals(state.systemMessageInstructions)
                 || (languageModelParameters != null
-                        && !languageModelParameters.equals(state.selectedLanguageModelParameters));
+                        && !languageModelParameters.equals(
+                                state.getSelectedLanguageModelParameters()));
     }
 
     @Override
@@ -94,7 +95,7 @@ public final class InlineSettingsConfigurable implements Configurable {
                 .setText(state.systemMessageInstructions);
         inlineSettingsComponent
                 .getLanguageModelParametersComboBox()
-                .setSelectedItem(state.selectedLanguageModelParameters);
+                .setSelectedItem(state.getSelectedLanguageModelParameters());
     }
 
     @Override
