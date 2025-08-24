@@ -18,7 +18,7 @@ import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.tool.ToolProvider;
@@ -45,8 +45,7 @@ public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
     private final String userTimezone;
 
     public ChatLanguageModelClientImpl(
-            LanguageModelParameters parameters,
-            StreamingChatLanguageModel streamingChatLanguageModel) {
+            LanguageModelParameters parameters, StreamingChatModel streamingChatLanguageModel) {
         super(parameters);
 
         Project project = ProjectUtil.getActiveProject();
@@ -65,7 +64,7 @@ public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
     }
 
     private ChatCodingAssistant getChatCodingAssistant(
-            StreamingChatLanguageModel streamingChatLanguageModel) {
+            StreamingChatModel streamingChatLanguageModel) {
         return ProgressManager.getInstance()
                 .runProcessWithProgressSynchronously(
                         () -> getCodingAssistant(streamingChatLanguageModel),
@@ -75,12 +74,12 @@ public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
     }
 
     private static ChatCodingAssistant getCodingAssistant(
-            StreamingChatLanguageModel streamingChatLanguageModel) {
+            StreamingChatModel streamingChatLanguageModel) {
         var state = ChatSettings.getInstance().getState();
 
         AiServices<ChatCodingAssistant> builder =
                 AiServices.builder(ChatCodingAssistant.class)
-                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .streamingChatModel(streamingChatLanguageModel)
                         .chatMemoryProvider(
                                 memoryId ->
                                         MessageWindowChatMemory.withMaxMessages(
