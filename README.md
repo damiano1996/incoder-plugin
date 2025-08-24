@@ -23,10 +23,6 @@ It seamlessly integrates advanced Large Language Models (LLMs) into your develop
 
 ---
 
-Here you go — concise and punchy, ready to paste:
-
----
-
 ## Key Features
 
 ### Interactive Chat for Code Assistance
