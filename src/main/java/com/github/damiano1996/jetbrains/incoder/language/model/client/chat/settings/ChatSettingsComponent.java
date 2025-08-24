@@ -25,12 +25,10 @@ public class ChatSettingsComponent {
     private final JBTextArea systemMessageInstructionsField;
     private final JButton reloadDefaultButton;
 
-    // Tools granulari
     private final JBCheckBox enableFileTool;
     private final JBCheckBox enableEditorTool;
     private final JBCheckBox enableCommandLineTool;
 
-    // MCP
     private final JBCheckBox enableMcp;
     private final DefaultListModel<ChatSettings.McpConfig> mcpListModel;
     private final JList<ChatSettings.McpConfig> mcpList;
@@ -59,12 +57,10 @@ public class ChatSettingsComponent {
         labelPanel.add(Box.createHorizontalGlue());
         labelPanel.add(reloadDefaultButton);
 
-        // === Tools built-in ==================================================
         enableFileTool = new JBCheckBox("Enable fileTool");
         enableEditorTool = new JBCheckBox("Enable editorTool");
         enableCommandLineTool = new JBCheckBox("Enable commandLineTool");
 
-        // === MCP =============================================================
         enableMcp = new JBCheckBox("Enable MCP");
 
         mcpListModel = new DefaultListModel<>();
@@ -76,25 +72,28 @@ public class ChatSettingsComponent {
 
         ToolbarDecorator decorator =
                 ToolbarDecorator.createDecorator(mcpList)
-                        .setAddAction(button -> {
-                            McpConfigDialog dialog = new McpConfigDialog(null);
-                            if (dialog.showAndGet()) {
-                                mcpListModel.addElement(dialog.getValue());
-                            }
-                        })
-                        .setEditAction(button -> {
-                            ChatSettings.McpConfig selected = mcpList.getSelectedValue();
-                            if (selected == null) return;
-                            McpConfigDialog dialog = new McpConfigDialog(selected);
-                            if (dialog.showAndGet()) {
-                                int idx = mcpList.getSelectedIndex();
-                                mcpListModel.set(idx, dialog.getValue());
-                            }
-                        })
-                        .setRemoveAction(button -> {
-                            int idx = mcpList.getSelectedIndex();
-                            if (idx >= 0) mcpListModel.remove(idx);
-                        })
+                        .setAddAction(
+                                button -> {
+                                    McpConfigDialog dialog = new McpConfigDialog(null);
+                                    if (dialog.showAndGet()) {
+                                        mcpListModel.addElement(dialog.getValue());
+                                    }
+                                })
+                        .setEditAction(
+                                button -> {
+                                    ChatSettings.McpConfig selected = mcpList.getSelectedValue();
+                                    if (selected == null) return;
+                                    McpConfigDialog dialog = new McpConfigDialog(selected);
+                                    if (dialog.showAndGet()) {
+                                        int idx = mcpList.getSelectedIndex();
+                                        mcpListModel.set(idx, dialog.getValue());
+                                    }
+                                })
+                        .setRemoveAction(
+                                button -> {
+                                    int idx = mcpList.getSelectedIndex();
+                                    if (idx >= 0) mcpListModel.remove(idx);
+                                })
                         .disableUpDownActions();
 
         mcpPanel.add(decorator.createPanel(), BorderLayout.CENTER);
@@ -112,8 +111,8 @@ public class ChatSettingsComponent {
                         .addComponent(
                                 new DescriptionLabel(
                                         "Custom system prompt that defines the AI assistant's"
-                                        + " behavior, role, and response style for all chat"
-                                        + " interactions."))
+                                                + " behavior, role, and response style for all chat"
+                                                + " interactions."))
                         .addVerticalGap(20)
                         .addComponent(new JBLabel("Built-in tools:"))
                         .addComponent(enableFileTool)
@@ -125,7 +124,7 @@ public class ChatSettingsComponent {
                         .addComponent(
                                 new DescriptionLabel(
                                         "Configure one or more MCP servers (Model Context Protocol)"
-                                        + " to expose external tools to the LLM."))
+                                                + " to expose external tools to the LLM."))
                         .addComponentFillVertically(new JPanel(), 0)
                         .getPanel();
     }
@@ -143,17 +142,22 @@ public class ChatSettingsComponent {
         if (configs != null) configs.forEach(mcpListModel::addElement);
     }
 
-    // === Renderer per entry MCP =============================================
     private static class McpListCellRenderer extends DefaultListCellRenderer {
-        @Override public java.awt.Component getListCellRendererComponent(
+        @Override
+        public java.awt.Component getListCellRendererComponent(
                 JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            JLabel c = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            JLabel c =
+                    (JLabel)
+                            super.getListCellRendererComponent(
+                                    list, value, index, isSelected, cellHasFocus);
             ChatSettings.McpConfig cfg = (ChatSettings.McpConfig) value;
             String cmd = String.join(" ", cfg.command);
-            c.setText(String.format("[%s] %s%s",
-                    cfg.enabled ? "ON" : "OFF",
-                    cfg.key != null ? cfg.key : "(no-key)",
-                    cmd.isEmpty() ? "" : "  —  " + cmd));
+            c.setText(
+                    String.format(
+                            "[%s] %s%s",
+                            cfg.enabled ? "ON" : "OFF",
+                            cfg.key != null ? cfg.key : "(no-key)",
+                            cmd.isEmpty() ? "" : "  —  " + cmd));
             return c;
         }
     }

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.*;
-
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,10 +20,8 @@ public class McpConfigDialog extends DialogWrapper {
     private final JTextField commandField = new JTextField();
     private final JBTextArea envField = new JBTextArea(6, 40);
     private final JBCheckBox enabled = new JBCheckBox("Enabled", true);
-    private final JBCheckBox logEvents = new JBCheckBox("Log MCP events", false);
 
-    @Getter
-    private ChatSettings.McpConfig value;
+    @Getter private ChatSettings.McpConfig value;
 
     public McpConfigDialog(@Nullable ChatSettings.McpConfig initial) {
         super(true);
@@ -34,12 +31,9 @@ public class McpConfigDialog extends DialogWrapper {
             commandField.setText(String.join(" ", initial.command));
             envField.setText(envToMultiline(initial.env));
             enabled.setSelected(initial.enabled);
-            logEvents.setSelected(initial.logEvents);
         } else {
-            // sensible defaults for the memory server
             keyField.setText("memory");
             commandField.setText("npx -y @modelcontextprotocol/server-memory");
-            logEvents.setSelected(true);
         }
         init();
     }
@@ -56,7 +50,6 @@ public class McpConfigDialog extends DialogWrapper {
                 .addLabeledComponent("Command (space-separated):", commandField)
                 .addLabeledComponent("Env (one per line: KEY=VALUE):", envScroll)
                 .addComponent(enabled)
-                .addComponent(logEvents)
                 .getPanel();
     }
 
@@ -67,14 +60,12 @@ public class McpConfigDialog extends DialogWrapper {
         cfg.command = splitCommand(commandField.getText().trim());
         cfg.env = parseEnv(envField.getText());
         cfg.enabled = enabled.isSelected();
-        cfg.logEvents = logEvents.isSelected();
         this.value = cfg;
         super.doOKAction();
     }
 
     private static List<String> splitCommand(@NotNull String s) {
         if (s.isEmpty()) return List.of();
-        // naive split on spaces; users can quote via UI later if necessario
         return Arrays.asList(s.split("\\s+"));
     }
 

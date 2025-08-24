@@ -10,6 +10,7 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstrea
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tokenstream.StoppableTokenStreamImpl;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.LanguageModelParametersUtils;
+import com.github.damiano1996.jetbrains.incoder.language.model.server.settings.ServerSettings;
 import com.github.damiano1996.jetbrains.incoder.notification.NotificationService;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.ChatBody;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ai.AiChatMessage;
@@ -38,6 +39,7 @@ import javax.swing.border.CompoundBorder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -216,15 +218,24 @@ public class Chat {
 
         ComboBox<LanguageModelParameters> languageModelParametersComboBox =
                 getLanguageModelParametersComboBox();
-        LanguageModelParametersUtils.refreshModels(
-                languageModelParametersComboBox,
-                ChatSettings.getInstance().getState().getDefaultLanguageModelParameters());
+
+        if (ServerSettings.getInstance().getState().configuredLanguageModels.isEmpty()) {
+            NotificationService.getInstance(project)
+                    .notifyWithSettingsActionButton(
+                            "No language model selected. Please, add one from Settings and select"
+                                    + " it to start chatting.",
+                            NotificationType.INFORMATION);
+        } else {
+            LanguageModelParametersUtils.refreshComboBoxModels(
+                    languageModelParametersComboBox,
+                    ChatSettings.getInstance().getState().getDefaultLanguageModelParameters());
+        }
 
         JButton refreshModelsButton = createToolBarButton("Refresh models");
         refreshModelsButton.setIcon(getColoredIcon(AllIcons.Actions.Refresh));
         refreshModelsButton.addActionListener(
                 e ->
-                        LanguageModelParametersUtils.refreshModels(
+                        LanguageModelParametersUtils.refreshComboBoxModels(
                                 languageModelParametersComboBox,
                                 ChatSettings.getInstance()
                                         .getState()
@@ -304,7 +315,7 @@ public class Chat {
         return button;
     }
 
-    private void notifySettingsError(ItemEvent e) {
+    private void notifySettingsError(@NotNull ItemEvent e) {
         NotificationService.getInstance(project)
                 .notifyWithSettingsActionButton(
                         """
@@ -325,20 +336,21 @@ public class Chat {
                     private final int PREFERRED_WIDTH = 100;
 
                     @Override
-                    public Dimension getPreferredSize() {
+                    public @NotNull Dimension getPreferredSize() {
                         Component view = getViewport().getView();
                         int viewHeight = view != null ? view.getPreferredSize().height : MIN_HEIGHT;
                         int height = Math.max(MIN_HEIGHT, Math.min(viewHeight, MAX_HEIGHT));
                         return new Dimension(PREFERRED_WIDTH, height);
                     }
 
+                    @Contract(value = " -> new", pure = true)
                     @Override
-                    public Dimension getMinimumSize() {
+                    public @NotNull Dimension getMinimumSize() {
                         return new Dimension(PREFERRED_WIDTH, MIN_HEIGHT);
                     }
 
                     @Override
-                    public Dimension getMaximumSize() {
+                    public @NotNull Dimension getMaximumSize() {
                         Dimension viewPreferredSize = getViewport().getView().getPreferredSize();
                         int maxHeight = Math.min(viewPreferredSize.height, MAX_HEIGHT);
                         return new Dimension(PREFERRED_WIDTH, maxHeight);

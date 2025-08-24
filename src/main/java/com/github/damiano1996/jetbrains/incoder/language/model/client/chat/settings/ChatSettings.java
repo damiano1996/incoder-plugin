@@ -16,7 +16,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -42,33 +44,32 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
 
     @ToString
     public static class State {
-        // === LLM defaults già esistenti ======================================
         @XCollection(
                 elementTypes = {
-                        AnthropicParameters.class,
-                        OllamaParameters.class,
-                        OpenAiParameters.class
+                    AnthropicParameters.class,
+                    OllamaParameters.class,
+                    OpenAiParameters.class
                 },
                 style = XCollection.Style.v2)
         public List<LanguageModelParameters> defaultLanguageModelParameters = new ArrayList<>();
-        public int maxMessages = 20;
+
+        public int maxMessages = 50;
         public String systemMessageInstructions = loadDefaultSystemPrompt();
 
-        // === Tools built-in: granularità =====================================
         public boolean enableFileTool = true;
         public boolean enableEditorTool = true;
-        public boolean enableCommandLineTool = false;
+        public boolean enableCommandLineTool = true;
 
-        // === MCP: granularità e multi-config =================================
-        public boolean enableMcp = true;
+        public boolean enableMcp = false;
 
-        @XCollection(elementTypes = {McpConfig.class}, style = XCollection.Style.v2)
+        @XCollection(
+                elementTypes = {McpConfig.class},
+                style = XCollection.Style.v2)
         public List<McpConfig> mcpConfigs = new ArrayList<>();
 
-        // Default system prompt loader
         public static @NotNull String loadDefaultSystemPrompt() {
             try (InputStream inputStream =
-                         State.class.getClassLoader().getResourceAsStream("prompts/system_prompt.txt")) {
+                    State.class.getClassLoader().getResourceAsStream("prompts/system_prompt.txt")) {
                 if (inputStream != null) {
                     return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                 }
@@ -92,39 +93,26 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
         }
     }
 
-    // ===== Beans serializzabili per MCP =====================================
-
     @ToString
     public static class McpConfig {
-        /** Identificatore/chiave usata anche come clientName in MCP */
         public String key = "memory";
-        /** Comando completo in lista (es. ["npx","-y","@modelcontextprotocol/server-memory"]) */
+
         @XCollection(style = XCollection.Style.v2)
         public List<String> command = new ArrayList<>();
-        /** Variabili d’ambiente come lista K/V serializzabile */
-        @XCollection(elementTypes = {EnvVar.class}, style = XCollection.Style.v2)
-        public List<EnvVar> env = new ArrayList<>();
-        /** Abilitato/visibile al runtime */
-        public boolean enabled = true;
-        /** Loggare traffico MCP */
-        public boolean logEvents = false;
 
-        public static McpConfig memoryPreset() {
-            McpConfig c = new McpConfig();
-            c.key = "memory";
-            c.command = List.of("npx", "-y", "@modelcontextprotocol/server-memory");
-            c.env = new ArrayList<>();
-            c.enabled = true;
-            c.logEvents = true;
-            return c;
-        }
+        @XCollection(
+                elementTypes = {EnvVar.class},
+                style = XCollection.Style.v2)
+        public List<EnvVar> env = new ArrayList<>();
+
+        public boolean enabled = true;
     }
 
+    @AllArgsConstructor
+    @NoArgsConstructor
     @ToString
     public static class EnvVar {
         public String key;
         public String value;
-        public EnvVar() {}
-        public EnvVar(String key, String value) { this.key = key; this.value = value; }
     }
 }
