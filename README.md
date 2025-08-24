@@ -21,89 +21,61 @@
 It seamlessly integrates advanced Large Language Models (LLMs) into your development workflow, providing you with code generation, understanding, completion, and intelligent action capabilities, all directly within your favorite IDE.
 <!-- Plugin description end -->
 
-<div align="center">
+---
 
-  <img src=".github/readme/demo-chat-hello-world-01.png" alt="Demo Chat Hello World 01" style="width: 70%;">
-
-  <img src=".github/readme/demo-chat-hello-world-02.png" alt="Demo Chat Hello World 02" style="width: 70%;">
-
-  <img src=".github/readme/demo-chat-editor.png" alt="Demo Chat Editor" style="width: 70%;">
-
-</div>
+Here you go — concise and punchy, ready to paste:
 
 ---
 
 ## Key Features
 
-### 1. **Interactive Chat for Code Assistance**
+### Interactive Chat for Code Assistance
 
 <p align="center">
-  <img src=".github/readme/demo-chat.png" alt="Demo Chat" style="width: 70%;">
+  <img src=".github/readme/demo-chat.png" style="width: 70%;" alt="Chat Demo">
+
+  <img src=".github/readme/demo-chat-02.png" style="width: 70%;" alt="Chat Demo 2">
+
 </p>
+
+#### Local Tools
+
+* **Command line tool:** Runs shell commands in the **IntelliJ integrated terminal** *after explicit confirmation*.
+<p align="center">
+  <img src=".github/readme/demo-command-line.png" style="width: 50%;" alt="Command Line Demo">
+</p>
+
+* **Editor tool:** Creates **unified diff patches** and opens a **merge dialog** (visual diff) for review before applying.
+<p align="center">
+  <img src=".github/readme/demo-chat-merge.png" style="width: 50%;" alt="Chat Merge Demo">
+</p>
+
+* **File tool:**
+
+    * **Scan directory**: lists files and folders.
+    * **Read file**: returns content with **line numbers** (great for precise edits).
+    * **Create empty file**: safely creates files only if they don’t exist and **refreshes the project** view.
+
+#### MCP Tools
 
 <p align="center">
-  <img src=".github/readme/demo-chat-merge.png" alt="Demo Chat Merge" style="width: 50%;">
+  <img src=".github/readme/chat-settings.png" style="width: 50%;" alt="Command Line Demo">
 </p>
 
+* InCoder can **attach to MCP servers** and surface their tools directly in chat.
+* Tools are **discovered dynamically** (e.g., filesystem, editor, shell, git from compatible servers).
 
-- A dedicated **tool window** appears on the right panel of the IDE after installing the plugin.
-- Interact with an LLM that now offers powerful autonomous capabilities:
-  - **Generate code snippets** or solve coding challenges.
-  - **Understand code** by analyzing the file or specific lines you're viewing.
-  - **Autonomous Project Interaction**:
-  	- Create new files and directories directly within your project structure
-    - Navigate through project files and folders
-    - Propose and apply code changes with intelligent context-aware suggestions
-  - Get contextual suggestions and explanations based on the active file you're working on, as the LLM has access to the current code.
-- **Advanced Tools**:
-    - File creation: instantly generate new source files, test cases, or configuration files
-    - Project navigation: quickly locate and open relevant files
-    - Command line execution: give to the LLM the possibility to execute command lines after human approval.
-      <p align="center">
-        <img src=".github/readme/demo-command-line.png" alt="Demo Command Line" style="width: 50%;">
-      </p>
-    - Merge request and Patch generation: suggest and implement code improvements, extract methods, and optimize existing code
-
-### 2. **Inline Code Completion**
+### Inline Code Completion
 
 <p align="center">
-  <img src=".github/readme/demo-inline.png" alt="Demo Inline" style="width: 70%;">
+  <img src=".github/readme/demo-inline.png" style="width: 50%;" alt="Inline Code Completion">
 </p>
 
-- **Real-time suggestions** while you type in the editor.
-- Press **Tab** to accept the suggested code and insert it directly into your file.
-- Accelerate your coding workflow with intelligent autocompletion that understands the context of your project.
-
-### 3. **Support for Multiple LLM Providers**
-- InCoder supports **multiple LLM providers**, giving you flexibility and choice:
-  - **Ollama**: Utilize models running locally on your machine to preserve privacy.
-  - **OpenAI**: Access advanced cloud-based LLMs for high-quality suggestions and assistance.
-  - **Anthropic**: Integrate with this leading LLM provider for ethical and powerful AI capabilities.
-- All providers can be easily **configured** through the plugin's settings, allowing you to choose the one that best fits your needs.
-
-### 4. **Privacy-Focused Local LLM Support**
-- By using **Ollama**, InCoder enables local LLM inference directly on your computer.
-- Keeps sensitive project data private and ensures compliance with internal security policies.
-- Ideal for developers who value privacy and want to avoid sending data to external servers.
-
-## Settings
-The plugin is highly customizable through the **InCoder Settings** panel in your IDE. Access it via the settings/preferences menu under the section **InCoder**. 
-Configuration is divided into three main subsections:
-
-- **Chat**: Configure settings for the interactive chat window, such as history retention and UI preferences.
-- **Inline**: Enable or disable inline code completion and customize the behavior (e.g., auto-suggestions, Tab behavior).
-- **Server**: Set up your preferred LLM provider.
+* **Real-time inline suggestions** (ghost text) while you type.
+* Press **Tab** to accept; stays out of your way when you don’t need it.
+* Context-aware across the current buffer; configurable in settings (feature is evolving fast).
 
 ---
-
-## Benefits of Using InCoder
-- **Boost productivity**: Generate boilerplate code, debug faster, and understand unfamiliar codebases more quickly.
-- **Enhanced contextual understanding**: The LLM has access to your active file, ensuring accurate and relevant suggestions tailored to your project.
-- **Customizable and flexible**: Easily switch between LLM providers to adapt to your workflow or organizational requirements.
-- **Seamless integration**: Designed specifically for JetBrains IDEs, ensuring an intuitive and native user experience.
-
-## Experimental Features
-- **Inline code completion** is currently experimental but highly promising for real-time code assistance and efficiency. Feedback is welcome to improve this feature further.
 
 ## Supported JetBrains IDEs
 While InCoder is primarily tested on **IntelliJ IDEA** and **PyCharm**, it is compatible with most JetBrains IDEs, making it a versatile choice for developers working in diverse environments.
