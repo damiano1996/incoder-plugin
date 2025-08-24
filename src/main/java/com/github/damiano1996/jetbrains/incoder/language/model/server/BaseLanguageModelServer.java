@@ -5,8 +5,8 @@ import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatL
 import com.github.damiano1996.jetbrains.incoder.language.model.client.chat.ChatLanguageModelClientImpl;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineLanguageModelClient;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.InlineLanguageModelClientImpl;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -14,9 +14,9 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public abstract class BaseLanguageModelServer implements LanguageModelServer {
 
-    public abstract ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters);
+    public abstract ChatModel createChatLanguageModel(LanguageModelParameters parameters);
 
-    public abstract StreamingChatLanguageModel createStreamingChatLanguageModel(
+    public abstract StreamingChatModel createStreamingChatLanguageModel(
             LanguageModelParameters parameters);
 
     @Contract("_ -> new")

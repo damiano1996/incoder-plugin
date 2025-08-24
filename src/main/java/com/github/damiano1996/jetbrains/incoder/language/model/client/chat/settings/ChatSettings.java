@@ -1,3 +1,4 @@
+// ChatSettings.java
 package com.github.damiano1996.jetbrains.incoder.language.model.client.chat.settings;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
@@ -15,7 +16,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -50,9 +53,19 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
                 style = XCollection.Style.v2)
         public List<LanguageModelParameters> defaultLanguageModelParameters = new ArrayList<>();
 
-        public int maxMessages = 20;
+        public int maxMessages = 50;
         public String systemMessageInstructions = loadDefaultSystemPrompt();
-        public boolean enableTools = true;
+
+        public boolean enableFileTool = true;
+        public boolean enableEditorTool = true;
+        public boolean enableCommandLineTool = true;
+
+        public boolean enableMcp = false;
+
+        @XCollection(
+                elementTypes = {McpConfig.class},
+                style = XCollection.Style.v2)
+        public List<McpConfig> mcpConfigs = new ArrayList<>();
 
         public static @NotNull String loadDefaultSystemPrompt() {
             try (InputStream inputStream =
@@ -78,5 +91,28 @@ public final class ChatSettings implements PersistentStateComponent<ChatSettings
                 defaultLanguageModelParameters.add(parameters);
             }
         }
+    }
+
+    @ToString
+    public static class McpConfig {
+        public String key = "memory";
+
+        @XCollection(style = XCollection.Style.v2)
+        public List<String> command = new ArrayList<>();
+
+        @XCollection(
+                elementTypes = {EnvVar.class},
+                style = XCollection.Style.v2)
+        public List<EnvVar> env = new ArrayList<>();
+
+        public boolean enabled = true;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @ToString
+    public static class EnvVar {
+        public String key;
+        public String value;
     }
 }

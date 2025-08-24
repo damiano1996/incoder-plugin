@@ -4,7 +4,7 @@ import com.github.damiano1996.jetbrains.incoder.completion.CodeCompletionContext
 import com.github.damiano1996.jetbrains.incoder.language.model.client.BaseLanguageModelClient;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.inline.settings.InlineSettings;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -16,17 +16,17 @@ public class InlineLanguageModelClientImpl extends BaseLanguageModelClient
     private final InlineCodingAssistant inlineCodingAssistant;
 
     public InlineLanguageModelClientImpl(
-            LanguageModelParameters parameters, ChatLanguageModel chatLanguageModel) {
+            LanguageModelParameters parameters, ChatModel chatLanguageModel) {
         super(parameters);
 
         inlineCodingAssistant = getInlineCodingAssistant(chatLanguageModel);
     }
 
-    private InlineCodingAssistant getInlineCodingAssistant(ChatLanguageModel chatLanguageModel) {
+    private InlineCodingAssistant getInlineCodingAssistant(ChatModel chatLanguageModel) {
         final InlineCodingAssistant inlineCodingAssistant;
         inlineCodingAssistant =
                 AiServices.builder(InlineCodingAssistant.class)
-                        .chatLanguageModel(chatLanguageModel)
+                        .chatModel(chatLanguageModel)
                         .build();
         return inlineCodingAssistant;
     }

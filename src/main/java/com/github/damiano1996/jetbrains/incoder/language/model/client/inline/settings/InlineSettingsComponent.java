@@ -27,7 +27,7 @@ public class InlineSettingsComponent {
     public InlineSettingsComponent() {
         languageModelParametersComboBox =
                 LanguageModelParametersUtils.getLanguageModelParametersComboBox();
-        LanguageModelParametersUtils.refreshModels(
+        LanguageModelParametersUtils.refreshComboBoxModels(
                 languageModelParametersComboBox,
                 InlineSettings.getInstance().getState().getSelectedLanguageModelParameters());
 

@@ -5,8 +5,8 @@ import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageMo
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.anthropic.AnthropicStreamingChatModel;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -18,7 +18,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     public static final String ANTHROPIC = "Anthropic";
 
     @Override
-    public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
+    public ChatModel createChatLanguageModel(LanguageModelParameters parameters) {
         AnthropicParameters p = (AnthropicParameters) parameters;
         return AnthropicChatModel.builder()
                 .baseUrl(p.baseUrl)
@@ -36,8 +36,7 @@ public class AnthropicLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public StreamingChatLanguageModel createStreamingChatLanguageModel(
-            LanguageModelParameters parameters) {
+    public StreamingChatModel createStreamingChatLanguageModel(LanguageModelParameters parameters) {
         AnthropicParameters p = (AnthropicParameters) parameters;
         return AnthropicStreamingChatModel.builder()
                 .baseUrl(p.baseUrl)

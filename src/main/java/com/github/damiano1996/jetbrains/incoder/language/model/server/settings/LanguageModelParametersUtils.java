@@ -71,23 +71,23 @@ public final class LanguageModelParametersUtils {
         return serverNamesComboBox;
     }
 
-    public static void refreshModels(
+    public static void refreshComboBoxModels(
             @NotNull ComboBox<LanguageModelParameters> serverNamesComboBox,
             LanguageModelParameters defaultParams) {
         DefaultComboBoxModel<LanguageModelParameters> model =
                 (DefaultComboBoxModel<LanguageModelParameters>) serverNamesComboBox.getModel();
         model.removeAllElements();
 
-        List<LanguageModelParameters> updatedModels =
+        List<LanguageModelParameters> configuredModels =
                 ServerSettings.getInstance().getState().configuredLanguageModels;
 
-        for (LanguageModelParameters p : updatedModels) {
+        for (LanguageModelParameters p : configuredModels) {
             model.addElement(p);
         }
 
-        if (defaultParams != null && updatedModels.contains(defaultParams)) {
+        if (defaultParams != null && configuredModels.contains(defaultParams)) {
             serverNamesComboBox.setSelectedItem(defaultParams);
-        } else if (!updatedModels.isEmpty()) {
+        } else if (!configuredModels.isEmpty()) {
             serverNamesComboBox.setSelectedIndex(0);
         }
     }

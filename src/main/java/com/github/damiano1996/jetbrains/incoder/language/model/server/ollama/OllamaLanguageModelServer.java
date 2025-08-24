@@ -2,8 +2,8 @@ package com.github.damiano1996.jetbrains.incoder.language.model.server.ollama;
 
 import com.github.damiano1996.jetbrains.incoder.language.model.server.BaseLanguageModelServer;
 import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageModelParameters;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.ollama.OllamaModel;
 import dev.langchain4j.model.ollama.OllamaModels;
@@ -20,7 +20,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     public static final String OLLAMA = "Ollama";
 
     @Override
-    public ChatLanguageModel createChatLanguageModel(LanguageModelParameters parameters) {
+    public ChatModel createChatLanguageModel(LanguageModelParameters parameters) {
         OllamaParameters p = (OllamaParameters) parameters;
         return OllamaChatModel.builder()
                 .baseUrl(p.baseUrl)
@@ -38,8 +38,7 @@ public class OllamaLanguageModelServer extends BaseLanguageModelServer {
     }
 
     @Override
-    public StreamingChatLanguageModel createStreamingChatLanguageModel(
-            LanguageModelParameters parameters) {
+    public StreamingChatModel createStreamingChatLanguageModel(LanguageModelParameters parameters) {
         OllamaParameters p = (OllamaParameters) parameters;
         return OllamaStreamingChatModel.builder()
                 .baseUrl(p.baseUrl)

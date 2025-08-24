@@ -40,12 +40,28 @@ dependencies {
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
     implementation("org.reflections:reflections:0.10.2")
 
-    implementation("dev.langchain4j:langchain4j:1.0.0-beta2")
-    implementation("dev.langchain4j:langchain4j-ollama:1.0.0-beta2")
-    implementation("dev.langchain4j:langchain4j-open-ai:1.0.0-beta2")
-    implementation("dev.langchain4j:langchain4j-anthropic:1.0.0-beta2")
+    implementation(platform("dev.langchain4j:langchain4j-bom:1.3.0"))
+
+    implementation("dev.langchain4j:langchain4j")
+    implementation("dev.langchain4j:langchain4j-mcp")
+    implementation("dev.langchain4j:langchain4j-ollama")
+    implementation("dev.langchain4j:langchain4j-open-ai")
+    implementation("dev.langchain4j:langchain4j-anthropic")
 
     implementation("org.jsoup:jsoup:1.21.1")
+
+    // allinea le core libs (se vuoi fissare la versione)
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
+
+    // se usi date/time Java 8+
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
+
+    // evita di trascinare il modulo Kotlin
+    configurations.all {
+        exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-kotlin")
+    }
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {

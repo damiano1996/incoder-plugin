@@ -9,15 +9,25 @@ import com.github.damiano1996.jetbrains.incoder.language.model.server.LanguageMo
 import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import dev.langchain4j.mcp.McpToolProvider;
+import dev.langchain4j.mcp.client.DefaultMcpClient;
+import dev.langchain4j.mcp.client.McpClient;
+import dev.langchain4j.mcp.client.transport.McpTransport;
+import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.tool.ToolProvider;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,8 +45,7 @@ public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
     private final String userTimezone;
 
     public ChatLanguageModelClientImpl(
-            LanguageModelParameters parameters,
-            StreamingChatLanguageModel streamingChatLanguageModel) {
+            LanguageModelParameters parameters, StreamingChatModel streamingChatLanguageModel) {
         super(parameters);
 
         Project project = ProjectUtil.getActiveProject();
@@ -55,22 +64,92 @@ public class ChatLanguageModelClientImpl extends BaseLanguageModelClient
     }
 
     private ChatCodingAssistant getChatCodingAssistant(
-            StreamingChatLanguageModel streamingChatLanguageModel) {
-        final ChatCodingAssistant chatCodingAssistant;
-        AiServices<ChatCodingAssistant> aiAssistantBuilder =
+            StreamingChatModel streamingChatLanguageModel) {
+        return ProgressManager.getInstance()
+                .runProcessWithProgressSynchronously(
+                        () -> getCodingAssistant(streamingChatLanguageModel),
+                        "Initializing Chat Coding Assistant",
+                        false,
+                        ProjectUtil.getActiveProject());
+    }
+
+    private static ChatCodingAssistant getCodingAssistant(
+            StreamingChatModel streamingChatLanguageModel) {
+        var state = ChatSettings.getInstance().getState();
+
+        AiServices<ChatCodingAssistant> builder =
                 AiServices.builder(ChatCodingAssistant.class)
-                        .streamingChatLanguageModel(streamingChatLanguageModel)
+                        .streamingChatModel(streamingChatLanguageModel)
                         .chatMemoryProvider(
                                 memoryId ->
                                         MessageWindowChatMemory.withMaxMessages(
-                                                ChatSettings.getInstance().getState().maxMessages));
+                                                state.maxMessages > 0 ? state.maxMessages : 50));
 
-        if (ChatSettings.getInstance().getState().enableTools) {
-            aiAssistantBuilder.tools(new FileTool(), new EditorTool(), new CommandLineTool());
+        collectLocalTools(state, builder);
+
+        collectMcpTools(state, builder);
+
+        return builder.build();
+    }
+
+    private static void collectMcpTools(
+            ChatSettings.@NotNull State state, AiServices<ChatCodingAssistant> builder) {
+        if (state.enableMcp && state.mcpConfigs != null && !state.mcpConfigs.isEmpty()) {
+            List<McpClient> clients = new ArrayList<>();
+
+            for (var cfg : state.mcpConfigs) {
+                if (cfg == null || !cfg.enabled || cfg.command == null || cfg.command.isEmpty())
+                    continue;
+
+                List<String> cmd = cfg.command;
+                Map<String, String> env = getEnv(cfg);
+
+                McpTransport transport =
+                        new StdioMcpTransport.Builder()
+                                .command(cmd)
+                                .environment(env)
+                                .logEvents(true)
+                                .build();
+
+                McpClient mcpClient =
+                        new DefaultMcpClient.Builder()
+                                .clientName(
+                                        (cfg.key == null || cfg.key.isBlank()) ? "mcp" : cfg.key)
+                                .transport(transport)
+                                .build();
+
+                clients.add(mcpClient);
+            }
+
+            if (!clients.isEmpty()) {
+                ToolProvider mcpTools = McpToolProvider.builder().mcpClients(clients).build();
+
+                builder.toolProvider(mcpTools);
+            }
         }
+    }
 
-        chatCodingAssistant = aiAssistantBuilder.build();
-        return chatCodingAssistant;
+    private static void collectLocalTools(
+            ChatSettings.@NotNull State state, AiServices<ChatCodingAssistant> builder) {
+        List<Object> localTools = new ArrayList<>();
+        if (state.enableFileTool) localTools.add(new FileTool());
+        if (state.enableEditorTool) localTools.add(new EditorTool());
+        if (state.enableCommandLineTool) localTools.add(new CommandLineTool());
+        if (!localTools.isEmpty()) {
+            builder.tools(localTools.toArray());
+        }
+    }
+
+    private static @NotNull Map<String, String> getEnv(ChatSettings.@NotNull McpConfig cfg) {
+        Map<String, String> env = new java.util.HashMap<>();
+        if (cfg.env != null) {
+            for (var ev : cfg.env) {
+                if (ev.key != null && !ev.key.isBlank()) {
+                    env.put(ev.key, ev.value == null ? "" : ev.value);
+                }
+            }
+        }
+        return env;
     }
 
     @Override
