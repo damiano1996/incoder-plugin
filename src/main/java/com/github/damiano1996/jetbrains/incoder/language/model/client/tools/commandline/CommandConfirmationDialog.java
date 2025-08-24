@@ -10,6 +10,7 @@ import com.intellij.util.ui.FormBuilder;
 import com.intellij.util.ui.JBUI;
 import java.awt.*;
 import javax.swing.*;
+import org.jetbrains.annotations.NotNull;
 
 public class CommandConfirmationDialog extends DialogWrapper {
     private final String command;
@@ -83,7 +84,7 @@ Please review the command carefully before proceeding. Only execute commands you
                 .getPanel();
     }
 
-    private String getShellInfo(String osName) {
+    private @NotNull String getShellInfo(@NotNull String osName) {
         if (osName.toLowerCase().contains("win")) {
             return "Windows Command Prompt (cmd.exe)";
         } else {
@@ -91,7 +92,7 @@ Please review the command carefully before proceeding. Only execute commands you
         }
     }
 
-    private JComponent createInfoPanel() {
+    private @NotNull JComponent createInfoPanel() {
         JPanel infoPanel = new JPanel(new BorderLayout());
         infoPanel.setBackground(JBUI.CurrentTheme.NotificationInfo.backgroundColor());
         infoPanel.setBorder(

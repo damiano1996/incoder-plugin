@@ -52,7 +52,7 @@ public class EditorTool {
     }
 
     @Tool(
-            name = "CREATE_PATCH",
+            name = "local-editor-create_patch",
             value =
                     """
 Creates and applies a unified diff patch to a file, presenting changes in a merge dialog for user review and approval.
@@ -124,7 +124,7 @@ Key characteristics:
     }
 
     @Tool(
-            name = "MERGE_REQUEST",
+            name = "local-editor-merge_request",
             value =
                     """
 Creates a merge request dialog to review and apply proposed changes to a file.
@@ -168,15 +168,7 @@ Should be properly formatted and syntactically correct code.
                         mergeResultConsumer,
                         resultMessage);
 
-        String contentWithLineNumbers = FileTool.getContentWithLineNumbers(filePath);
-
-        String result =
-                """
-                Merge result: %s
-
-                New file content:
-                %s"""
-                        .formatted(mergeResultMessage, contentWithLineNumbers);
+        String result = "Merge result: %s".formatted(mergeResultMessage);
 
         log.debug("Result of the merge action:\n{}", result);
 
@@ -188,7 +180,7 @@ Should be properly formatted and syntactically correct code.
             VirtualFile virtualFile,
             String originalContent,
             Consumer<MergeResult> mergeResultConsumer,
-            CompletableFuture<String> resultMessage) {
+            @NotNull CompletableFuture<String> resultMessage) {
         try {
             Project project = ProjectUtil.getActiveProject();
 

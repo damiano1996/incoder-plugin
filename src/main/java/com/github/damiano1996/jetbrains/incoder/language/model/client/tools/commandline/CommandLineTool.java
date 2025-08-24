@@ -32,7 +32,7 @@ public class CommandLineTool {
     private static final int TAIL_LINES = 50;
 
     @Tool(
-            name = "COMMAND_LINE_TOOL",
+            name = "local-command_line-execute_command",
             value =
                     """
 Executes a shell command in the IntelliJ integrated terminal after obtaining user approval through a confirmation dialog.
@@ -127,8 +127,8 @@ Must be an absolute path to an existing directory.
         }
     }
 
-    private String executeCommandInTerminal(
-            Project project, @Nullable List<String> command, File workingDirectory) {
+    private @NotNull String executeCommandInTerminal(
+            Project project, @Nullable List<String> command, @NotNull File workingDirectory) {
         log.debug(
                 "Executing command in terminal: '{}' in directory: '{}'",
                 command,
@@ -212,12 +212,12 @@ Must be an absolute path to an existing directory.
         }
     }
 
-    public static String truncateOutput(String output) {
+    public static @NotNull String truncateOutput(String output) {
         return truncateOutput(output, MAX_OUTPUT_LINES, HEAD_LINES, TAIL_LINES);
     }
 
-    public static String truncateOutput(
-            String output, int maxOutputLines, int headLines, int tailLines) {
+    public static @NotNull String truncateOutput(
+            @NotNull String output, int maxOutputLines, int headLines, int tailLines) {
 
         String[] lines = output.split("\n");
 

@@ -29,7 +29,9 @@ public class FileTool {
         }
     }
 
-    @Tool(name = "SCAN_DIRECTORY", value = "List all file and folder paths in the given folder")
+    @Tool(
+            name = "local-file-scan_directory",
+            value = "List all file and folder paths in the given folder")
     public List<String> scanDirectory(@P("Folder path") String folderPath) {
         log.info("Tool called, looking for files and folders in folder: {}", folderPath);
 
@@ -56,7 +58,7 @@ public class FileTool {
         return filePaths;
     }
 
-    @Tool(name = "READ_FILE", value = "Read the content of a file given its path")
+    @Tool(name = "local-file-read_file", value = "Read the content of a file given its path")
     public String readFile(@P("File path") String filePath) {
         log.info("Tool called, reading file content from: {}", filePath);
 
@@ -72,10 +74,10 @@ public class FileTool {
 
         String contentWithLineNumbers = getContentWithLineNumbers(filePath);
 
-        return "File content:\n%s".formatted(contentWithLineNumbers);
+        return "File content with line numbers:\n%s".formatted(contentWithLineNumbers);
     }
 
-    public static @NotNull String getContentWithLineNumbers(String filePath) {
+    private static @NotNull String getContentWithLineNumbers(String filePath) {
         try {
             List<String> lines = Files.readAllLines(Paths.get(filePath));
             StringBuilder contentWithLineNumbersBuilder = new StringBuilder();
@@ -93,7 +95,7 @@ public class FileTool {
     }
 
     @Tool(
-            name = "CREATE_EMPTY_FILE",
+            name = "local-file-create_empty_file",
             value = "Create an empty file at the given path. Only if the file does not exist yet.")
     public String createEmptyFile(@P("File path") String filePath) {
         log.info("Tool called, creating file at: {}", filePath);
