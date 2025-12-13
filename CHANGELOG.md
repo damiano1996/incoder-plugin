@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [1.7.1] - 2025-12-13
+
+### Changed
+
+- `pluginSinceBuild` and removed until
+
 ## [1.7.0] - 2025-08-24
 
 ### Added
@@ -145,7 +151,8 @@
 
 - Qodana recommendations.
 
-[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/damiano1996/incoder-plugin/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/damiano1996/incoder-plugin/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/damiano1996/incoder-plugin/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/damiano1996/incoder-plugin/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/damiano1996/incoder-plugin/compare/v1.5.0...v1.5.1
