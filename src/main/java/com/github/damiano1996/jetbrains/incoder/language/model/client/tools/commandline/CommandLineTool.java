@@ -1,14 +1,9 @@
 package com.github.damiano1996.jetbrains.incoder.language.model.client.tools.commandline;
 
-import com.github.damiano1996.jetbrains.incoder.InCoderBundle;
 import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.ToolException;
 import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.jediterm.terminal.TtyConnector;
-import com.pty4j.PtyProcess;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import java.io.File;
@@ -18,18 +13,23 @@ import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.plugins.terminal.LocalTerminalDirectRunner;
-import org.jetbrains.plugins.terminal.TerminalTabState;
-import org.jetbrains.plugins.terminal.TerminalToolWindowManager;
 
+/**
+ * Agent tool for executing shell commands with user confirmation. Delegates actual command
+ * execution to CommandExecutor implementation.
+ */
 @Slf4j
 public class CommandLineTool {
 
-    private static final String TERMINAL_TOOL_WINDOW_ID = "Terminal";
+    private final CommandExecutor commandExecutor;
 
-    private static final int MAX_OUTPUT_LINES = 100;
-    private static final int HEAD_LINES = 50;
-    private static final int TAIL_LINES = 50;
+    public CommandLineTool() {
+        this.commandExecutor = new TerminalCommandExecutor();
+    }
+
+    public CommandLineTool(CommandExecutor commandExecutor) {
+        this.commandExecutor = commandExecutor;
+    }
 
     @Tool(
             name = "local-command_line-execute_command",
@@ -38,6 +38,7 @@ public class CommandLineTool {
 Executes a shell command in the IntelliJ integrated terminal after obtaining user approval through a confirmation dialog.
 The command will be executed in a new terminal tab, allowing real-time monitoring of the execution.
 This tool provides a safe way to run system commands with user oversight and visual feedback.
+Returns the command output and exit code.
 """)
     public String executeCommand(
             @P(
@@ -61,8 +62,11 @@ Must be an absolute path to an existing directory.
                 command,
                 workingDirectory);
 
-        Project project = ProjectUtil.getActiveProject();
+        if (command == null || command.isEmpty()) {
+            return "No command provided";
+        }
 
+        Project project = ProjectUtil.getActiveProject();
         File workDir = prepareWorkingDirectory(project, workingDirectory);
 
         if (!showConfirmationDialog(project, command, workDir.getAbsolutePath())) {
@@ -70,7 +74,7 @@ Must be an absolute path to an existing directory.
                     + "Ask why to understand their motivation before proceeding.";
         }
 
-        return executeCommandInTerminal(project, command, workDir);
+        return commandExecutor.execute(project, command, workDir);
     }
 
     private @NotNull File prepareWorkingDirectory(Project project, String workingDirectory) {
@@ -125,123 +129,5 @@ Must be an absolute path to an existing directory.
             log.error("Error waiting for user confirmation", e);
             return false;
         }
-    }
-
-    private @NotNull String executeCommandInTerminal(
-            Project project, @Nullable List<String> command, @NotNull File workingDirectory) {
-        log.debug(
-                "Executing command in terminal: '{}' in directory: '{}'",
-                command,
-                workingDirectory.getAbsolutePath());
-
-        CompletableFuture<Boolean> terminalSessionCreationResult = new CompletableFuture<>();
-        CompletableFuture<StringBuilder> commandExecutionOutputResult = new CompletableFuture<>();
-
-        ApplicationManager.getApplication()
-                .invokeLater(
-                        () -> {
-                            ToolWindowManager toolWindowManager =
-                                    ToolWindowManager.getInstance(project);
-                            ToolWindow terminalToolWindow =
-                                    toolWindowManager.getToolWindow(TERMINAL_TOOL_WINDOW_ID);
-
-                            if (terminalToolWindow != null) {
-                                terminalToolWindow.show();
-                            }
-
-                            TerminalToolWindowManager terminalManager =
-                                    TerminalToolWindowManager.getInstance(project);
-
-                            TerminalTabState tabState = new TerminalTabState();
-                            tabState.myWorkingDirectory = workingDirectory.getAbsolutePath();
-                            tabState.myShellCommand = command;
-                            tabState.myTabName = InCoderBundle.message("name");
-                            tabState.myIsUserDefinedTabTitle = false;
-
-                            try {
-
-                                var runner =
-                                        new LocalTerminalDirectRunner(project) {
-                                            @Override
-                                            public @NotNull TtyConnector createTtyConnector(
-                                                    @NotNull PtyProcess process) {
-                                                TtyConnector originalConnector =
-                                                        super.createTtyConnector(process);
-                                                return new OutputCapturingTtyConnector(
-                                                        originalConnector,
-                                                        commandExecutionOutputResult);
-                                            }
-                                        };
-
-                                terminalManager.createNewSession(runner, tabState);
-                                log.info("Terminal session created");
-                                terminalSessionCreationResult.complete(true);
-
-                            } catch (Exception e) {
-                                log.warn("Unable to run new terminal session.", e);
-                                terminalSessionCreationResult.complete(false);
-                            }
-                        });
-
-        try {
-
-            boolean isTerminalSessionCreated = terminalSessionCreationResult.get();
-
-            if (!isTerminalSessionCreated)
-                throw new ToolException("Unable to run the command: %s".formatted(command));
-
-            StringBuilder commandExecutionOutputStringBuilder = commandExecutionOutputResult.get();
-
-            String result =
-                    """
-                    Command executed successfully.
-                    Output:
-                    %s
-                    """
-                            .formatted(commandExecutionOutputStringBuilder.toString());
-
-            result = truncateOutput(result);
-            log.info(result);
-
-            return result;
-
-        } catch (InterruptedException | ExecutionException e) {
-            throw new ToolException(
-                    "Unable to get the result of the command execution. Error: " + e.getMessage(),
-                    e);
-        }
-    }
-
-    public static @NotNull String truncateOutput(String output) {
-        return truncateOutput(output, MAX_OUTPUT_LINES, HEAD_LINES, TAIL_LINES);
-    }
-
-    public static @NotNull String truncateOutput(
-            @NotNull String output, int maxOutputLines, int headLines, int tailLines) {
-
-        String[] lines = output.split("\n");
-
-        if (lines.length <= maxOutputLines) {
-            return output;
-        }
-
-        StringBuilder result = new StringBuilder();
-
-        // Add first N lines
-        for (int i = 0; i < headLines; i++) {
-            result.append(lines[i]).append("\n");
-        }
-
-        // Add truncation indicator
-        result.append("\n... [OUTPUT TRUNCATED - ")
-                .append(lines.length - headLines - tailLines)
-                .append(" lines omitted] ...\n\n");
-
-        // Add last N lines
-        for (int i = lines.length - tailLines; i < lines.length; i++) {
-            result.append(lines[i]).append("\n");
-        }
-
-        return result.toString();
     }
 }

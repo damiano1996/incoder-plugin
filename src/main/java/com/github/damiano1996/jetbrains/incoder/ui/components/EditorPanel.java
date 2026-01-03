@@ -120,7 +120,8 @@ public class EditorPanel extends JPanel implements TextAccessor, Disposable {
         try {
             Editor editor = editorFuture.get();
             if (editor != null && !editor.isDisposed()) {
-                EditorFactory.getInstance().releaseEditor(editor);
+                ApplicationManager.getApplication()
+                        .invokeAndWait(() -> EditorFactory.getInstance().releaseEditor(editor));
             }
         } catch (InterruptedException | ExecutionException e) {
             log.warn("Unable to dispose editor", e);

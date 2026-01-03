@@ -3,7 +3,7 @@ package com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.
 import static com.github.damiano1996.jetbrains.incoder.tool.window.chat.ChatConstants.ARC_DIAMETER;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.damiano1996.jetbrains.incoder.language.model.client.tools.commandline.CommandLineTool;
+import com.github.damiano1996.jetbrains.incoder.formatting.OutputFormatter;
 import com.github.damiano1996.jetbrains.incoder.tool.window.chat.body.messages.ChatMessage;
 import com.github.damiano1996.jetbrains.incoder.ui.components.RoundedUtils;
 import com.intellij.icons.AllIcons;
@@ -89,7 +89,8 @@ public class ToolChatMessage implements ChatMessage {
     }
 
     private static @NotNull String getArgValue(Map.Entry<String, Object> e) {
-        return CommandLineTool.truncateOutput(e.getValue().toString(), 10, 5, 5)
-                .replace("\n", "<br>");
+        String value = e.getValue().toString();
+        String truncated = OutputFormatter.truncateOutput(value, 10, 5, 5);
+        return truncated.replace("\n", "<br>");
     }
 }
